@@ -51,6 +51,9 @@ set(hBNSD_SCRIPTS
     macro.mac
     vis.mac
     cube.stl
+    assembly.PLY
+    ellipsoid.PLY
+    30.STL
   )
 
 foreach(_script ${hBNSD_SCRIPTS})

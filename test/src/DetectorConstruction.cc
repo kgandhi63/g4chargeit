@@ -66,6 +66,7 @@
 #include "G4NistManager.hh"
 #include "G4PeriodicBoundaryBuilder.hh"
 #include "G4UserLimits.hh"
+
 #include "CADMesh.hh"
 
 
@@ -117,8 +118,8 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   //     
   // World
   //
-  G4double world_sizeXY = 1*m;
-  G4double world_sizeZ  = 1*m;
+  G4double world_sizeXY = 100*um;
+  G4double world_sizeZ  = 100*um;
 
 
   // define vacuum 
@@ -157,13 +158,24 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 
 
  // Load In CAD Files
-  auto sphere_mesh = CADMesh::TessellatedMesh::FromSTL("cube.stl");
-
+  auto sphere_mesh = CADMesh::TessellatedMesh::FromSTL("30.STL");
+  sphere_mesh->SetScale(.0025);
   // Get the solid
-  auto sphere_solid = sphere_mesh->GetSolid();
+ auto sphere_solid = sphere_mesh->GetSolid();
+/*auto tets = CADMesh::TetrahedralMesh::FromPLY("assembly.PLY");
 
+  tets->SetMaterial(SiO2);
+
+  auto assembly = tets->GetAssembly();
+
+  auto position = G4ThreeVector();
+  auto rotation = new G4RotationMatrix();
+
+  assembly->MakeImprint(logicWorld_, position, rotation);
+*/
   //     
   // 100 um sphere
+ // G4Sphere * sphere_solid = new G4Sphere("SphereSolid", 0., 50*um, 0., 360.*deg, 0., 180.*deg);
 
 
 
@@ -171,14 +183,13 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   G4LogicalVolume* logicSphere = new G4LogicalVolume(sphere_solid, SiO2 , SiO2->GetName());  
   
   new G4PVPlacement(0,                          	//no rotation
-                    G4ThreeVector(-25*um,-25*um,0),     //at (0,0,0)
+                    G4ThreeVector(-37.5*um,-37.5*um,-37.5*um),     //at (0,0,0)
                     logicSphere,                               //its logical volume
                     SiO2->GetName(),               //its name
                     logicWorld_,                        //its mother volume
                     false,                              //no boolean operation
                     0);                                 //copy number
-
-  //
+  
   // Set vacuum layer after to layered material
   //
 
@@ -191,7 +202,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 
 
  
-G4double step = 1* cm;
+ G4double step = 1 *um;
  G4UserLimits* userLimits = new G4UserLimits(step);
  logicWorld_->SetUserLimits(userLimits);
 

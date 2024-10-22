@@ -80,7 +80,7 @@ PhysicsList::PhysicsList()
   G4String name = G4String("standard");
   RegisterPhysics(new PhysListEmLivermore(name));
   
-  RegisterPhysics(new G4EmExtraPhysics());
+  //RegisterPhysics(new G4EmExtraPhysics());
 
   // 
   // Other Physics Libraries to include

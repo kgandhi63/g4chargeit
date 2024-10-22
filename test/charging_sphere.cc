@@ -38,6 +38,8 @@
 #include "G4RunManager.hh"
 #endif
 
+
+
 #include "G4UImanager.hh"
 #include "Randomize.hh"
 
@@ -49,6 +51,7 @@
 #include "G4VisExecutive.hh"
 
 #include "G4ParticleHPManager.hh"
+#include "G4EmPenelopePhysics.hh"
 
 #include "G4PhysListFactory.hh"
 #include "G4VModularPhysicsList.hh"
@@ -78,18 +81,19 @@ int main(int argc,char** argv) {
   // EITHER CLOSE THE PHYSICSLIST THAT WE DEFINE OR THE REFERENCE PHYSICS LIST
 
   // load all physics that we defined
-  PhysicsList* phys = new PhysicsList;
+  //PhysicsList* phys = new PhysicsList;
 
   // use the reference physics list <-- this only works for version 11.2.0
-  //G4PhysListFactory physListFactory;
-  //G4VModularPhysicsList* phys = physListFactory.GetReferencePhysList("Shielding_HPT");
+ G4PhysListFactory factory;
+ G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT");
+ physList->ReplacePhysics(new G4EmPenelopePhysics);
 
   //arguments: physics list name, cycle x, y, z, reflecting walls
-  G4PeriodicBoundaryPhysics* pbc = new G4PeriodicBoundaryPhysics("PBC", true, true, false);
+  G4PeriodicBoundaryPhysics* pbc = new G4PeriodicBoundaryPhysics("PBC", true, true,false);
   pbc->SetVerboseLevel(0);
-  phys->RegisterPhysics(pbc);
+  physList->RegisterPhysics(pbc);
 
-  runManager->SetUserInitialization(phys);
+  runManager->SetUserInitialization(physList);
   runManager->SetUserInitialization(new ActionInitialization());
 
   /// initialize visualization
