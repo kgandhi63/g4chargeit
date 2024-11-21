@@ -1,0 +1,43 @@
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /storage/coda1/p-zjiang33/0/shared/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_dc8ee/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_dc8ee.dir/build.make CMakeFiles/cmTC_dc8ee.dir/build
+gmake[1]: Entering directory `/storage/coda1/p-zjiang33/0/shared/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_dc8ee.dir/src.c.o
+/usr/local/pace-apps/spack/packages/linux-rhel7-x86_64/gcc-4.8.5/gcc-10.3.0-o57x6h2gubo7bzh7evmy4mvibdqrlghr/bin/gcc -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_dc8ee.dir/src.c.o -c /storage/coda1/p-zjiang33/0/shared/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_dc8ee
+/storage/pace-apps/spack/packages/linux-rhel7-x86_64/gcc-4.8.5/cmake-3.23.1-327dblnbramviejdezocehqsujhu7yyg/bin/cmake -E cmake_link_script CMakeFiles/cmTC_dc8ee.dir/link.txt --verbose=1
+/usr/local/pace-apps/spack/packages/linux-rhel7-x86_64/gcc-4.8.5/gcc-10.3.0-o57x6h2gubo7bzh7evmy4mvibdqrlghr/bin/gcc -rdynamic CMakeFiles/cmTC_dc8ee.dir/src.c.o -o cmTC_dc8ee 
+CMakeFiles/cmTC_dc8ee.dir/src.c.o: In function `main':
+src.c:(.text+0x2d): undefined reference to `pthread_create'
+src.c:(.text+0x39): undefined reference to `pthread_detach'
+src.c:(.text+0x45): undefined reference to `pthread_cancel'
+src.c:(.text+0x56): undefined reference to `pthread_join'
+src.c:(.text+0x6a): undefined reference to `pthread_atfork'
+collect2: error: ld returned 1 exit status
+gmake[1]: *** [cmTC_dc8ee] Error 1
+gmake[1]: Leaving directory `/storage/coda1/p-zjiang33/0/shared/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/CMakeTmp'
+gmake: *** [cmTC_dc8ee/fast] Error 2
+
+
+Source file was:
+#include <pthread.h>
+
+static void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_cancel(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
