@@ -1,4 +1,5 @@
-# Grain-Charging-Simulations
+
+# Sphere Charging
 
 ## 1- MATERIALS AND GEOMETRY DEFINITION
  
@@ -67,4 +68,3 @@ Once GUI boots:
 > `control/execute example.mac`
 	
 Macros provided in example.mac: proton (100 GeV) in silicon.
-
