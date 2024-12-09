@@ -34,6 +34,9 @@
 #define DetectorConstruction_h 1
 
 #include "G4VUserDetectorConstruction.hh"
+#include "G4UniformElectricField.hh"
+#include "G4FieldManager.hh"
+
 #include <memory>
 
 class G4LogicalVolume;
@@ -53,19 +56,16 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     // construct function
     virtual G4VPhysicalVolume* Construct();
     // function to set the sensitive detector volume
-    void ConstructSDandField();                 
+    void SetFieldValue(G4ThreeVector value);
+    void ConstructSDandField() override;
     void SetPBC (G4bool);
 
                        
   private:
     G4VPhysicalVolume* ConstructVolumes();  
     G4bool PBC_;
-    G4LogicalVolume* logicWorld_;
- 
-    
+    G4LogicalVolume* logicWorld_; 
 
-
-    // G4ThreeVector     efield_;
  
      DetectorMessenger* detectorMessenger_;
 

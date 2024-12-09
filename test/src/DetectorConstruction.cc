@@ -1,4 +1,4 @@
-//
+code//
 // ********************************************************************
 // * License and Disclaimer                                           *
 // *                                                                  *
@@ -35,6 +35,22 @@
 #include "G4VUserDetectorConstruction.hh"
 #include "DetectorMessenger.hh"
 
+#include "TFile.h"
+#include "TTree.h"
+
+
+
+#include "G4MaterialPropertiesTable.hh"
+#include "G4FieldManager.hh"
+#include "G4ThreeVector.hh"
+#include "G4ChordFinder.hh"
+#include "G4EqMagElectricField.hh" 
+#include "G4TransportationManager.hh"
+#include "G4ChordFinder.hh"
+#include "G4ClassicalRK4.hh"  
+#include "G4IntegrationDriver.hh"  // 4th-order Runge-Kutta stepper
+#include "G4UniformElectricField.hh"
+#include "G4SystemOfUnits.hh"
 #include "SDManager.hh"
 #include "G4SDManager.hh"
 #include "G4RunManager.hh"
@@ -54,6 +70,7 @@
 
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
+#include "G4FieldManager.hh"
 
 #include "G4UserLimits.hh"
 #include "G4UnitsTable.hh"
@@ -66,6 +83,7 @@
 #include "G4NistManager.hh"
 #include "G4PeriodicBoundaryBuilder.hh"
 #include "G4UserLimits.hh"
+#include "G4RadialElectricField.hh"
 
 #include "CADMesh.hh"
 
@@ -111,8 +129,42 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   //
   // Define Materials
   //
+  //read root file
+
+  TFile* file = TFile::Open("test.root");
+if (!file || file->IsZombie()) {
+    G4cerr << "Error opening ROOT file!" << G4endl;
+    return nullptr;
+}
+
+TTree* tree;
+file->GetObject("Hit Data", tree);  // Replace "TreeName" with your actual tree name
+
+TVector3* post_step_position = nullptr;
+tree->SetBranchAddress("Post_Step_Position_mm", &post_step_position);
+
+std::vector<G4ThreeVector> locations;
+Long64_t nEntries = tree->GetEntries();
+for (Long64_t i = 0; i < nEntries; i++) {
+    tree->GetEntry(i);
+    if (post_step_position) {
+        // Convert from mm to the units used in Geant4 (e.g., micrometers)
+        G4ThreeVector pos(post_step_position->X() * mm, 
+                          post_step_position->Y() * mm, 
+                          post_step_position->Z() * mm);
+        locations.push_back(pos);
+    }
+}
+
+
+  
+// Add dielectric Constant
+ G4MaterialPropertiesTable* dielectric = new G4MaterialPropertiesTable();
+ G4double permittivity = 3.9; // Alumina at low frequencies
+ dielectric->AddConstProperty("Epsilon", permittivity);
 
  G4Material* SiO2 = G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
+ SiO2->SetMaterialPropertiesTable(dielectric);
 
   
   //     
@@ -129,7 +181,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
     new G4Box("World",                       //its name
        world_sizeXY/2, world_sizeXY/2, world_sizeZ/2);     //its size
 
-     logicWorld_ =                         
+    logicWorld_ =                         
     new G4LogicalVolume(solidWorld,          //its solid
                         world_mat,           //its material
                         "World");            //its name
@@ -157,11 +209,13 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
     }
 
 
+
+
  // Load In CAD Files
   auto sphere_mesh = CADMesh::TessellatedMesh::FromSTL("30.STL");
-  sphere_mesh->SetScale(.0025);
+  sphere_mesh->SetScale(.001);
   // Get the solid
- auto sphere_solid = sphere_mesh->GetSolid();
+  auto sphere_solid = sphere_mesh->GetSolid();
 /*auto tets = CADMesh::TetrahedralMesh::FromPLY("assembly.PLY");
 
   tets->SetMaterial(SiO2);
@@ -175,20 +229,64 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 */
   //     
   // 100 um sphere
- // G4Sphere * sphere_solid = new G4Sphere("SphereSolid", 0., 50*um, 0., 360.*deg, 0., 180.*deg);
+ G4Sphere * electron = new G4Sphere("Electron", 0., .1*um, 0., 360.*deg, 0., 180.*deg);
 
-
+//Create Electrons
+G4LogicalVolume*logicElectron = new G4LogicalVolume(electron, world_mat, electron->GetName());
 
     // Create logical volume
-  G4LogicalVolume* logicSphere = new G4LogicalVolume(sphere_solid, SiO2 , SiO2->GetName());  
+G4LogicalVolume*logicSphere= new G4LogicalVolume(sphere_solid, SiO2 , SiO2->GetName());  
   
   new G4PVPlacement(0,                          	//no rotation
-                    G4ThreeVector(-37.5*um,-37.5*um,-37.5*um),     //at (0,0,0)
+                    G4ThreeVector(15*um,15*um,15*um),     //at (0,0,0)
                     logicSphere,                               //its logical volume
                     SiO2->GetName(),               //its name
                     logicWorld_,                        //its mother volume
                     false,                              //no boolean operation
                     0);                                 //copy number
+  
+
+    new G4PVPlacement(0,                          	//no rotation
+                    G4ThreeVector(-15*um,-15*um,-15*um),     //at (0,0,0)
+                    logicSphere,                               //its logical volume
+                    SiO2->GetName(),               //its name
+                    logicWorld_,                        //its mother volume
+                    false,                              //no boolean operation
+                    0);                                 //copy number
+  
+
+
+    new G4PVPlacement(0,                          	//no rotation
+                    G4ThreeVector(-15*um,15*um,-15*um),     //at (0,0,0)
+                    logicSphere,                               //its logical volume
+                    SiO2->GetName(),               //its name
+                    logicWorld_,                        //its mother volume
+                    false,                              //no boolean operation
+                    0);                                 //copy number
+  
+
+
+    new G4PVPlacement(0,                          	//no rotation
+                    G4ThreeVector(-15*um,15*um,15*um),     //at (0,0,0)
+                    logicSphere,                               //its logical volume
+                    SiO2->GetName(),               //its name
+                    logicWorld_,                        //its mother volume
+                    false,                              //no boolean operation
+                    0);                                 //copy number
+  
+
+// Use these locations for elecrton placements
+for (const auto& pos : locations) {
+    new G4PVPlacement(
+        0,                      // no rotation
+        pos,                    // position from the vector
+        logicElectron,            // logical volume (or particle placement logic)
+        "ElectronPlacement",    // name
+        logicWorld_,            // mother volume
+        false,                  // no boolean operation
+        0                       // copy number
+    );
+}
   
   // Set vacuum layer after to layered material
   //
@@ -198,15 +296,15 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   
 
   // colors
-  logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
+logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
 
 
  
- G4double step = 1 *um;
+ G4double step = .01 *um;
  G4UserLimits* userLimits = new G4UserLimits(step);
  logicWorld_->SetUserLimits(userLimits);
 
-  return physWorld;
+return physWorld;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -218,36 +316,57 @@ void DetectorConstruction::ConstructSDandField() {
 
   // create an instance of a sensitive detector
   SensitiveDetector* sd = sdManager -> GetSD();
+
+
   
   // register the sensitive detector to the SD manager  
   G4SDManager* g4sdManager = G4SDManager::GetSDMpointer();  
   g4sdManager ->AddNewDetector(sd);
-  
-  // assign the pointer of your SD to the logical volumne of your detector geometry
-
 
   int numDaughters = logicWorld_->GetNoDaughters();
 
-  G4cout << numDaughters << G4endl;
-  for (int i=0; i<numDaughters; i++) {
-        G4LogicalVolume* logicLayer = logicWorld_-> GetDaughter(i) -> GetLogicalVolume();
-        G4cout << logicLayer->GetName() << G4endl;
-        logicLayer-> SetSensitiveDetector(sd); 
-  }
+// Define and set a uniform electric field for each daughter
+//G4ThreeVector fieldVector(0.0, 0.0, 1*volt / mm);  // Constant electric field along z-axis
+  //auto uniformElectricField = new G4UniformElectricField(fieldVector);
+  
 
-  //logicWorld_ -> SetSensitiveDetector(sd);
-  G4cout << "Set Area to Sensitive Detector" << G4endl;
+
+G4cout << "Number of Daughter Volumes: " << numDaughters << G4endl;
+for (int i = 0; i < numDaughters; i++) {
+    // Access the logical volume of each daughter
+    G4LogicalVolume* logicLayer = logicWorld_->GetDaughter(i)->GetLogicalVolume();
+    if (logicLayer->GetName() == "Electron") {
+        G4cout << "Found Electron volume at index: " << i << G4endl;
+      // Create a local field manager specifically for this daughter volume
+      auto localFieldManager = new G4FieldManager();
+      auto radialElectricField = new G4RadialElectricField();
+      localFieldManager->SetDetectorField(radialElectricField);
+      localFieldManager->SetMinimumEpsilonStep(1.0e-6);  // Adjusted for accuracy
+      localFieldManager->SetDeltaOneStep(1.0e-3 * mm);   // Step accuracy
+      
+      // Set up equation of motion and stepper for this local field
+      auto equationOfMotion = new G4EqMagElectricField(radialElectricField);
+      auto stepper = new G4ClassicalRK4(equationOfMotion, 8); // 8th order for high accuracy
+      G4double minStep = 0.01 * um;
+      
+      // Create and assign an integration driver and chord finder
+      auto integrationDriver = new G4IntegrationDriver<G4ClassicalRK4>(minStep, stepper, stepper->GetNumberOfVariables());
+      localFieldManager->SetChordFinder(new G4ChordFinder(integrationDriver));
+      
+      // Assign this local field manager to the daughter volume
+      logicLayer->SetFieldManager(localFieldManager, true); // 'true' for local application
+    }
+
+    // Optional: Set a sensitive detector if needed
+    if (sd) logicLayer->SetSensitiveDetector(sd);
+}
+
+G4cout << "Electric field set in daughter volumes" << G4endl;
 
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-/*
-void DetectorConstruction::SetDensity(G4double value)
-{
-  density_ = value;
-  G4RunManager::GetRunManager()->ReinitializeGeometry();
-}
-*/
+
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -257,4 +376,3 @@ void DetectorConstruction::SetPBC(G4bool value)
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
  
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -41,6 +41,11 @@ add_executable(charging_sphere charging_sphere.cc ${sources} ${headers})
 target_link_libraries(charging_sphere ${Geant4_LIBRARIES} )
 target_link_libraries(charging_sphere g4pbc::g4pbc)
 
+find_package(ROOT REQUIRED)
+include_directories(${ROOT_INCLUDE_DIRS})
+target_link_libraries(your_executable ${ROOT_LIBRARIES})
+
+
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
 # build Hadr04. This is so that we can run the executable directly because it

@@ -1,7 +1,0 @@
-/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build/CMakeFiles/charging_sphere.dir
-/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build/CMakeFiles/edit_cache.dir
-/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build/CMakeFiles/rebuild_cache.dir
-/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build/CMakeFiles/list_install_components.dir
-/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build/CMakeFiles/install.dir
-/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build/CMakeFiles/install/local.dir
-/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build/CMakeFiles/install/strip.dir
