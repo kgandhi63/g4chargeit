@@ -1,7 +1,0 @@
-/storage/coda1/p-zjiang33/0/shared/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles/charging_sphere.dir
-/storage/coda1/p-zjiang33/0/shared/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles/edit_cache.dir
-/storage/coda1/p-zjiang33/0/shared/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles/rebuild_cache.dir
-/storage/coda1/p-zjiang33/0/shared/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles/list_install_components.dir
-/storage/coda1/p-zjiang33/0/shared/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles/install.dir
-/storage/coda1/p-zjiang33/0/shared/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles/install/local.dir
-/storage/coda1/p-zjiang33/0/shared/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles/install/strip.dir
