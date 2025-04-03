@@ -1,0 +1,9 @@
+/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/g4pbc.dir
+/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/package.dir
+/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/package_source.dir
+/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/edit_cache.dir
+/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/rebuild_cache.dir
+/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/list_install_components.dir
+/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/install.dir
+/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/install/local.dir
+/storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles/install/strip.dir
