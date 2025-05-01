@@ -36,13 +36,13 @@
 #include "G4VUserDetectorConstruction.hh"
 #include "G4UniformElectricField.hh"
 #include "G4FieldManager.hh"
+#include "SumRadialField.hh"
 
 #include <memory>
 
 class G4LogicalVolume;
 class DetectorMessenger;
 class G4VPhysicalVolume;
-
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -63,6 +63,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetEpsilon (G4double);
     void SetCADFile (G4String);
     void SetRootInput (G4String);
+    void SetCADScale (G4double);
+
 
 
                        
@@ -73,9 +75,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4double Epsilon_;
     G4String CADFile_;
     G4String RootInput_;
-
- 
-     DetectorMessenger* detectorMessenger_;
+    G4double Scale_;
+    std::vector<G4ThreeVector> fElectronPositions;
+    DetectorMessenger* detectorMessenger_;
 
 };
 
@@ -83,6 +85,4 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-
 #endif
-

@@ -65,6 +65,7 @@
 #include "G4Sphere.hh"
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
+#include "SumRadialField.hh"
 
 #include "G4GeometryManager.hh"
 #include "G4PhysicalVolumeStore.hh"
@@ -86,7 +87,6 @@
 #include "G4NistManager.hh"
 #include "G4PeriodicBoundaryBuilder.hh"
 #include "G4UserLimits.hh"
-#include "G4RadialElectricField.hh" 
 
 #include "CADMesh.hh"
 
@@ -94,7 +94,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
-, PBC_(0), Epsilon_(0), CADFile_(""), RootInput_("")
+, PBC_(false), Epsilon_(0), CADFile_(""), RootInput_(""), Scale_(1)
 
 {
   // create commands for interactive definition of the detector 
@@ -118,7 +118,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4VPhysicalVolume* DetectorConstruction::ConstructVolumes() {
-  // Cleanup old geometry
 G4GeometryManager::GetInstance()->OpenGeometry();
 G4PhysicalVolumeStore::GetInstance()->Clean();
 G4LogicalVolumeStore::GetInstance()->Clean();
@@ -136,9 +135,9 @@ G4bool checkOverlaps = false;
   //     
   // World Characteristics
   //
-  G4double world_sizeX = 100*um;
-  G4double world_sizeY = 100 *um;
-  G4double world_sizeZ  = 100*um;
+  G4double world_sizeX = 200*um;
+  G4double world_sizeY = 200 *um;
+  G4double world_sizeZ  = 200*um;
 
 
   // define vacuum 
@@ -183,7 +182,7 @@ if (!CADFile_.empty()) {
   std::string full_path = oss.str();
 
   auto sphere_mesh = CADMesh::TessellatedMesh::FromSTL(full_path);
-  sphere_mesh->SetScale(1);
+  sphere_mesh->SetScale(Scale_);
   // Get the solid
   sphere_solid = sphere_mesh->GetSolid();
  }
@@ -194,20 +193,6 @@ if (!CADFile_.empty()) {
  }
 
 //Create Electrons
-
-// Create logical volume
-
-G4LogicalVolume*logicSphere= new G4LogicalVolume(sphere_solid, SiO2 , SiO2->GetName());  
-
-
-new G4PVPlacement(0,                          	//no rotation
-              G4ThreeVector(),     //at (0,0,0)
-              logicSphere,                               //its logical volume
-              SiO2->GetName(),               //its name
-              logicWorld_,                        //its mother volume
-              false,                              //no boolean operation
-              0);                                 //copy number
-
 
 if (!RootInput_.empty()) {
   std::istringstream iss(RootInput_);
@@ -230,7 +215,6 @@ if (!RootInput_.empty()) {
 
   
     file = TFile::Open(full_path.c_str(),"READ");
-    std::vector<G4ThreeVector> locations;
     tree = nullptr;
 
     if (file && file->IsOpen()) {
@@ -266,16 +250,16 @@ if (!RootInput_.empty()) {
               G4ThreeVector pos((*post_step_position)[0] * mm, // x
                                 (*post_step_position)[1] * mm, // y
                                 (*post_step_position)[2] * mm); // z
-              locations.push_back(pos);
+              fElectronPositions.push_back(pos);
         }
       }
     }
-    G4Sphere * electron = new G4Sphere("Electron", 0., 100*um, 0., 360.*deg, 0., 180.*deg);
+    G4Sphere * electron = new G4Sphere("Electron", 0., 1*nm , 0., 360.*deg, 0., 180.*deg);
     G4LogicalVolume*logicElectron = new G4LogicalVolume(electron, world_mat, electron->GetName());
     logicElectron->SetVisAttributes(G4VisAttributes::GetInvisible());
-    int count = 0;
+
     // Use these locations for electron placements
-    for (const auto& pos : locations) {
+    for (const auto& pos : fElectronPositions) {
       new G4PVPlacement(
           0,                      // no rotation
           pos,                    // position from the vector
@@ -285,16 +269,27 @@ if (!RootInput_.empty()) {
           false,                  // no boolean operation
           0                       // copy number
       );
-      count++;
+
+    G4cout << "Placed Electron" << G4endl;
     }
 
-
-    G4cout << "Placed Electron: " << count << G4endl;
 }
 }
 
-// Make Certain Volumes Invisible
-logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
+G4LogicalVolume*logicSphere= new G4LogicalVolume(sphere_solid, SiO2 , SiO2->GetName());  
+
+
+new G4PVPlacement(0,                          	//no rotation
+              G4ThreeVector(),     //at (0,0,0)
+              logicSphere,                               //its logical volume
+              SiO2->GetName(),               //its name
+              logicWorld_,                        //its mother volume
+              false,                              //no boolean operation
+              0);                                 //copy number
+
+
+
+//logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
 
 
 
@@ -307,64 +302,42 @@ return physWorld;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void DetectorConstruction::ConstructSDandField() {
-
   static auto sdManager = SDManager::GetInstance();
-  sdManager -> CreateSD();
+  sdManager->CreateSD();
+  auto sd = sdManager->GetSD();
+  G4SDManager::GetSDMpointer()->AddNewDetector(sd);
 
-  // create an instance of a sensitive detector
-  SensitiveDetector* sd = sdManager -> GetSD();
+  // 2) build one SumRadialField from all stored positions:
+  G4double eCharge = -1.602e-19 * CLHEP::coulomb;
+  auto sumField = new SumRadialField(fElectronPositions, eCharge);
 
-  // register the sensitive detector to the SD manager  
-  G4SDManager* g4sdManager = G4SDManager::GetSDMpointer();  
-  g4sdManager ->AddNewDetector(sd);
+  // 3) one global FieldManager on the world:
+  auto worldFM = new G4FieldManager();
+  worldFM->SetDetectorField(sumField);
+  worldFM->SetMinimumEpsilonStep(1.0e-7);
+  worldFM->SetMaximumEpsilonStep(1.0e-4);
+  worldFM->SetDeltaOneStep(0.1*um);
 
-  int numDaughters = logicWorld_->GetNoDaughters();
+  auto equation = new G4EqMagElectricField(sumField);
+  const G4int nvar = 8;
+  auto stepper = new G4DormandPrince745(equation, nvar);
+  auto driver  = new G4IntegrationDriver<G4DormandPrince745>(0.1*um, stepper, nvar);
+  auto chord   = new G4ChordFinder(driver);
+  worldFM->SetChordFinder(chord);
 
-  G4cout << "Number of Daughter Volumes: " << numDaughters << G4endl;
-  for (int i = 0; i < numDaughters; i++) {
-      G4LogicalVolume* logicLayer = logicWorld_->GetDaughter(i)->GetLogicalVolume();
-      if (logicLayer->GetName() == "Electron") {
-          // Create and configure electric field
-          auto radialElectricField = new G4RadialElectricField(-1.602e-19);
-          
-          // Create field manager with conservative parameters
-          auto localFieldManager = new G4FieldManager();
-          localFieldManager->SetDetectorField(radialElectricField);
-          
-          // Set integration parameters
-          localFieldManager->SetMinimumEpsilonStep(1.0e-7);  // More conservative
-          localFieldManager->SetMaximumEpsilonStep(1.0e-4);
-          localFieldManager->SetDeltaOneStep(0.1*um);
+  logicWorld_->SetFieldManager(worldFM, true);
 
-          // Create equation of motion
-          auto equationOfMotion = new G4EqMagElectricField(radialElectricField);
-          
-          const G4int nvar = 8;
-          
-          // Create stepper with proper configuration
-          auto stepper = new G4DormandPrince745(equationOfMotion, nvar); 
-          
-          // Create integration driver with appropriate minimum step
-          G4double minStep = .1*um;
-          auto integrationDriver = new G4IntegrationDriver<G4DormandPrince745>(
-              minStep, 
-              stepper, 
-              nvar  // Use same variable count here
-          );
-          
-          // Configure chord finder
-          auto chordFinder = new G4ChordFinder(integrationDriver);
-          chordFinder->SetDeltaChord(0.1*um);
-          localFieldManager->SetChordFinder(chordFinder);
-
-          // Assign field manager to volume
-          logicLayer->SetFieldManager(localFieldManager, true);
-      }
-    if (sd) logicLayer->SetSensitiveDetector(sd);
+  // 4) re-assign your sensitive detector to each electron volume:
+  G4int nD = logicWorld_->GetNoDaughters();
+  for (G4int i = 0; i < nD; ++i) {
+    auto lv = logicWorld_->GetDaughter(i)->GetLogicalVolume();
+    if (lv->GetName() == "Electron" && sd) {
+      lv->SetSensitiveDetector(sd);
+    }
   }
 }
+
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -394,3 +367,8 @@ void DetectorConstruction::SetCADFile(G4String value)
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
  
+void DetectorConstruction::SetCADScale(G4double value)
+{
+  Scale_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
