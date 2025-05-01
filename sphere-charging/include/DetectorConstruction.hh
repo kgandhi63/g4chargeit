@@ -34,12 +34,15 @@
 #define DetectorConstruction_h 1
 
 #include "G4VUserDetectorConstruction.hh"
+#include "G4UniformElectricField.hh"
+#include "G4FieldManager.hh"
+#include "SumRadialField.hh"
+
 #include <memory>
 
 class G4LogicalVolume;
 class DetectorMessenger;
 class G4VPhysicalVolume;
-
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -53,21 +56,28 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     // construct function
     virtual G4VPhysicalVolume* Construct();
     // function to set the sensitive detector volume
-    void ConstructSDandField();                 
+    void SetFieldValue(G4ThreeVector value);
+    void ConstructSDandField() override;
     void SetPBC (G4bool);
+    void SetRoot (G4bool);
+    void SetEpsilon (G4double);
+    void SetCADFile (G4String);
+    void SetRootInput (G4String);
+    void SetCADScale (G4double);
+
+
 
                        
   private:
     G4VPhysicalVolume* ConstructVolumes();  
     G4bool PBC_;
-    G4LogicalVolume* logicWorld_;
- 
-    
-
-
-    // G4ThreeVector     efield_;
- 
-     DetectorMessenger* detectorMessenger_;
+    G4LogicalVolume* logicWorld_; 
+    G4double Epsilon_;
+    G4String CADFile_;
+    G4String RootInput_;
+    G4double Scale_;
+    std::vector<G4ThreeVector> fElectronPositions;
+    DetectorMessenger* detectorMessenger_;
 
 };
 
@@ -75,6 +85,4 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-
 #endif
-

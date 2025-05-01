@@ -51,7 +51,8 @@
 #include "G4VisExecutive.hh"
 
 #include "G4ParticleHPManager.hh"
-#include "G4EmPenelopePhysics.hh"
+#include "G4EmStandardPhysics_option4.hh"
+
 
 #include "G4PhysListFactory.hh"
 #include "G4VModularPhysicsList.hh"
@@ -78,18 +79,14 @@ int main(int argc,char** argv) {
   DetectorConstruction* det= new DetectorConstruction;
   runManager->SetUserInitialization(det);
 
-  // EITHER CLOSE THE PHYSICSLIST THAT WE DEFINE OR THE REFERENCE PHYSICS LIST
 
   // load all physics that we defined
-  //PhysicsList* phys = new PhysicsList;
+ // PhysicsList* physList = new PhysicsList;
 
-  // use the reference physics list <-- this only works for version 11.2.0
- G4PhysListFactory factory;
- G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT");
- physList->ReplacePhysics(new G4EmPenelopePhysics);
-
-  //arguments: physics list name, cycle x, y, z, reflecting walls
-  G4PeriodicBoundaryPhysics* pbc = new G4PeriodicBoundaryPhysics("PBC", true, true,false);
+ G4PhysListFactory factory; 
+  G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT_EMX"); 
+  physList->ReplacePhysics(new G4EmStandardPhysics_option4);
+  G4PeriodicBoundaryPhysics* pbc = new G4PeriodicBoundaryPhysics("PBC", true, true, false); // Turn off pbc in Z direction
   pbc->SetVerboseLevel(0);
   physList->RegisterPhysics(pbc);
 

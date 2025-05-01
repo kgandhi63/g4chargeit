@@ -1,4 +1,5 @@
 file(REMOVE_RECURSE
+  ".1"
   "CMakeFiles/g4pbc.dir/src/G4PeriodicBoundaryBuilder.cc.o"
   "CMakeFiles/g4pbc.dir/src/G4PeriodicBoundaryBuilder.cc.o.d"
   "CMakeFiles/g4pbc.dir/src/G4PeriodicBoundaryPhysics.cc.o"

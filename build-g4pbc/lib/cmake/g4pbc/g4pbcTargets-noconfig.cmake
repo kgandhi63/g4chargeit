@@ -12,8 +12,8 @@ set_target_properties(g4pbc::g4pbc PROPERTIES
   IMPORTED_SONAME_NOCONFIG "libg4pbc.so.1"
   )
 
-list(APPEND _IMPORT_CHECK_TARGETS g4pbc::g4pbc )
-list(APPEND _IMPORT_CHECK_FILES_FOR_g4pbc::g4pbc "${_IMPORT_PREFIX}/lib/libg4pbc.so.1.0.0" )
+list(APPEND _cmake_import_check_targets g4pbc::g4pbc )
+list(APPEND _cmake_import_check_files_for_g4pbc::g4pbc "${_IMPORT_PREFIX}/lib/libg4pbc.so.1.0.0" )
 
 # Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

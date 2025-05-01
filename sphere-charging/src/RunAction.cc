@@ -38,18 +38,23 @@
 
 #include "G4Run.hh"
 #include "Randomize.hh"
+#include "G4Timer.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 RunAction::RunAction(PrimaryGeneratorAction*)
   : G4UserRunAction(), 
     rootManager_(G4RootAnalysisManager::Instance())
-{}
+{
+  timer = new G4Timer();
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 RunAction::~RunAction()
-{}
+{
+  delete timer;
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -67,9 +72,9 @@ void RunAction::BeginOfRunAction(const G4Run*)
   // show Rndm status
   if (isMaster) G4Random::showEngineStatus();
 
+  timer->Start(); 
   // open the file 
-  //rootManager_->SetVerboseLevel(10);
-  //rootManager_ -> OpenFile("HDPEh10BNmix_sensitive_lunar.root");
+  rootManager_->SetVerboseLevel(0);
  
   // create trees
   SDManager::CreateTrees(); 
@@ -87,7 +92,8 @@ void RunAction::EndOfRunAction(const G4Run*)
   // close the file
   rootManager_ -> Write();
   rootManager_ -> CloseFile();
-
+  timer->Stop(); // Stop the timer
+  G4cout << "Elapsed time: " << *timer << G4endl;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

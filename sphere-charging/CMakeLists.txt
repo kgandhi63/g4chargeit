@@ -33,6 +33,8 @@ include_directories(${PROJECT_SOURCE_DIR}/include
                     ${Geant4_INCLUDE_DIR})
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/geometry)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/root)
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
@@ -40,6 +42,11 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 add_executable(charging_sphere charging_sphere.cc ${sources} ${headers})
 target_link_libraries(charging_sphere ${Geant4_LIBRARIES} )
 target_link_libraries(charging_sphere g4pbc::g4pbc)
+
+find_package(ROOT REQUIRED)
+include_directories(${ROOT_INCLUDE_DIRS})
+target_link_libraries(charging_sphere ${ROOT_LIBRARIES})
+
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we
@@ -50,11 +57,9 @@ target_link_libraries(charging_sphere g4pbc::g4pbc)
 set(hBNSD_SCRIPTS
     macro.mac
     vis.mac
-    cube.stl
-    assembly.PLY
-    ellipsoid.PLY
-    30.STL
   )
+
+  
 
 foreach(_script ${hBNSD_SCRIPTS})
   configure_file(

@@ -1,43 +1,68 @@
 #
-#
-/control/verbose 1
+/control/verbose 0
 /run/verbose 1
 /event/verbose 0
-/tracking/verbose 0 
+/tracking/verbose 0
+/process/verbose 0
+/process/had/verbose 0 
+/process/em/verbose 0
 #
 /random/setSeeds 10006195 10006819
 /random/setSavingFlag 1
 #
 #/run/setCut 1 um
 
-/sphere/filename test.root
-/sphere/PBC true
+/sphere/rootinput/file iteration1.root
+#/sphere/cadinput/file stacked_spheres 1.stl
+/sphere/epsilon 3.9
+
+/sphere/filename iteration2.root
+/sphere/PBC false
 
 #
 /run/initialize
 #
 /gps/particle e-
 /gps/ene/type Mono
-/gps/energy 100 eV
+/gps/energy 120 eV
 #
 /gps/pos/type Plane
 /gps/pos/shape Square
 /gps/pos/halfx 50 um
 /gps/pos/halfy 50 um
-/gps/pos/centre 0 50 0 um
+/gps/pos/centre 0 0 60 um
 
-/gps/pos/rot1 1 0 0  # This aligns the X-axis with the world X-axis
-/gps/pos/rot2 0 0 1  # This aligns the Z-axis with the world Z-axis
+#/gps/pos/rot1 1 0 0  # This aligns the X-axis with the world X-axis
+#/gps/pos/rot2 0 0 1  # This aligns the Z-axis with the world Z-axis
 
-/gps/direction 0.5 -0.866 0
+#/gps/direction 0.5 -0.866 0
+/gps/direction 0 0 -1
 
 #
 /gps/ang/type planar
-/control/execute vis.mac
 
-/run/printProgress 100
-/run/beamOn 100
+
+# Set up the gamma particle gun
+/gps/source/add 1  # Add a second particle source
+/gps/source/intensity 1.5  # Relative intensity of the gamma source
+/gps/particle gamma
+/gps/ene/type Mono
+/gps/energy .2 meV  # Set gamma energy
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 50 um
+/gps/pos/halfy 50 um
+/gps/pos/centre 0 0 60 um
+/gps/direction 0 0 -1
+/gps/ang/type planar
+
+
+#/control/execute vis.mac
+
+/run/printProgress 10000
+/run/beamOn 1000000
 
 # run the cmake and make command
 #os.system("cmake -DGeant4_DIR=$G4COMP /storage/home/hcoda1/5/avira7/p-pf17-0/geant4_workdir/HDPE_hBN_shielding/hBN_poly_code/HDPE-hBN-blended-B10enrich") 
-#os.system("make")
+#os.system("make") 
+

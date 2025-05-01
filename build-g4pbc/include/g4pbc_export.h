@@ -33,6 +33,7 @@
 #  define G4PBC_DEPRECATED_NO_EXPORT G4PBC_NO_EXPORT G4PBC_DEPRECATED
 #endif
 
+/* NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if) */
 #if 0 /* DEFINE_NO_DEPRECATED */
 #  ifndef G4PBC_NO_DEPRECATED
 #    define G4PBC_NO_DEPRECATED

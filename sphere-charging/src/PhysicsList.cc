@@ -53,11 +53,15 @@
 #include "G4HadronElasticPhysics_mod.hh"
 #include "G4HadronPhysicsShielding.hh"
 #include "G4EmLivermorePhysics.hh"
+#include "G4EmPenelopePhysics.hh"
+#include "G4PenelopeComptonModel.hh"
 
 #include "G4NuclideTable.hh"
 #include "G4NuclearLevelData.hh"
 #include "G4DeexPrecoParameters.hh"
 #include "G4PeriodicBoundaryPhysics.hh"
+
+
 
 //#include "G4PeriodicBoundaryPhysics.hh"
 
@@ -75,11 +79,14 @@ PhysicsList::PhysicsList()
   RegisterPhysics(new G4RadioactiveDecayPhysics());
 
   // EM physics
-  //RegisterPhysics(new G4EmStandardPhysics_option4());
+  RegisterPhysics(new G4EmStandardPhysics_option4());
   // EM physics
-  G4String name = G4String("standard");
-  RegisterPhysics(new PhysListEmLivermore(name));
-  
+  //RegisterPhysics(new PhysListEmLivermore(name));
+  RegisterPhysics(new G4EmPenelopePhysics());
+  //RegisterPhysics(new G4PenelopeComptonModel());
+  RegisterPhysics( new G4StoppingPhysics(1));
+  RegisterPhysics(new G4EmExtraPhysics());
+  RegisterPhysics(new G4IonPhysics());
   //RegisterPhysics(new G4EmExtraPhysics());
 
   // 

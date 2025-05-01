@@ -64,6 +64,12 @@ class DetectorMessenger: public G4UImessenger
     G4UIdirectory*             projectDir_;
     G4UIcmdWithAString*        fileNameCmd_;
     G4UIcmdWithABool*           PBCCmd_;
+    G4UIcmdWithADouble*           EpsilonCmd_;
+    G4UIcmdWithAString*         RootInputCmd_;
+    G4UIcmdWithAString*         CADFileCmd_;
+    G4UIcmdWithADouble*         ScaleCmd_;
+
+
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

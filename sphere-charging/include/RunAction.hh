@@ -35,6 +35,7 @@
 
 #include "G4UserRunAction.hh"
 #include "G4RootAnalysisManager.hh"
+#include "G4Timer.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -55,13 +56,14 @@ class RunAction : public G4UserRunAction
   public:
 
     virtual G4Run* GenerateRun();  
-    virtual void BeginOfRunAction(const G4Run*);
-    virtual void EndOfRunAction(const G4Run*);
+    void BeginOfRunAction(const G4Run*) override;
+    void EndOfRunAction(const G4Run*) override;
                             
   private:
 
     // declare run
     Run* run_;    
+    G4Timer* timer;
 
     // Hits and Analysis Manager
     G4RootAnalysisManager* rootManager_; 
