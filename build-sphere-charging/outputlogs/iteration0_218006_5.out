@@ -1,0 +1,185 @@
+---------------------------------------
+Begin Slurm Prolog: Aug-22-2025 13:45:31
+Job ID:    218006
+User ID:   avira7
+Account:   gts-pf17
+Job name:  Iteration0_Array
+Partition: cpu-small
+QOS:       inferno
+---------------------------------------
+Running task 5: ./charging_sphere macros/04_iteration0_num1000000.mac
+
+**************************************************************
+ Geant4 version Name: geant4-11-03 [MT]   (6-December-2024)
+                       Copyright : Geant4 Collaboration
+                      References : NIM A 506 (2003), 250-303
+                                 : IEEE-TNS 53 (2006), 270-278
+                                 : NIM A 835 (2016), 186-225
+                             WWW : http://geant4.org/
+**************************************************************
+
+G4PhysListFactory::GetReferencePhysList <FTFP_BERT_EMX>  EMoption= 2
+<<< Geant4 Physics List simulation engine: FTFP_BERT
+
+G4VModularPhysicsList::ReplacePhysics: G4EmStandard with type : 2 is replaced with G4EmStandard_opt2
+
+G4VModularPhysicsList::ReplacePhysics: G4EmStandard_opt2 with type : 2 is replaced with G4EmStandard_opt4
+Opening ROOT file: root/04_iteration0_num1000000.root
+Auto Defaulted To 50 um Sphere.
+Creating SD with name:sensitive_detector_name
+### Adding tracking cuts for neutron  TimeCut(ns)= 10000  KinEnergyCut(MeV)= 0
+
+========= Table of registered couples ============================
+
+Index : 0     used in the geometry : Yes
+ Material : G4_Galactic
+ Range cuts        :  gamma  700 um     e-  700 um     e+  700 um  proton 700 um 
+ Energy thresholds :  gamma  990 eV     e-  990 eV     e+  990 eV  proton 70 keV
+ Region(s) which use this couple : 
+    DefaultRegionForTheWorld
+
+Index : 1     used in the geometry : Yes
+ Material : G4_SILICON_DIOXIDE
+ Range cuts        :  gamma  700 um     e-  700 um     e+  700 um  proton 700 um 
+ Energy thresholds :  gamma  4.822 keV    e-  432.879 keV    e+  418.584 keV proton 70 keV
+ Region(s) which use this couple : 
+    DefaultRegionForTheWorld
+
+==================================================================
+
+### Run 0 starts.
+
+--------- Ranecu engine status ---------
+ Initial seed (index) = 0
+ Current couple of seeds = 10008859, 10005380
+----------------------------------------
+--> Event 0 starts.
+--> Event 10000 starts.
+--> Event 20000 starts.
+--> Event 30000 starts.
+--> Event 40000 starts.
+--> Event 50000 starts.
+--> Event 60000 starts.
+--> Event 70000 starts.
+--> Event 80000 starts.
+--> Event 90000 starts.
+--> Event 100000 starts.
+--> Event 110000 starts.
+--> Event 120000 starts.
+--> Event 130000 starts.
+--> Event 140000 starts.
+--> Event 150000 starts.
+--> Event 160000 starts.
+--> Event 170000 starts.
+--> Event 180000 starts.
+--> Event 190000 starts.
+--> Event 200000 starts.
+--> Event 210000 starts.
+--> Event 220000 starts.
+--> Event 230000 starts.
+--> Event 240000 starts.
+--> Event 250000 starts.
+--> Event 260000 starts.
+--> Event 270000 starts.
+--> Event 280000 starts.
+--> Event 290000 starts.
+--> Event 300000 starts.
+--> Event 310000 starts.
+--> Event 320000 starts.
+--> Event 330000 starts.
+--> Event 340000 starts.
+--> Event 350000 starts.
+--> Event 360000 starts.
+--> Event 370000 starts.
+--> Event 380000 starts.
+--> Event 390000 starts.
+--> Event 400000 starts.
+--> Event 410000 starts.
+--> Event 420000 starts.
+--> Event 430000 starts.
+--> Event 440000 starts.
+--> Event 450000 starts.
+--> Event 460000 starts.
+--> Event 470000 starts.
+--> Event 480000 starts.
+--> Event 490000 starts.
+--> Event 500000 starts.
+--> Event 510000 starts.
+--> Event 520000 starts.
+--> Event 530000 starts.
+--> Event 540000 starts.
+--> Event 550000 starts.
+--> Event 560000 starts.
+--> Event 570000 starts.
+--> Event 580000 starts.
+--> Event 590000 starts.
+--> Event 600000 starts.
+--> Event 610000 starts.
+--> Event 620000 starts.
+--> Event 630000 starts.
+--> Event 640000 starts.
+--> Event 650000 starts.
+--> Event 660000 starts.
+--> Event 670000 starts.
+--> Event 680000 starts.
+--> Event 690000 starts.
+--> Event 700000 starts.
+--> Event 710000 starts.
+--> Event 720000 starts.
+--> Event 730000 starts.
+--> Event 740000 starts.
+--> Event 750000 starts.
+--> Event 760000 starts.
+--> Event 770000 starts.
+--> Event 780000 starts.
+--> Event 790000 starts.
+--> Event 800000 starts.
+--> Event 810000 starts.
+--> Event 820000 starts.
+--> Event 830000 starts.
+--> Event 840000 starts.
+--> Event 850000 starts.
+--> Event 860000 starts.
+--> Event 870000 starts.
+--> Event 880000 starts.
+--> Event 890000 starts.
+--> Event 900000 starts.
+--> Event 910000 starts.
+--> Event 920000 starts.
+--> Event 930000 starts.
+--> Event 940000 starts.
+--> Event 950000 starts.
+--> Event 960000 starts.
+--> Event 970000 starts.
+--> Event 980000 starts.
+--> Event 990000 starts.
+ Run terminated.
+Run Summary
+  Number of events processed : 1000000
+  User=49.430000s Real=861.048836s Sys=126.980000s [Cpu=20.5%]
+
+--------- Ranecu engine status ---------
+ Initial seed (index) = 0
+ Current couple of seeds = 1106223352, 84756371
+----------------------------------------
+... write file : root/04_iteration0_num1000000.root - done
+... close file : root/04_iteration0_num1000000.root - done
+Elapsed time: User=49.440000s Real=863.321506s Sys=126.990000s [Cpu=20.4%]
+================== Deleting memory pools ===================
+Number of memory pools allocated: 12; of which, static: 1
+Dynamic pools deleted: 11 / Total memory freed: 0.025 MB
+============================================================
+Fri Aug 22 02:02:02 PM EDT 2025
+---------------------------------------
+Begin Slurm Epilog: Aug-22-2025 14:02:03
+Job ID:        218006
+Array Job ID:  218006_5
+User ID:       avira7
+Account:       gts-pf17
+Job name:      Iteration0_Array
+Resources:     cpu=64,mem=128G,node=4
+Rsrc Used:     cput=01:01:52,vmem=0,walltime=00:00:58,mem=141372K,energy_used=0
+Partition:     cpu-small
+QOS:           inferno
+Nodes:         atl1-1-02-009-17-[1-2],atl1-1-02-009-26-[1-2]
+---------------------------------------

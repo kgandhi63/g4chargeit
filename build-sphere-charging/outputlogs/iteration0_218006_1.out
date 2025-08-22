@@ -1,0 +1,86 @@
+---------------------------------------
+Begin Slurm Prolog: Aug-22-2025 13:45:31
+Job ID:    218008
+User ID:   avira7
+Account:   gts-pf17
+Job name:  Iteration0_Array
+Partition: cpu-small
+QOS:       inferno
+---------------------------------------
+Running task 1: ./charging_sphere macros/00_iteration0_num10000.mac
+
+**************************************************************
+ Geant4 version Name: geant4-11-03 [MT]   (6-December-2024)
+                       Copyright : Geant4 Collaboration
+                      References : NIM A 506 (2003), 250-303
+                                 : IEEE-TNS 53 (2006), 270-278
+                                 : NIM A 835 (2016), 186-225
+                             WWW : http://geant4.org/
+**************************************************************
+
+G4PhysListFactory::GetReferencePhysList <FTFP_BERT_EMX>  EMoption= 2
+<<< Geant4 Physics List simulation engine: FTFP_BERT
+
+G4VModularPhysicsList::ReplacePhysics: G4EmStandard with type : 2 is replaced with G4EmStandard_opt2
+
+G4VModularPhysicsList::ReplacePhysics: G4EmStandard_opt2 with type : 2 is replaced with G4EmStandard_opt4
+Opening ROOT file: root/00_iteration0_num10000.root
+Auto Defaulted To 50 um Sphere.
+Creating SD with name:sensitive_detector_name
+### Adding tracking cuts for neutron  TimeCut(ns)= 10000  KinEnergyCut(MeV)= 0
+
+========= Table of registered couples ============================
+
+Index : 0     used in the geometry : Yes
+ Material : G4_Galactic
+ Range cuts        :  gamma  700 um     e-  700 um     e+  700 um  proton 700 um 
+ Energy thresholds :  gamma  990 eV     e-  990 eV     e+  990 eV  proton 70 keV
+ Region(s) which use this couple : 
+    DefaultRegionForTheWorld
+
+Index : 1     used in the geometry : Yes
+ Material : G4_SILICON_DIOXIDE
+ Range cuts        :  gamma  700 um     e-  700 um     e+  700 um  proton 700 um 
+ Energy thresholds :  gamma  4.822 keV    e-  432.879 keV    e+  418.584 keV proton 70 keV
+ Region(s) which use this couple : 
+    DefaultRegionForTheWorld
+
+==================================================================
+
+### Run 0 starts.
+
+--------- Ranecu engine status ---------
+ Initial seed (index) = 0
+ Current couple of seeds = 10008859, 10005380
+----------------------------------------
+--> Event 0 starts.
+ Run terminated.
+Run Summary
+  Number of events processed : 10000
+  User=0.570000s Real=9.230624s Sys=1.730000s [Cpu=24.9%]
+
+--------- Ranecu engine status ---------
+ Initial seed (index) = 0
+ Current couple of seeds = 635487332, 177428861
+----------------------------------------
+... write file : root/00_iteration0_num10000.root - done
+... close file : root/00_iteration0_num10000.root - done
+Elapsed time: User=0.580000s Real=9.277189s Sys=1.730000s [Cpu=24.9%]
+================== Deleting memory pools ===================
+Number of memory pools allocated: 12; of which, static: 1
+Dynamic pools deleted: 11 / Total memory freed: 0.022 MB
+============================================================
+Fri Aug 22 01:46:28 PM EDT 2025
+---------------------------------------
+Begin Slurm Epilog: Aug-22-2025 13:46:28
+Job ID:        218008
+Array Job ID:  218006_1
+User ID:       avira7
+Account:       gts-pf17
+Job name:      Iteration0_Array
+Resources:     cpu=64,mem=128G,node=4
+Rsrc Used:     cput=01:01:52,vmem=0,walltime=00:00:58,mem=141372K,energy_used=0
+Partition:     cpu-small
+QOS:           inferno
+Nodes:         atl1-1-02-009-17-[1-2],atl1-1-02-009-26-[1-2]
+---------------------------------------

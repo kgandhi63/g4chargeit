@@ -1,0 +1,47 @@
+# Macro file for 10_iteration2_from_num1000000
+#
+/control/verbose 0
+/run/verbose 1
+/event/verbose 0
+/tracking/verbose 0
+/process/verbose 0
+/process/had/verbose 0
+/process/em/verbose 0
+#
+/random/setSeeds 10008859 10005380
+/random/setSavingFlag 1
+#
+/sphere/rootinput/file 04_iteration0_num1000000.root 09_iteration1_from_04_num1000000.root
+/sphere/filename root/10_iteration2_from_num1000000.root
+/sphere/epsilon 3.9
+/sphere/PBC false
+#
+/run/initialize
+#
+/gps/particle e-
+/gps/ene/type Mono
+/gps/energy 120 eV
+#
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 50 um
+/gps/pos/halfy 50 um
+/gps/pos/centre 0 0 60 um
+/gps/direction 0 0 -1
+/gps/ang/type planar
+#
+/gps/source/add 1
+/gps/source/intensity 1.5
+/gps/particle gamma
+/gps/ene/type Mono
+/gps/energy .2 meV
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 50 um
+/gps/pos/halfy 50 um
+/gps/pos/centre 0 0 60 um
+/gps/direction 0 0 -1
+/gps/ang/type planar
+#
+/run/printProgress 10000
+/run/beamOn 100
