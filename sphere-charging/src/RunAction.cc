@@ -71,11 +71,10 @@ void RunAction::BeginOfRunAction(const G4Run*)
 
   // show Rndm status
   if (isMaster) G4Random::showEngineStatus();
-
   timer->Start(); 
   // open the file 
-  rootManager_->SetVerboseLevel(0);
- 
+  rootManager_->SetVerboseLevel(1); 
+
   // create trees
   SDManager::CreateTrees(); 
              

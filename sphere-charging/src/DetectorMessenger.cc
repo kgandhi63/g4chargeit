@@ -106,7 +106,8 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 { 
 
   if( command == fileNameCmd_ )
-   { rootManager_->OpenFile(newValue);}
+   {G4cout << "Opening ROOT file: " << newValue << G4endl;
+    rootManager_->OpenFile(newValue);}
 
 
  if( command == PBCCmd_ )

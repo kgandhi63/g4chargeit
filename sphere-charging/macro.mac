@@ -14,9 +14,10 @@
 
 /sphere/rootinput/file iteration1.root
 #/sphere/cadinput/file stacked_spheres 1.stl
+#sphere/cadinput/scale  .000001
 /sphere/epsilon 3.9
 
-/sphere/filename iteration2.root
+/sphere/filename iteration0.root
 /sphere/PBC false
 
 #
@@ -60,7 +61,7 @@
 #/control/execute vis.mac
 
 /run/printProgress 10000
-/run/beamOn 1000000
+/run/beamOn 100
 
 # run the cmake and make command
 #os.system("cmake -DGeant4_DIR=$G4COMP /storage/home/hcoda1/5/avira7/p-pf17-0/geant4_workdir/HDPE_hBN_shielding/hBN_poly_code/HDPE-hBN-blended-B10enrich") 

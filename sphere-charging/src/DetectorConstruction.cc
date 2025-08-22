@@ -257,7 +257,7 @@ if (!RootInput_.empty()) {
     G4Sphere * electron = new G4Sphere("Electron", 0., 1*nm , 0., 360.*deg, 0., 180.*deg);
     G4LogicalVolume*logicElectron = new G4LogicalVolume(electron, world_mat, electron->GetName());
     logicElectron->SetVisAttributes(G4VisAttributes::GetInvisible());
-
+    int count = 0;
     // Use these locations for electron placements
     for (const auto& pos : fElectronPositions) {
       new G4PVPlacement(
@@ -270,7 +270,7 @@ if (!RootInput_.empty()) {
           0                       // copy number
       );
 
-    G4cout << "Placed Electron" << G4endl;
+    G4cout << "Placed Electron: " << count++ << G4endl;
     }
 
 }
@@ -328,11 +328,10 @@ void DetectorConstruction::ConstructSDandField() {
 
   logicWorld_->SetFieldManager(worldFM, true);
 
-  // 4) re-assign your sensitive detector to each electron volume:
   G4int nD = logicWorld_->GetNoDaughters();
   for (G4int i = 0; i < nD; ++i) {
     auto lv = logicWorld_->GetDaughter(i)->GetLogicalVolume();
-    if (lv->GetName() == "Electron" && sd) {
+    if (sd) {
       lv->SetSensitiveDetector(sd);
     }
   }
