@@ -34,6 +34,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/geometry)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/pacescripts)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/root)
 
 #----------------------------------------------------------------------------
@@ -54,20 +55,23 @@ target_link_libraries(charging_sphere ${ROOT_LIBRARIES})
 # relies on these scripts being in the current working directory.
 #
 
-set(hBNSD_SCRIPTS
+set(charging_scripts
     macro.mac
     vis.mac
   )
 
-  
 
-foreach(_script ${hBNSD_SCRIPTS})
+foreach(_script ${charging_scripts})
   configure_file(
     ${PROJECT_SOURCE_DIR}/${_script}
     ${PROJECT_BINARY_DIR}/${_script}
     COPYONLY
     )
 endforeach()
+
+# Copy all contents of pacescripts/ into the build directory (not the folder itself)
+file(GLOB PACE_SCRIPTS ${CMAKE_SOURCE_DIR}/pacescripts/*)
+file(COPY ${PACE_SCRIPTS} DESTINATION ${CMAKE_BINARY_DIR})
 
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX

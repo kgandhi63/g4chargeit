@@ -232,11 +232,13 @@ if (!RootInput_.empty()) {
     std::vector<double>* post_step_position = nullptr;
     Char_t volume_name_post[100];
     double kinetic_energy_post_mev;
+    Char_t particle_type[50];
+    
     // Set branch addresses
     tree->SetBranchAddress("Post_Step_Position_mm", &post_step_position);
     tree->SetBranchAddress("Volume_Name_Post", &volume_name_post);
     tree->SetBranchAddress("Kinetic_Energy_Post_MeV", &kinetic_energy_post_mev);
-    //tree->SetBranchAddress("Particle_ID", );
+    tree->SetBranchAddress("Particle_Type", &particle_type);
 
     // Define the specific volume to filter
     const std::string target_volume = "G4_SILICON_DIOXIDE";  // Replace with the desired volume name
@@ -244,7 +246,9 @@ if (!RootInput_.empty()) {
     Long64_t nEntries = tree->GetEntries();
     for (Long64_t i = 0; i < nEntries; i++) {
         tree->GetEntry(i);
-        if (volume_name_post && std::string(volume_name_post) == target_volume && kinetic_energy_post_mev == 0.0) {
+        if (std::string(volume_name_post) == target_volume
+         && std::string(particle_type) == "e-" 
+         && kinetic_energy_post_mev == 0.0) {
           if (post_step_position && post_step_position->size() >= 3) { 
               // Ensure the vector contains at least x, y, z components
               G4ThreeVector pos((*post_step_position)[0] * mm, // x
