@@ -8,6 +8,10 @@
 /process/had/verbose 0
 /process/em/verbose 0
 #
+/process/em/auger true
+/process/em/augerCascade true
+/process/em/QuantumEntanglement true
+#
 /random/setSeeds 10008859 10005380
 /random/setSavingFlag 1
 #
@@ -30,10 +34,10 @@
 /gps/ang/type planar
 #
 /gps/source/add 1
-/gps/source/intensity 1.5
+/gps/source/intensity 1.4
 /gps/particle gamma
 /gps/ene/type Mono
-/gps/energy .2 meV
+/gps/energy 7.2 eV
 /gps/pos/type Plane
 /gps/pos/shape Square
 /gps/pos/halfx 50 um

@@ -25,6 +25,10 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('/process/had/verbose 0\n')
     f.write('/process/em/verbose 0\n')
     f.write('#\n')
+    f.write('/process/em/auger true\n')
+    f.write('/process/em/augerCascade true\n')
+    f.write('/process/em/QuantumEntanglement true\n')
+    f.write('#\n')
     f.write(f'/random/setSeeds {seedIN[0]} {seedIN[1]}\n')
     f.write('/random/setSavingFlag 1\n')
     f.write('#\n')
@@ -49,10 +53,10 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('/gps/ang/type planar\n')
     f.write('#\n')
     f.write('/gps/source/add 1\n')
-    f.write('/gps/source/intensity 1.5\n')
+    f.write('/gps/source/intensity 1.4\n')
     f.write('/gps/particle gamma\n')
     f.write('/gps/ene/type Mono\n')
-    f.write('/gps/energy .2 meV\n')
+    f.write('/gps/energy 7.2 eV\n')
     f.write('/gps/pos/type Plane\n')
     f.write('/gps/pos/shape Square\n')
     f.write('/gps/pos/halfx 50 um\n')
@@ -234,7 +238,7 @@ with open(output_script, "w") as f:
             previous_job_var = "$jid0"
         else:
             f.write(f"# Submit job {i} with dependency on previous job\n")
-            f.write(f"jid{i}=$(sbatch --dependency=afterok:{previous_job_var} {script_path})\n")
+            f.write(f"jid{i}=$(sbatch --parsable --dependency=afterok:{previous_job_var} {script_path})\n")
             f.write(f"echo \"Submitted iteration {i} job (afterok dependency): $jid{i}\"\n\n")
             previous_job_var = f"$jid{i}"
 

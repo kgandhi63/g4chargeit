@@ -5,22 +5,22 @@ jid0=$(sbatch --parsable batchscripts/submit_iteration0.sh)
 echo "Submitted iteration 0 job: $jid0"
 
 # Submit job 1 with dependency on previous job
-jid1=$(sbatch --dependency=afterok:$jid0 batchscripts/submit_iteration1.sh)
+jid1=$(sbatch --parsable --dependency=afterok:$jid0 batchscripts/submit_iteration1.sh)
 echo "Submitted iteration 1 job (afterok dependency): $jid1"
 
 # Submit job 2 with dependency on previous job
-jid2=$(sbatch --dependency=afterok:$jid1 batchscripts/submit_iteration2.sh)
+jid2=$(sbatch --parsable --dependency=afterok:$jid1 batchscripts/submit_iteration2.sh)
 echo "Submitted iteration 2 job (afterok dependency): $jid2"
 
 # Submit job 3 with dependency on previous job
-jid3=$(sbatch --dependency=afterok:$jid2 batchscripts/submit_iteration3.sh)
+jid3=$(sbatch --parsable --dependency=afterok:$jid2 batchscripts/submit_iteration3.sh)
 echo "Submitted iteration 3 job (afterok dependency): $jid3"
 
 # Submit job 4 with dependency on previous job
-jid4=$(sbatch --dependency=afterok:$jid3 batchscripts/submit_iteration4.sh)
+jid4=$(sbatch --parsable --dependency=afterok:$jid3 batchscripts/submit_iteration4.sh)
 echo "Submitted iteration 4 job (afterok dependency): $jid4"
 
 # Submit job 5 with dependency on previous job
-jid5=$(sbatch --dependency=afterok:$jid4 batchscripts/submit_iteration5.sh)
+jid5=$(sbatch --parsable --dependency=afterok:$jid4 batchscripts/submit_iteration5.sh)
 echo "Submitted iteration 5 job (afterok dependency): $jid5"
 
