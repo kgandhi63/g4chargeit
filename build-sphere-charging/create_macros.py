@@ -204,3 +204,40 @@ for fname in os.listdir(run_dir):
             f.write(batch_script)
 
         print(f"Created: {batch_path}")
+
+#############################################################
+
+# Directories
+batch_dir = "batchscripts"
+output_script = "submit_all_iterations.sh"
+
+# Get and sort all batch submission scripts by iteration number
+batch_scripts = []
+for fname in os.listdir(batch_dir):
+    match = re.match(r"submit_iteration(\d+)\.sh", fname)
+    if match:
+        batch_scripts.append((int(match.group(1)), fname))
+
+batch_scripts.sort()  # Sort by iteration number
+
+# Start writing the master submission script
+with open(output_script, "w") as f:
+    f.write("#!/bin/bash\n\n")
+
+    previous_job_var = ""
+    for i, (_, script_name) in enumerate(batch_scripts):
+        script_path = os.path.join(batch_dir, script_name)
+        if i == 0:
+            f.write(f"# Submit the first job and capture its Job ID\n")
+            f.write(f"jid0=$(sbatch --parsable {script_path})\n")
+            f.write(f"echo \"Submitted iteration 0 job: $jid0\"\n\n")
+            previous_job_var = "$jid0"
+        else:
+            f.write(f"# Submit job {i} with dependency on previous job\n")
+            f.write(f"jid{i}=$(sbatch --dependency=afterok:{previous_job_var} {script_path})\n")
+            f.write(f"echo \"Submitted iteration {i} job (afterok dependency): $jid{i}\"\n\n")
+            previous_job_var = f"$jid{i}"
+
+# Make the script executable
+os.chmod("submit_all_iterations.sh", 0o755)
+print(f"Created chained submission script: {output_script}")

@@ -54,7 +54,7 @@ if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/charging_sphere")
     file(RPATH_CHANGE
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/charging_sphere"
-         OLD_RPATH "/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/lib:/storage/coda1/p-zjiang33/0/shared/geant4-v11.3.0-vis-1/geant4-v11.3.0-vis/lib64:/usr/local/pace-apps/manual/packages/anaconda3/2023.03/lib:"
+         OLD_RPATH "/storage/home/hcoda1/5/avira7/p-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/lib:/storage/coda1/p-zjiang33/0/shared/geant4-v11.3.0-vis-1/geant4-v11.3.0-vis/lib64:/usr/local/pace-apps/manual/packages/anaconda3/2023.03/lib:"
          NEW_RPATH "")
     if(CMAKE_INSTALL_DO_STRIP)
       execute_process(COMMAND "/usr/bin/strip" "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/charging_sphere")
