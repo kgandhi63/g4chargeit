@@ -1,9 +1,18 @@
 import os
 import re
+import shutil
 from collections import defaultdict
 
-# Ensure macro directory exists
-os.makedirs("macros", exist_ok=True)
+# Overwrite the "macros" folder
+if os.path.exists("macros"):
+    shutil.rmtree("macros")  # Delete the folder and all its contents
+
+os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
+
+# define the number of particles for the each iteration
+account = "pf17"
+username = "avira7"
+selected_num = 50000 
 
 # Define a list of random seeds
 seedIN = [10008859, 10005380]
@@ -11,8 +20,6 @@ seedIN = [10008859, 10005380]
 # Output files tracking
 output_files = []
 i = 0
-
-selected_num = 50000 # for higher than 1 iterations
 
 def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'# Macro file for {increment_filename}\n')
@@ -27,7 +34,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('#\n')
     f.write('/process/em/auger true\n')
     f.write('/process/em/augerCascade true\n')
-    f.write('/process/em/QuantumEntanglement true\n')
+#    f.write('/process/em/QuantumEntanglement true\n') # only matters if a position is introduce
     f.write('#\n')
     f.write(f'/random/setSeeds {seedIN[0]} {seedIN[1]}\n')
     f.write('/random/setSavingFlag 1\n')
@@ -67,16 +74,12 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('/gps/direction 0 0 -1\n')
     f.write('/gps/ang/type planar\n')
     f.write('#\n')
-    f.write('/run/printProgress 10000\n')
+    f.write('/run/printProgress 1000\n')
     f.write(f'/run/beamOn {event_num}\n')
 
-
-#event_num_list = [100,500,1000,2000,5000,10000]
+#############################################################
 output_files = []
 i = 0
-
-# Assume selected_num is defined somewhere before this block
-# selected_num = 100000  # Example value
 
 for incrementIN in range(6):
 
@@ -92,7 +95,6 @@ for incrementIN in range(6):
         # Iteration 1 using various event numbers from iteration 0 output
         filtered = [fname for fname, evnum, iterID in output_files if iterID == 0]
         for inputfile in filtered:
-            #for event_num in event_num_list:
             input_name_prefix = inputfile.split('_')[0]
             increment_filename = f"{i:02d}_iteration1_from_{input_name_prefix}_num{selected_num}"
             with open(f"macros/{increment_filename}.mac", 'w') as f:
@@ -186,12 +188,12 @@ os.makedirs(batch_dir, exist_ok=True)
 # Template for SLURM batch file
 batch_template_serial = """#!/bin/bash
 #SBATCH --job-name=Iteration{iter}_Run
-#SBATCH --account=gts-pf17
-#SBATCH --mail-user=avira7@gatech.edu
+#SBATCH --account=gts-{account}
+#SBATCH --mail-user={username}@gatech.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --nodes=4
-#SBATCH --ntasks-per-node=16
-#SBATCH --mem=32gb
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=32
+#SBATCH --mem=64gb
 #SBATCH --time=10:00:00
 #SBATCH --output=outputlogs/iteration{iter}.out
 
@@ -202,8 +204,8 @@ date
 
 batch_template_array = """#!/bin/bash
 #SBATCH --job-name=Iteration{iter}_Array
-#SBATCH --account=gts-pf17
-#SBATCH --mail-user=avira7@gatech.edu
+#SBATCH --account=gts-{account}
+#SBATCH --mail-user={username}@gatech.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --nodes=4
 #SBATCH --ntasks-per-node=16
@@ -241,12 +243,16 @@ for fname in os.listdir(run_dir):
             batch_script = batch_template_array.format(
                 iter=iter_num,
                 run_script=run_script_path,
-                array_size=num_lines
+                array_size=num_lines,                
+                account=account, 
+                username=username
             )
         else:
             batch_script = batch_template_serial.format(
                 iter=iter_num,
-                run_script=run_script_path
+                run_script=run_script_path, 
+                account=account, 
+                username=username
             )
 
         with open(batch_path, "w") as f:

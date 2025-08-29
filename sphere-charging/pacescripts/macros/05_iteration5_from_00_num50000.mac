@@ -10,7 +10,6 @@
 #
 /process/em/auger true
 /process/em/augerCascade true
-/process/em/QuantumEntanglement true
 #
 /random/setSeeds 10008859 10005380
 /random/setSavingFlag 1
@@ -47,5 +46,5 @@
 /gps/direction 0 0 -1
 /gps/ang/type planar
 #
-/run/printProgress 10000
+/run/printProgress 1000
 /run/beamOn 50000

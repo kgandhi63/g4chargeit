@@ -3,9 +3,9 @@
 #SBATCH --account=gts-pf17
 #SBATCH --mail-user=avira7@gatech.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --nodes=4
-#SBATCH --ntasks-per-node=16
-#SBATCH --mem=32gb
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=32
+#SBATCH --mem=64gb
 #SBATCH --time=10:00:00
 #SBATCH --output=outputlogs/iteration4.out
 
