@@ -33,8 +33,8 @@ include_directories(${PROJECT_SOURCE_DIR}/include
                     ${Geant4_INCLUDE_DIR})
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/outputlogs)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/geometry)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/pacescripts)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/root)
 
 #----------------------------------------------------------------------------
@@ -72,6 +72,10 @@ endforeach()
 # Copy all contents of pacescripts/ into the build directory (not the folder itself)
 file(GLOB PACE_SCRIPTS ${CMAKE_SOURCE_DIR}/pacescripts/*)
 file(COPY ${PACE_SCRIPTS} DESTINATION ${CMAKE_BINARY_DIR})
+
+# Copy all contents of pacescripts/ into the build directory (not the folder itself)
+file(GLOB GEOMETRY ${CMAKE_SOURCE_DIR}/geometry/*)
+file(COPY ${GEOMETRY} DESTINATION ${CMAKE_BINARY_DIR}/geometry/)
 
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX

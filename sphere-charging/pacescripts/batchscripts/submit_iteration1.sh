@@ -8,7 +8,7 @@
 #SBATCH --mem=32gb
 #SBATCH --time=10:00:00
 #SBATCH --output=outputlogs/iteration1_%A_%a.out
-#SBATCH --array=1-5
+#SBATCH --array=1-1
 
 # Read in the array of commands
 readarray -t commands < runscripts/run_iteration1.sh

@@ -1,5 +1,1 @@
-./charging_sphere macros/05_iteration1_from_00_num10000.mac
-./charging_sphere macros/06_iteration1_from_01_num50000.mac
-./charging_sphere macros/07_iteration1_from_02_num100000.mac
-./charging_sphere macros/08_iteration1_from_03_num500000.mac
-./charging_sphere macros/09_iteration1_from_04_num1000000.mac
+./charging_sphere macros/01_iteration1_from_00_num50000.mac

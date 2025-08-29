@@ -1,1 +1,1 @@
-./charging_sphere macros/10_iteration2_from_num1000000.mac
+./charging_sphere macros/02_iteration2_from_00_num50000.mac

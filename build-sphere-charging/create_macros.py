@@ -12,7 +12,7 @@ seedIN = [10008859, 10005380]
 output_files = []
 i = 0
 
-selected_num = 1000000 # for higher than 1 iterations
+selected_num = 50000 # for higher than 1 iterations
 
 def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'# Macro file for {increment_filename}\n')
@@ -35,6 +35,8 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
     f.write(f'/sphere/filename root/{increment_filename}.root\n')
+    #f.write('/sphere/cadinput/file geometry/stacked_spheres.stl\n')
+    #f.write('/sphere/cadinput/scale 0.000001\n')
     f.write('/sphere/epsilon 3.9\n')
     f.write('/sphere/PBC false\n')
     f.write('#\n')
@@ -69,38 +71,81 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/run/beamOn {event_num}\n')
 
 
-for incrementIN in [0, 1, 2, 3, 4, 5]:
-	if incrementIN == 0:
-		event_num_list = [10000, 50000, 100000, 500000, 1000000]
-		for event_num in event_num_list:
-			increment_filename = f"{i:02d}_iteration0_num{event_num}"
-			with open(f"macros/{increment_filename}.mac", 'w') as f:
-				write_macro(f, increment_filename, event_num)
-			output_files.append((increment_filename + ".root", event_num, incrementIN))
-			i += 1
+#event_num_list = [100,500,1000,2000,5000,10000]
+output_files = []
+i = 0
 
-	elif incrementIN == 1:
-		# Filter iteration0 files with 100000 particles
-		filtered = [fname for fname, evnum, iterID in output_files if "iteration0" in fname]
-		for inputfile in filtered:
-			increment_filename = f"{i:02d}_iteration1_from_{inputfile.split('_')[0]}_{inputfile.split('_')[-1].replace('.root', '')}"
-			with open(f"macros/{increment_filename}.mac", 'w') as f:
-				write_macro(f, increment_filename, 100, input_files=[inputfile])
-			output_files.append((increment_filename + ".root", 100, incrementIN))
-			i += 1
+# Assume selected_num is defined somewhere before this block
+# selected_num = 100000  # Example value
 
-	elif incrementIN >= 2:
+for incrementIN in range(6):
 
-		# Filter iteration0 files with 100000 particles
-		filtered = [fname for fname, evnum, iterID in output_files if "_num1000000" in fname]
+    if incrementIN == 0:
+        # Iteration 0 with selected_num
+        increment_filename = f"{i:02d}_iteration0_num{selected_num}"
+        with open(f"macros/{increment_filename}.mac", 'w') as f:
+            write_macro(f, increment_filename, selected_num)
+        output_files.append((increment_filename + ".root", selected_num, incrementIN))
+        i += 1
+
+    elif incrementIN == 1:
+        # Iteration 1 using various event numbers from iteration 0 output
+        filtered = [fname for fname, evnum, iterID in output_files if iterID == 0]
+        for inputfile in filtered:
+            #for event_num in event_num_list:
+            input_name_prefix = inputfile.split('_')[0]
+            increment_filename = f"{i:02d}_iteration1_from_{input_name_prefix}_num{selected_num}"
+            with open(f"macros/{increment_filename}.mac", 'w') as f:
+                write_macro(f, increment_filename, selected_num, input_files=[inputfile])
+            output_files.append((increment_filename + ".root", selected_num, incrementIN))
+            i += 1
+
+    elif incrementIN >= 2:
+        # Iteration 2+ using only iteration 1 files with 1000000 particles
+        filtered = [fname for fname, evnum, iterID in output_files if iterID ==0 or evnum == selected_num]
+        input_list = ' '.join(filtered)
+        print(input_list)
+  
+        increment_filename = f"{i:02d}_iteration{incrementIN}_from_{input_name_prefix}_num{selected_num}"
+        with open(f"macros/{increment_filename}.mac", 'w') as f:
+            write_macro(f, increment_filename, selected_num, input_files=[input_list])
+        output_files.append((increment_filename + ".root", selected_num, incrementIN))
+        i += 1
+
+# for incrementIN in [0, 1, 2, 3, 4, 5]:
+# 	if incrementIN == 0:
+# 		#event_num_list = [10000, 50000, 100000, 500000, 1000000]
+# 		#for event_num in event_num_list:
+#         increment_filename = f"{i:02d}_iteration0_num{selected_num}"
+#         with open(f"macros/{increment_filename}.mac", 'w') as f:
+#             write_macro(f, increment_filename, selected_num)
+#         output_files.append((increment_filename + ".root", selected_num, incrementIN))
+#         i += 1
+
+# 	elif incrementIN == 1:
+#         event_num_list = [10000, 50000, 100000, 500000, 1000000]
+# 		for event_num in event_num_list:
+#             # Filter iteration0 files with 100000 particles
+#             filtered = [fname for fname, evnum, iterID in output_files if "iteration0" in fname]
+#             for inputfile in filtered:
+#                 increment_filename = f"{i:02d}_iteration1_from_{inputfile.split('_')[0]}_{inputfile.split('_')[-1].replace('.root', '')}"
+#                 with open(f"macros/{increment_filename}.mac", 'w') as f:
+#                     write_macro(f, increment_filename, event_num, input_files=[inputfile])
+#                 output_files.append((increment_filename + ".root", event_num, incrementIN))
+#                 i += 1
+
+# 	elif incrementIN >= 2:
+
+# 		# Filter iteration0 files with 100000 particles
+# 		filtered = [fname for fname, evnum, iterID in output_files if "_num1000000" in fname]
             
-		input_list = ' '.join(filtered)
+# 		input_list = ' '.join(filtered)
 
-		increment_filename = f"{i:02d}_iteration{incrementIN}_from_num1000000"
-		with open(f"macros/{increment_filename}.mac", 'w') as f:
-				write_macro(f, increment_filename, 100, input_files=[input_list])
-		output_files.append((increment_filename + ".root", 100, incrementIN))
-		i += 1
+# 		increment_filename = f"{i:02d}_iteration{incrementIN}_from_num1000000"
+# 		with open(f"macros/{increment_filename}.mac", 'w') as f:
+# 				write_macro(f, increment_filename, 100, input_files=[input_list])
+# 		output_files.append((increment_filename + ".root", 100, incrementIN))
+# 		i += 1
 		
 #############################################################
 
