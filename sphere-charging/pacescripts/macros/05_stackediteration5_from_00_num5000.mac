@@ -1,4 +1,4 @@
-# Macro file for 00_iteration0_num50000
+# Macro file for 05_stackediteration5_from_00_num5000
 #
 /control/verbose 0
 /run/verbose 1
@@ -14,7 +14,10 @@
 /random/setSeeds 10008859 10005380
 /random/setSavingFlag 1
 #
-/sphere/filename root/00_iteration0_num50000.root
+/sphere/rootinput/file 00_stackediteration0_num5000.root 01_stackediteration1_from_00_num5000.root 02_stackediteration2_from_00_num5000.root 03_stackediteration3_from_00_num5000.root 04_stackediteration4_from_00_num5000.root
+/sphere/filename root/05_stackediteration5_from_00_num5000.root
+/sphere/cadinput/file stacked_spheres.stl
+/sphere/cadinput/scale 0.001
 /sphere/epsilon 3.9
 /sphere/PBC false
 #
@@ -45,5 +48,5 @@
 /gps/direction 0 0 -1
 /gps/ang/type planar
 #
-/run/printProgress 1000
-/run/beamOn 50000
+/run/printProgress 100
+/run/beamOn 5000

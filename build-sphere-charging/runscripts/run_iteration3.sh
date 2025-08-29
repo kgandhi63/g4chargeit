@@ -1,1 +1,1 @@
-./charging_sphere macros/03_iteration3_from_00_num50000.mac
+./charging_sphere macros/03_stackediteration3_from_00_num5000.mac

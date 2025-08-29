@@ -12,7 +12,7 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-selected_num = 50000 
+selected_num = 5000 
 
 # Define a list of random seeds
 seedIN = [10008859, 10005380]
@@ -42,8 +42,8 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
     f.write(f'/sphere/filename root/{increment_filename}.root\n')
-    #f.write('/sphere/cadinput/file geometry/stacked_spheres.stl\n')
-    #f.write('/sphere/cadinput/scale 0.000001\n')
+    f.write('/sphere/cadinput/file stacked_spheres.stl\n')
+    f.write('/sphere/cadinput/scale 0.001\n')
     f.write('/sphere/epsilon 3.9\n')
     f.write('/sphere/PBC false\n')
     f.write('#\n')
@@ -74,7 +74,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('/gps/direction 0 0 -1\n')
     f.write('/gps/ang/type planar\n')
     f.write('#\n')
-    f.write('/run/printProgress 1000\n')
+    f.write('/run/printProgress 100\n')
     f.write(f'/run/beamOn {event_num}\n')
 
 #############################################################
@@ -85,30 +85,30 @@ for incrementIN in range(6):
 
     if incrementIN == 0:
         # Iteration 0 with selected_num
-        increment_filename = f"{i:02d}_iteration0_num{selected_num}"
+        increment_filename = f"{i:02d}_stackediteration0_num{selected_num}"
         with open(f"macros/{increment_filename}.mac", 'w') as f:
             write_macro(f, increment_filename, selected_num)
         output_files.append((increment_filename + ".root", selected_num, incrementIN))
         i += 1
 
-    elif incrementIN == 1:
-        # Iteration 1 using various event numbers from iteration 0 output
-        filtered = [fname for fname, evnum, iterID in output_files if iterID == 0]
-        for inputfile in filtered:
-            input_name_prefix = inputfile.split('_')[0]
-            increment_filename = f"{i:02d}_iteration1_from_{input_name_prefix}_num{selected_num}"
-            with open(f"macros/{increment_filename}.mac", 'w') as f:
-                write_macro(f, increment_filename, selected_num, input_files=[inputfile])
-            output_files.append((increment_filename + ".root", selected_num, incrementIN))
-            i += 1
+    # elif incrementIN == 1:
+    #     # Iteration 1 using various event numbers from iteration 0 output
+    #     filtered = [fname for fname, evnum, iterID in output_files if iterID == 0]
+    #     for inputfile in filtered:
+    #         input_name_prefix = inputfile.split('_')[0]
+    #         increment_filename = f"{i:02d}_iteration1_from_{input_name_prefix}_num{selected_num}"
+    #         with open(f"macros/{increment_filename}.mac", 'w') as f:
+    #             write_macro(f, increment_filename, selected_num, input_files=[inputfile])
+    #         output_files.append((increment_filename + ".root", selected_num, incrementIN))
+    #         i += 1
 
-    elif incrementIN >= 2:
+    elif incrementIN > 0:
         # Iteration 2+ using only iteration 1 files with 1000000 particles
         filtered = [fname for fname, evnum, iterID in output_files if iterID ==0 or evnum == selected_num]
         input_list = ' '.join(filtered)
         print(input_list)
   
-        increment_filename = f"{i:02d}_iteration{incrementIN}_from_{input_name_prefix}_num{selected_num}"
+        increment_filename = f"{i:02d}_stackediteration{incrementIN}_from_00_num{selected_num}"
         with open(f"macros/{increment_filename}.mac", 'w') as f:
             write_macro(f, increment_filename, selected_num, input_files=[input_list])
         output_files.append((increment_filename + ".root", selected_num, incrementIN))
@@ -192,10 +192,10 @@ batch_template_serial = """#!/bin/bash
 #SBATCH --mail-user={username}@gatech.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=32
-#SBATCH --mem=64gb
+#SBATCH --ntasks-per-node=16
+#SBATCH --mem=32gb
 #SBATCH --time=10:00:00
-#SBATCH --output=outputlogs/iteration{iter}.out
+#SBATCH --output=outputlogs/iteration{iter}_%A.out
 
 echo "Starting iteration{iter} runs"
 bash {run_script}
@@ -239,21 +239,21 @@ for fname in os.listdir(run_dir):
             num_lines = sum(1 for _ in f)
 
         # Use job array for iteration0 and iteration1
-        if iter_num in [0, 1]:
-            batch_script = batch_template_array.format(
-                iter=iter_num,
-                run_script=run_script_path,
-                array_size=num_lines,                
-                account=account, 
-                username=username
-            )
-        else:
-            batch_script = batch_template_serial.format(
-                iter=iter_num,
-                run_script=run_script_path, 
-                account=account, 
-                username=username
-            )
+        # if iter_num in [0, 1]:
+        #     batch_script = batch_template_array.format(
+        #         iter=iter_num,
+        #         run_script=run_script_path,
+        #         array_size=num_lines,                
+        #         account=account, 
+        #         username=username
+        #     )
+        # else:
+        batch_script = batch_template_serial.format(
+            iter=iter_num,
+            run_script=run_script_path, 
+            account=account, 
+            username=username
+        )
 
         with open(batch_path, "w") as f:
             f.write(batch_script)
