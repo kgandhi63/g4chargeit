@@ -12,7 +12,7 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-selected_num = 5000 
+selected_num = 10000
 
 # Define a list of random seeds
 seedIN = [10008859, 10005380]
