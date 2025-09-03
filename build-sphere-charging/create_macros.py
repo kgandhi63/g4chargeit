@@ -12,7 +12,7 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-selected_num = 10000
+selected_num = 20000
 
 # Define a list of random seeds
 seedIN = [10008859, 10005380]
@@ -194,7 +194,7 @@ batch_template_serial = """#!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=16
 #SBATCH --mem=32gb
-#SBATCH --time=10:00:00
+#SBATCH --time=15:00:00
 #SBATCH --output=outputlogs/iteration{iter}_%A.out
 
 echo "Starting iteration{iter} runs"
@@ -210,7 +210,7 @@ batch_template_array = """#!/bin/bash
 #SBATCH --nodes=4
 #SBATCH --ntasks-per-node=16
 #SBATCH --mem=32gb
-#SBATCH --time=10:00:00
+#SBATCH --time=15:00:00
 #SBATCH --output=outputlogs/iteration{iter}_%A_%a.out
 #SBATCH --array=1-{array_size}
 

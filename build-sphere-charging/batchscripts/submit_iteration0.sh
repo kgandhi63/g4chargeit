@@ -6,7 +6,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=16
 #SBATCH --mem=32gb
-#SBATCH --time=10:00:00
+#SBATCH --time=15:00:00
 #SBATCH --output=outputlogs/iteration0_%A.out
 
 echo "Starting iteration0 runs"
