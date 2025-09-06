@@ -127,11 +127,25 @@ G4SolidStore::GetInstance()->Clean();
  G4MaterialPropertiesTable* dielectric = new G4MaterialPropertiesTable();
  dielectric->AddConstProperty("Epsilon",  Epsilon_, true);
 
-// Set Property to SiO2
-G4Material* SiO2 = G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
-SiO2->SetMaterialPropertiesTable(dielectric);
+// Set Property to ilmenite
+  G4int ncomponents,natoms; //, abundance;
  
-G4bool checkOverlaps = false;
+  // mixture of HDPE and h10BN
+  G4Material* ilmenite = new G4Material("Ilmenite", 4.78*g/cm3, ncomponents=3,
+      kStateSolid); //, 293.15*kelvin, 1*atmosphere
+  
+  // polyethlyene elements
+  G4Element* Fe = new G4Element("Iron","Fe", 26., 55.845*g/mole);
+  G4Element* Ti = new G4Element("Titanium", "Ti", 22., 47.87*g/mole);
+  G4Element* O = new G4Element("Oxygen", "O", 8., 16.00*g/mole);
+ 
+  // add components
+  ilmenite->AddElement(Fe, natoms=1);
+  ilmenite->AddElement(Ti, natoms=1);
+  ilmenite->AddElement(O, natoms=3);
+  //ilmenite->SetMaterialPropertiesTable(dielectric);
+ 
+  G4bool checkOverlaps = false;
   //     
   // World Characteristics
   //
@@ -241,52 +255,39 @@ if (!RootInput_.empty()) {
     tree->SetBranchAddress("Particle_Type", &particle_type);
 
     // Define the specific volume to filter
-    const std::string target_volume = "G4_SILICON_DIOXIDE";  // Replace with the desired volume name
+    const std::string target_volume = "Ilmenite";  // Replace with the desired volume name
 
     Long64_t nEntries = tree->GetEntries();
     for (Long64_t i = 0; i < nEntries; i++) {
         tree->GetEntry(i);
         if (std::string(volume_name_post) == target_volume
-         && std::string(particle_type) == "e-" 
+         && (std::string(particle_type) == "e-" || std::string(particle_type) == "proton")
          && kinetic_energy_post_mev == 0.0) {
           if (post_step_position && post_step_position->size() >= 3) { 
-              // Ensure the vector contains at least x, y, z components
-              G4ThreeVector pos((*post_step_position)[0] * mm, // x
-                                (*post_step_position)[1] * mm, // y
-                                (*post_step_position)[2] * mm); // z
-              fElectronPositions.push_back(pos);
+              G4ThreeVector pos((*post_step_position)[0] * mm,
+                                (*post_step_position)[1] * mm,
+                                (*post_step_position)[2] * mm);
+              if (std::string(particle_type) == "e-") {
+                  fElectronPositions.push_back(pos);
+              } else if (std::string(particle_type) == "proton") {
+                  fProtonPositions.push_back(pos);
+              }
+          }
         }
-      }
-    }
-    G4Sphere * electron = new G4Sphere("Electron", 0., 1*nm , 0., 360.*deg, 0., 180.*deg);
-    G4LogicalVolume*logicElectron = new G4LogicalVolume(electron, world_mat, electron->GetName());
-    logicElectron->SetVisAttributes(G4VisAttributes::GetInvisible());
-    int count = 0;
-    // Use these locations for electron placements
-    for (const auto& pos : fElectronPositions) {
-      new G4PVPlacement(
-          0,                      // no rotation
-          pos,                    // position from the vector
-          logicElectron,            // logical volume (or particle placement logic)
-          "ElectronPlacement",    // name
-          logicWorld_,            // mother volume
-          false,                  // no boolean operation
-          0                       // copy number
-      );
-
-    G4cout << "Placed Electron: " << count++ << G4endl;
     }
 
+    G4cout << "electrons: " << fElectronPositions.size() << G4endl;
+    G4cout << "protons: " << fProtonPositions.size() << G4endl;
 }
 }
 
-G4LogicalVolume*logicSphere= new G4LogicalVolume(sphere_solid, SiO2 , SiO2->GetName());  
+G4LogicalVolume*logicSphere= new G4LogicalVolume(sphere_solid, ilmenite , ilmenite->GetName());  
 
 
 new G4PVPlacement(0,                          	//no rotation
               G4ThreeVector(),     //at (0,0,0)
               logicSphere,                               //its logical volume
-              SiO2->GetName(),               //its name
+              ilmenite->GetName(),               //its name
               logicWorld_,                        //its mother volume
               false,                              //no boolean operation
               0);                                 //copy number
@@ -295,12 +296,9 @@ new G4PVPlacement(0,                          	//no rotation
 
 //logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
 
-
-
-// Set Maximum Step Size (to avoid RungeKutta Errors)
-G4double step = 1 * um;
+G4double step = 1 * nm;
 G4UserLimits* userLimits = new G4UserLimits(step);
-logicWorld_->SetUserLimits(userLimits);
+//logicSphere->SetUserLimits(userLimits);
 
 return physWorld;
 }
@@ -312,11 +310,27 @@ void DetectorConstruction::ConstructSDandField() {
   auto sd = sdManager->GetSD();
   G4SDManager::GetSDMpointer()->AddNewDetector(sd);
 
-  // 2) build one SumRadialField from all stored positions:
-  G4double eCharge = -1.602e-19 * CLHEP::coulomb;
-  auto sumField = new SumRadialField(fElectronPositions, eCharge);
+  // Combine all positions and charges
+  std::vector<G4ThreeVector> allPositions;
+  std::vector<G4double> allCharges;
 
-  // 3) one global FieldManager on the world:
+  // Electrons (negative charge)
+  G4double eCharge = -1.602e-19 * CLHEP::coulomb;
+  for (const auto& pos : fElectronPositions) {
+      allPositions.push_back(pos);
+      allCharges.push_back(eCharge);
+  }
+  // Protons (positive charge)
+  G4double pCharge = +1.602e-19 * CLHEP::coulomb;
+  for (const auto& pos : fProtonPositions) {
+      allPositions.push_back(pos);
+      allCharges.push_back(pCharge);
+  }
+
+  // Create the field with both electrons and protons
+  auto sumField = new SumRadialField(allPositions, allCharges);
+
+  // Set up the field manager as before
   auto worldFM = new G4FieldManager();
   worldFM->SetDetectorField(sumField);
   worldFM->SetMinimumEpsilonStep(1.0e-7);
@@ -375,3 +389,6 @@ void DetectorConstruction::SetCADScale(G4double value)
   Scale_ = value;
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
+
+
+

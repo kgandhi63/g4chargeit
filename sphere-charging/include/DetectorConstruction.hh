@@ -77,6 +77,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4String RootInput_;
     G4double Scale_;
     std::vector<G4ThreeVector> fElectronPositions;
+    std::vector<G4ThreeVector> fProtonPositions;
     DetectorMessenger* detectorMessenger_;
 
 };

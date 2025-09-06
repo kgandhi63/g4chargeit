@@ -9,20 +9,22 @@
 
 class SumRadialField : public G4ElectricField {
 public:
-  SumRadialField(const std::vector<G4ThreeVector>& pos, G4double q)
-    : fPositions(pos), fCharge(q) {}
-  
+  // Constructor now takes positions and charges
+  SumRadialField(const std::vector<G4ThreeVector>& pos, const std::vector<G4double>& charges)
+    : fPositions(pos), fCharges(charges) {}
+
   void GetFieldValue(const G4double point[4], G4double Field[6]) const override {
     G4ThreeVector r(point[0], point[1], point[2]);
     G4ThreeVector E(0., 0., 0.);
 
     const G4double epsilon0 = 1.0 / (mu0 * c_light * c_light);
 
-    for (auto& ri : fPositions) {
-      G4ThreeVector dr = r - ri;
+    // Sum the field from all charges
+    for (size_t i = 0; i < fPositions.size(); ++i) {
+      G4ThreeVector dr = r - fPositions[i];
       G4double r3 = std::pow(dr.mag(), 3);
       if (r3 > 0.) {
-        E += (fCharge / (4. * pi * epsilon0)) * (dr / r3);
+        E += (fCharges[i] / (4. * pi * epsilon0)) * (dr / r3);
       }
     }
 
@@ -34,7 +36,7 @@ public:
 
 private:
   std::vector<G4ThreeVector> fPositions;
-  G4double                   fCharge;
+  std::vector<G4double>      fCharges;
 };
 
 #endif  // SumRadialField_h

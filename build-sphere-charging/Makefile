@@ -57,10 +57,10 @@ RM = /storage/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-12.3.0/cmake-3.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging
+CMAKE_SOURCE_DIR = /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging
+CMAKE_BINARY_DIR = /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -68,7 +68,7 @@ CMAKE_BINARY_DIR = /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Gra
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running CMake cache editor..."
-	/usr/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/storage/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-12.3.0/cmake-3.30.2-yzfwrncmyizuujyat2tsx3j7gkcfheib/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -132,9 +132,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles 0
 .PHONY : all
 
 # The main clean target

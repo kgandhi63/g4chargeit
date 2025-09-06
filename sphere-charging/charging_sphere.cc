@@ -31,71 +31,139 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 #include "G4Types.hh"
-
+ 
 #ifdef G4MULTITHREADED
 #include "G4MTRunManager.hh"
 #else
 #include "G4RunManager.hh"
 #endif
-
-
-
+ 
+ 
+ 
 #include "G4UImanager.hh"
 #include "Randomize.hh"
-
+ 
 #include "DetectorConstruction.hh"
 #include "PhysicsList.hh"
 #include "ActionInitialization.hh"
-
+ 
 #include "G4UIExecutive.hh"
 #include "G4VisExecutive.hh"
-
+ 
 #include "G4ParticleHPManager.hh"
+#include "G4SystemOfUnits.hh"
+#include "G4ProductionCutsTable.hh"
+#include "G4EmParameters.hh"
+#include "G4EmLivermorePhysics.hh"    
+
 #include "G4EmStandardPhysics_option4.hh"
-
-
+ 
+ 
 #include "G4PhysListFactory.hh"
 #include "G4VModularPhysicsList.hh"
 #include "G4PeriodicBoundaryPhysics.hh"
+ 
+#include "G4StepLimiterPhysics.hh"
+#include "G4ProductionCutsTable.hh"
+ 
+#include "G4PeriodicBoundaryPhysics.hh"
+#include "G4StepLimiterPhysics.hh"
+#include "G4NuclearStopping.hh"
+#include "G4Proton.hh"
+ 
+#include "G4EmExtraPhysics.hh"
+ 
+#include "G4EmStandardPhysicsSS.hh"
+#include "G4EmLowEPPhysics.hh" 
+#include "G4EmLivermorePhysics.hh"
 
-
+#include "G4SystemOfUnits.hh"
+#include "G4ProductionCutsTable.hh"
+#include "G4EmParameters.hh"
 //#include "G4PeriodicBoundaryPhysics.hh"
-
+ 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
+ 
 int main(int argc,char** argv) {
-
+ 
   /// detect interactive mode (if no arguments) and define UI session
   G4UIExecutive* ui = nullptr;
   if (argc == 1) ui = new G4UIExecutive(argc,argv);
-
+ 
   /// choose the Random engine
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
-
+ 
   /// construct the default run manager
   G4RunManager* runManager = new G4RunManager;
-
+ 
   /// set mandatory initialization classes
   DetectorConstruction* det= new DetectorConstruction;
   runManager->SetUserInitialization(det);
-
-
+ 
+ 
   // load all physics that we defined
- // PhysicsList* physList = new PhysicsList;
+// PhysicsList* physList = new PhysicsList;
+ 
+// G4ProductionCutsTable::GetProductionCutsTable()->SetEnergyRange(0.1*eV, 10*keV);
+ 
+  G4ProductionCutsTable::GetProductionCutsTable()
+    ->SetEnergyRange(50*eV, 100*TeV);   // min = 50 eV
 
- G4PhysListFactory factory; 
-  G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT_EMX"); 
-  physList->ReplacePhysics(new G4EmStandardPhysics_option4);
+  auto* em = G4EmParameters::Instance();
+  em->SetMinEnergy(50*eV);
+  em->SetLowestElectronEnergy(10*eV);
+  em->SetNumberOfBinsPerDecade(40);
+  // Use PhysListFactory to get a reference physics list
+  G4PhysListFactory factory;
+   G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT_EMX"); //FTFP_BERT_EMX
+   //physList->ReplacePhysics(new G4EmStandardPhysics_option4);
+    physList->ReplacePhysics(new G4EmLivermorePhysics);
+    physList->RegisterPhysics(new G4EmExtraPhysics);
+
+ 
+//   // Add step limiter to all particles
+   auto* stepLimitPhys = new G4StepLimiterPhysics();
+   stepLimitPhys->SetApplyToAll(true); // apply to all particles, not just charged
+   physList->RegisterPhysics(stepLimitPhys);
+ 
+  // Add periodic boundary conditions
   G4PeriodicBoundaryPhysics* pbc = new G4PeriodicBoundaryPhysics("PBC", true, true, false); // Turn off pbc in Z direction
   pbc->SetVerboseLevel(0);
   physList->RegisterPhysics(pbc);
 
+ 
+  //pbc->SetVerboseLevel(0);
+  //physList->RegisterPhysics(pbc);
+ 
+// load all physics that we defined
+// PhysicsList* physList = new PhysicsList; auto* stepLimitPhys = new G4StepLimiterPhysics();
+  // auto* stepLimitPhys = new G4StepLimiterPhysics();
+  // stepLimitPhys->SetApplyToAll(true); // apply to all particles, not just charged
+  // G4PhysListFactory factory;
+  // G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT_EMX");
+  // physList->ReplacePhysics(new G4EmStandardPhysics_option4);
+  // G4PeriodicBoundaryPhysics* pbc = new G4PeriodicBoundaryPhysics("PBC", true, true, false); // Turn off pbc in Z direction
+  // pbc->SetVerboseLevel(0);
+  // physList->RegisterPhysics(pbc);
+  // physList->RegisterPhysics(stepLimitPhys);
+ 
+//   {
+//     auto* nuclearStopping = new G4NuclearStopping();
+//     nuclearStopping->SetBuildTableFlag(true);
+ 
+//     auto* pManager = G4Proton::Proton()->GetProcessManager();
+//     if (pManager) {
+//         pManager->AddProcess(nuclearStopping);
+//     }
+// }
+ 
+ 
   runManager->SetUserInitialization(physList);
   runManager->SetUserInitialization(new ActionInitialization());
-
+ 
   /// initialize visualization
   G4VisManager* visManager = nullptr;
-
+ 
   /// Replaced HP environmental variables with C++ calls
   G4ParticleHPManager::GetInstance()->SetSkipMissingIsotopes( false );
   G4ParticleHPManager::GetInstance()->SetDoNotAdjustFinalState( false );
@@ -111,10 +179,10 @@ int main(int argc,char** argv) {
   //G4ParticleHPManager::GetInstance()->SetProduceFissionFragments( true );
   //G4ParticleHPManager::GetInstance()->SetUseWendtFissionModel( true );
   //G4ParticleHPManager::GetInstance()->SetUseNRESP71Model( true );
-
+ 
   ///get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
-
+ 
   if (ui)  {
    /// interactive mode
    visManager = new G4VisExecutive;
@@ -130,12 +198,12 @@ int main(int argc,char** argv) {
    UImanager->ApplyCommand(command1+fileName);
    UImanager->ApplyCommand(command2+fileName);
   }
-
+ 
   /// job termination
   delete visManager;
   delete runManager;
-
-
+ 
+ 
 }
-
+ 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

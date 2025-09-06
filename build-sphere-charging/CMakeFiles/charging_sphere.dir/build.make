@@ -53,10 +53,10 @@ RM = /storage/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-12.3.0/cmake-3.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging
+CMAKE_SOURCE_DIR = /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging
+CMAKE_BINARY_DIR = /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging
 
 # Include any dependencies generated for this target.
 include CMakeFiles/charging_sphere.dir/depend.make
@@ -70,186 +70,186 @@ include CMakeFiles/charging_sphere.dir/progress.make
 include CMakeFiles/charging_sphere.dir/flags.make
 
 CMakeFiles/charging_sphere.dir/charging_sphere.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/charging_sphere.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/charging_sphere.cc
+CMakeFiles/charging_sphere.dir/charging_sphere.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/charging_sphere.cc
 CMakeFiles/charging_sphere.dir/charging_sphere.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/charging_sphere.dir/charging_sphere.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/charging_sphere.cc.o -MF CMakeFiles/charging_sphere.dir/charging_sphere.cc.o.d -o CMakeFiles/charging_sphere.dir/charging_sphere.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/charging_sphere.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/charging_sphere.dir/charging_sphere.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/charging_sphere.cc.o -MF CMakeFiles/charging_sphere.dir/charging_sphere.cc.o.d -o CMakeFiles/charging_sphere.dir/charging_sphere.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/charging_sphere.cc
 
 CMakeFiles/charging_sphere.dir/charging_sphere.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/charging_sphere.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/charging_sphere.cc > CMakeFiles/charging_sphere.dir/charging_sphere.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/charging_sphere.cc > CMakeFiles/charging_sphere.dir/charging_sphere.cc.i
 
 CMakeFiles/charging_sphere.dir/charging_sphere.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/charging_sphere.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/charging_sphere.cc -o CMakeFiles/charging_sphere.dir/charging_sphere.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/charging_sphere.cc -o CMakeFiles/charging_sphere.dir/charging_sphere.cc.s
 
 CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/ActionInitialization.cc
+CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/ActionInitialization.cc
 CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o -MF CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o.d -o CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/ActionInitialization.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o -MF CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o.d -o CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/ActionInitialization.cc
 
 CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/ActionInitialization.cc > CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/ActionInitialization.cc > CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.i
 
 CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/ActionInitialization.cc -o CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/ActionInitialization.cc -o CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.s
 
 CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/DetectorConstruction.cc
+CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/DetectorConstruction.cc
 CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o -MF CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o.d -o CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/DetectorConstruction.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o -MF CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o.d -o CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/DetectorConstruction.cc
 
 CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/DetectorConstruction.cc > CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/DetectorConstruction.cc > CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.i
 
 CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/DetectorConstruction.cc -o CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/DetectorConstruction.cc -o CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.s
 
 CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/DetectorMessenger.cc
+CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/DetectorMessenger.cc
 CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o -MF CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o.d -o CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/DetectorMessenger.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o -MF CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o.d -o CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/DetectorMessenger.cc
 
 CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/DetectorMessenger.cc > CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/DetectorMessenger.cc > CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.i
 
 CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/DetectorMessenger.cc -o CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/DetectorMessenger.cc -o CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.s
 
 CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysListEmLivermore.cc
+CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/PhysListEmLivermore.cc
 CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o -MF CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o.d -o CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysListEmLivermore.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o -MF CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o.d -o CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/PhysListEmLivermore.cc
 
 CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysListEmLivermore.cc > CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/PhysListEmLivermore.cc > CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.i
 
 CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysListEmLivermore.cc -o CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/PhysListEmLivermore.cc -o CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.s
 
 CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysicsList.cc
+CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/PhysicsList.cc
 CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o -MF CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o.d -o CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysicsList.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o -MF CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o.d -o CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/PhysicsList.cc
 
 CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysicsList.cc > CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/PhysicsList.cc > CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.i
 
 CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysicsList.cc -o CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/PhysicsList.cc -o CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.s
 
 CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PrimaryGeneratorAction.cc
+CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/PrimaryGeneratorAction.cc
 CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o -MF CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o.d -o CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PrimaryGeneratorAction.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o -MF CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o.d -o CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/PrimaryGeneratorAction.cc
 
 CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PrimaryGeneratorAction.cc > CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/PrimaryGeneratorAction.cc > CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.i
 
 CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PrimaryGeneratorAction.cc -o CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/PrimaryGeneratorAction.cc -o CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.s
 
 CMakeFiles/charging_sphere.dir/src/Run.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/Run.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/Run.cc
+CMakeFiles/charging_sphere.dir/src/Run.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/Run.cc
 CMakeFiles/charging_sphere.dir/src/Run.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/charging_sphere.dir/src/Run.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/Run.cc.o -MF CMakeFiles/charging_sphere.dir/src/Run.cc.o.d -o CMakeFiles/charging_sphere.dir/src/Run.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/Run.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/charging_sphere.dir/src/Run.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/Run.cc.o -MF CMakeFiles/charging_sphere.dir/src/Run.cc.o.d -o CMakeFiles/charging_sphere.dir/src/Run.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/Run.cc
 
 CMakeFiles/charging_sphere.dir/src/Run.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/Run.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/Run.cc > CMakeFiles/charging_sphere.dir/src/Run.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/Run.cc > CMakeFiles/charging_sphere.dir/src/Run.cc.i
 
 CMakeFiles/charging_sphere.dir/src/Run.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/Run.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/Run.cc -o CMakeFiles/charging_sphere.dir/src/Run.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/Run.cc -o CMakeFiles/charging_sphere.dir/src/Run.cc.s
 
 CMakeFiles/charging_sphere.dir/src/RunAction.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/RunAction.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/RunAction.cc
+CMakeFiles/charging_sphere.dir/src/RunAction.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/RunAction.cc
 CMakeFiles/charging_sphere.dir/src/RunAction.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/charging_sphere.dir/src/RunAction.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/RunAction.cc.o -MF CMakeFiles/charging_sphere.dir/src/RunAction.cc.o.d -o CMakeFiles/charging_sphere.dir/src/RunAction.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/RunAction.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/charging_sphere.dir/src/RunAction.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/RunAction.cc.o -MF CMakeFiles/charging_sphere.dir/src/RunAction.cc.o.d -o CMakeFiles/charging_sphere.dir/src/RunAction.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/RunAction.cc
 
 CMakeFiles/charging_sphere.dir/src/RunAction.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/RunAction.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/RunAction.cc > CMakeFiles/charging_sphere.dir/src/RunAction.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/RunAction.cc > CMakeFiles/charging_sphere.dir/src/RunAction.cc.i
 
 CMakeFiles/charging_sphere.dir/src/RunAction.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/RunAction.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/RunAction.cc -o CMakeFiles/charging_sphere.dir/src/RunAction.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/RunAction.cc -o CMakeFiles/charging_sphere.dir/src/RunAction.cc.s
 
 CMakeFiles/charging_sphere.dir/src/SDManager.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/SDManager.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SDManager.cc
+CMakeFiles/charging_sphere.dir/src/SDManager.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SDManager.cc
 CMakeFiles/charging_sphere.dir/src/SDManager.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/charging_sphere.dir/src/SDManager.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/SDManager.cc.o -MF CMakeFiles/charging_sphere.dir/src/SDManager.cc.o.d -o CMakeFiles/charging_sphere.dir/src/SDManager.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SDManager.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/charging_sphere.dir/src/SDManager.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/SDManager.cc.o -MF CMakeFiles/charging_sphere.dir/src/SDManager.cc.o.d -o CMakeFiles/charging_sphere.dir/src/SDManager.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SDManager.cc
 
 CMakeFiles/charging_sphere.dir/src/SDManager.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/SDManager.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SDManager.cc > CMakeFiles/charging_sphere.dir/src/SDManager.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SDManager.cc > CMakeFiles/charging_sphere.dir/src/SDManager.cc.i
 
 CMakeFiles/charging_sphere.dir/src/SDManager.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/SDManager.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SDManager.cc -o CMakeFiles/charging_sphere.dir/src/SDManager.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SDManager.cc -o CMakeFiles/charging_sphere.dir/src/SDManager.cc.s
 
 CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetector.cc
+CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetector.cc
 CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o -MF CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o.d -o CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetector.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o -MF CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o.d -o CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetector.cc
 
 CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetector.cc > CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetector.cc > CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.i
 
 CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetector.cc -o CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetector.cc -o CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.s
 
 CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetectorHit.cc
+CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetectorHit.cc
 CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o -MF CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o.d -o CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetectorHit.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o -MF CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o.d -o CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetectorHit.cc
 
 CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetectorHit.cc > CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetectorHit.cc > CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.i
 
 CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetectorHit.cc -o CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SensitiveDetectorHit.cc -o CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.s
 
 CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SumRadialField.cc
+CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o: /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SumRadialField.cc
 CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o -MF CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o.d -o CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SumRadialField.cc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o -MF CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o.d -o CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o -c /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SumRadialField.cc
 
 CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SumRadialField.cc > CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.i
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SumRadialField.cc > CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.i
 
 CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/SumRadialField.cc -o CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.s
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging/src/SumRadialField.cc -o CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.s
 
 # Object files for target charging_sphere
 charging_sphere_OBJECTS = \
@@ -284,7 +284,7 @@ charging_sphere: CMakeFiles/charging_sphere.dir/src/SensitiveDetector.cc.o
 charging_sphere: CMakeFiles/charging_sphere.dir/src/SensitiveDetectorHit.cc.o
 charging_sphere: CMakeFiles/charging_sphere.dir/src/SumRadialField.cc.o
 charging_sphere: CMakeFiles/charging_sphere.dir/build.make
-charging_sphere: /storage/home/hcoda1/5/avira7/p-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/lib/libg4pbc.so.1.0.0
+charging_sphere: /storage/home/hcoda1/1/kgandhi63/p-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/lib/libg4pbc.so.1.0.0
 charging_sphere: /usr/local/pace-apps/manual/packages/root/6.30.04/gcc-12.3.0/lib/libCore.so
 charging_sphere: /usr/local/pace-apps/manual/packages/root/6.30.04/gcc-12.3.0/lib/libImt.so
 charging_sphere: /usr/local/pace-apps/manual/packages/root/6.30.04/gcc-12.3.0/lib/libRIO.so
@@ -344,7 +344,7 @@ charging_sphere: /storage/coda1/p-zjiang33/0/shared/geant4-v11.3.0-vis-1/geant4-
 charging_sphere: /storage/coda1/p-zjiang33/0/shared/geant4-v11.3.0-vis-1/geant4-v11.3.0-vis/lib64/libG4zlib.so
 charging_sphere: /storage/coda1/p-zjiang33/0/shared/geant4-v11.3.0-vis-1/geant4-v11.3.0-vis/lib64/libG4ptl.so.3.0.0
 charging_sphere: CMakeFiles/charging_sphere.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable charging_sphere"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Linking CXX executable charging_sphere"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/charging_sphere.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -356,6 +356,6 @@ CMakeFiles/charging_sphere.dir/clean:
 .PHONY : CMakeFiles/charging_sphere.dir/clean
 
 CMakeFiles/charging_sphere.dir/depend:
-	cd /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles/charging_sphere.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/sphere-charging /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles/charging_sphere.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/charging_sphere.dir/depend
 
