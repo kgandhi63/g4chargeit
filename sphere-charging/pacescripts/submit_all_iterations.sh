@@ -24,3 +24,11 @@ echo "Submitted iteration 4 job (afterok dependency): $jid4"
 jid5=$(sbatch --parsable --dependency=afterok:$jid4 batchscripts/submit_iteration5.sh)
 echo "Submitted iteration 5 job (afterok dependency): $jid5"
 
+# Submit job 6 with dependency on previous job
+jid6=$(sbatch --parsable --dependency=afterok:$jid5 batchscripts/submit_iteration6.sh)
+echo "Submitted iteration 6 job (afterok dependency): $jid6"
+
+# Submit job 7 with dependency on previous job
+jid7=$(sbatch --parsable --dependency=afterok:$jid6 batchscripts/submit_iteration7.sh)
+echo "Submitted iteration 7 job (afterok dependency): $jid7"
+

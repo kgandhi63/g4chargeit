@@ -12,7 +12,7 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-selected_num = 20000
+selected_num = 10000
 
 # Define a list of random seeds
 seedIN = [10008859, 10005380]
@@ -25,19 +25,31 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'# Macro file for {increment_filename}\n')
     f.write('#\n')
     f.write('/control/verbose 0\n')
-    f.write('/run/verbose 1\n')
+    f.write('/run/verbose 0\n')
     f.write('/event/verbose 0\n')
     f.write('/tracking/verbose 0\n')
     f.write('/process/verbose 0\n')
     f.write('/process/had/verbose 0\n')
     f.write('/process/em/verbose 0\n')
-    f.write('#\n')
-    f.write('/process/em/auger true\n')
-    f.write('/process/em/augerCascade true\n')
-#    f.write('/process/em/QuantumEntanglement true\n') # only matters if a position is introduce
+    f.write('/cuts/setLowEdge 5 eV\n')
     f.write('#\n')
     f.write(f'/random/setSeeds {seedIN[0]} {seedIN[1]}\n')
     f.write('/random/setSavingFlag 1\n')
+    f.write('#\n')
+    f.write('/process/em/fluo true\n')
+    f.write('/process/em/auger true\n')
+    f.write('/process/em/augerCascade true\n')
+    f.write('/process/em/deexcitationIgnoreCut true\n')
+    f.write('/process/em/Polarisation true\n')
+    f.write('/process/em/PhotoeffectBelowKShell true\n')
+    f.write('#\n')
+    f.write('/process/em/lowestElectronEnergy 10 eV\n')
+    f.write('/process/em/lowestMuHadEnergy 10 eV\n')
+    f.write('/process/em/enableSamplingTable 1\n')
+    f.write('#\n')
+    f.write('/process/eLoss/CSDARange 1\n')
+    f.write('/process/eLoss/UseICRU90 1\n')
+    f.write('/process/eLoss/UseAngularGenerator true\n')
     f.write('#\n')
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
@@ -49,23 +61,35 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('#\n')
     f.write('/run/initialize\n')
     f.write('#\n')
+    f.write('/gps/particle proton\n')
+    f.write('/gps/ene/type Mono\n')
+    f.write('/gps/energy 1 keV\n')
+    f.write('/gps/pos/type Plane\n')
+    f.write('/gps/pos/shape Square\n')
+    f.write('/gps/pos/halfx 50 um\n') # ADV: changes this to 50 um to match other sources
+    f.write('/gps/pos/halfy 50 um\n')
+    f.write('/gps/pos/centre 0 0 60 um\n')
+    f.write('/gps/pos/rot1 1 0 0  # This aligns the X-axis with the world X-axis\n')
+    f.write('/gps/pos/rot2 0 0 1  # This aligns the Z-axis with the world Z-axis\n')
+    f.write('/gps/direction 0.707 -0.707 0\n')
+    f.write('#\n')
+    f.write('/gps/source/add 1\n')
     f.write('/gps/particle e-\n')
     f.write('/gps/ene/type Mono\n')
     f.write('/gps/energy 120 eV\n')
-    f.write('#\n')
     f.write('/gps/pos/type Plane\n')
     f.write('/gps/pos/shape Square\n')
     f.write('/gps/pos/halfx 50 um\n')
     f.write('/gps/pos/halfy 50 um\n')
     f.write('/gps/pos/centre 0 0 60 um\n')
     f.write('/gps/direction 0 0 -1\n')
-    f.write('/gps/ang/type planar\n')
+    f.write('/gps/ang/type planar\n') # ADV: not sure if this is necessary?
     f.write('#\n')
-    f.write('/gps/source/add 1\n')
-    f.write('/gps/source/intensity 1.4\n')
+    f.write('/gps/source/add 2\n')
+    f.write('/gps/source/intensity 100 # Relative intensity of the gamma source\n')
     f.write('/gps/particle gamma\n')
     f.write('/gps/ene/type Mono\n')
-    f.write('/gps/energy 7.2 eV\n')
+    f.write('/gps/energy 9 eV\n')
     f.write('/gps/pos/type Plane\n')
     f.write('/gps/pos/shape Square\n')
     f.write('/gps/pos/halfx 50 um\n')
@@ -81,7 +105,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
 output_files = []
 i = 0
 
-for incrementIN in range(6):
+for incrementIN in range(8):
 
     if incrementIN == 0:
         # Iteration 0 with selected_num

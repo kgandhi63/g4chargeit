@@ -1,1 +1,1 @@
-./charging_sphere macros/02_stackediteration2_from_00_num20000.mac
+./charging_sphere macros/02_stackediteration2_from_00_num10000.mac
