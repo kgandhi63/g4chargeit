@@ -127,23 +127,28 @@ G4SolidStore::GetInstance()->Clean();
  G4MaterialPropertiesTable* dielectric = new G4MaterialPropertiesTable();
  dielectric->AddConstProperty("Epsilon",  Epsilon_, true);
 
-// Set Property to ilmenite
-  G4int ncomponents,natoms; //, abundance;
+
+   // Set Property to SiO2
+  G4Material* SiO2 = G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
+  SiO2->SetMaterialPropertiesTable(dielectric);
+
+// Set Property to SiO2
+//G4int ncomponents,natoms; //, abundance;
  
-  // mixture of HDPE and h10BN
-  G4Material* ilmenite = new G4Material("Ilmenite", 4.78*g/cm3, ncomponents=3,
-      kStateSolid); //, 293.15*kelvin, 1*atmosphere
+  // // mixture of HDPE and h10BN
+  // G4Material* SiO2 = new G4Material("SiO2", 4.78*g/cm3, ncomponents=3,
+  //     kStateSolid); //, 293.15*kelvin, 1*atmosphere
   
-  // polyethlyene elements
-  G4Element* Fe = new G4Element("Iron","Fe", 26., 55.845*g/mole);
-  G4Element* Ti = new G4Element("Titanium", "Ti", 22., 47.87*g/mole);
-  G4Element* O = new G4Element("Oxygen", "O", 8., 16.00*g/mole);
+  // // polyethlyene elements
+  // G4Element* Fe = new G4Element("Iron","Fe", 26., 55.845*g/mole);
+  // G4Element* Ti = new G4Element("Titanium", "Ti", 22., 47.87*g/mole);
+  // G4Element* O = new G4Element("Oxygen", "O", 8., 16.00*g/mole);
  
-  // add components
-  ilmenite->AddElement(Fe, natoms=1);
-  ilmenite->AddElement(Ti, natoms=1);
-  ilmenite->AddElement(O, natoms=3);
-  //ilmenite->SetMaterialPropertiesTable(dielectric);
+  // // add components
+  // SiO2->AddElement(Fe, natoms=1);
+  // SiO2->AddElement(Ti, natoms=1);
+  // SiO2->AddElement(O, natoms=3);
+  // //SiO2->SetMaterialPropertiesTable(dielectric);
  
   G4bool checkOverlaps = false;
   //     
@@ -255,7 +260,7 @@ if (!RootInput_.empty()) {
     tree->SetBranchAddress("Particle_Type", &particle_type);
 
     // Define the specific volume to filter
-    const std::string target_volume = "Ilmenite";  // Replace with the desired volume name
+    const std::string target_volume = "SiO2";  // Replace with the desired volume name
 
     Long64_t nEntries = tree->GetEntries();
     for (Long64_t i = 0; i < nEntries; i++) {
@@ -281,13 +286,13 @@ if (!RootInput_.empty()) {
 }
 }
 
-G4LogicalVolume*logicSphere= new G4LogicalVolume(sphere_solid, ilmenite , ilmenite->GetName());  
+G4LogicalVolume*logicSphere= new G4LogicalVolume(sphere_solid, SiO2 , SiO2->GetName());  
 
 
 new G4PVPlacement(0,                          	//no rotation
               G4ThreeVector(),     //at (0,0,0)
               logicSphere,                               //its logical volume
-              ilmenite->GetName(),               //its name
+              SiO2->GetName(),               //its name
               logicWorld_,                        //its mother volume
               false,                              //no boolean operation
               0);                                 //copy number
@@ -296,8 +301,8 @@ new G4PVPlacement(0,                          	//no rotation
 
 //logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
 
-G4double step = 1 * nm;
-G4UserLimits* userLimits = new G4UserLimits(step);
+//G4double step = 1 * nm;
+//G4UserLimits* userLimits = new G4UserLimits(step);
 //logicSphere->SetUserLimits(userLimits);
 
 return physWorld;

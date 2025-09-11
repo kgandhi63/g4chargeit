@@ -101,30 +101,18 @@ int main(int argc,char** argv) {
   runManager->SetUserInitialization(det);
  
  
-  // load all physics that we defined
-// PhysicsList* physList = new PhysicsList;
- 
-// G4ProductionCutsTable::GetProductionCutsTable()->SetEnergyRange(0.1*eV, 10*keV);
- 
-  G4ProductionCutsTable::GetProductionCutsTable()
-    ->SetEnergyRange(50*eV, 100*TeV);   // min = 50 eV
-
-  auto* em = G4EmParameters::Instance();
-  em->SetMinEnergy(50*eV);
-  em->SetLowestElectronEnergy(10*eV);
-  em->SetNumberOfBinsPerDecade(40);
   // Use PhysListFactory to get a reference physics list
   G4PhysListFactory factory;
-   G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT_EMX"); //FTFP_BERT_EMX
-   //physList->ReplacePhysics(new G4EmStandardPhysics_option4);
-    physList->ReplacePhysics(new G4EmLivermorePhysics);
-    physList->RegisterPhysics(new G4EmExtraPhysics);
+  G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT_EMX"); //FTFP_BERT_EMX
+  physList->ReplacePhysics(new G4EmStandardPhysics_option4);
+    //physList->ReplacePhysics(new G4EmLivermorePhysics);
+    //physList->RegisterPhysics(new G4EmExtraPhysics);
 
- 
-//   // Add step limiter to all particles
-   auto* stepLimitPhys = new G4StepLimiterPhysics();
-   stepLimitPhys->SetApplyToAll(true); // apply to all particles, not just charged
-   physList->RegisterPhysics(stepLimitPhys);
+
+    // Add step limiter to all particles
+   //auto* stepLimitPhys = new G4StepLimiterPhysics();
+   //stepLimitPhys->SetApplyToAll(true); // apply to all particles, not just charged
+   //physList->RegisterPhysics(stepLimitPhys);
  
   // Add periodic boundary conditions
   G4PeriodicBoundaryPhysics* pbc = new G4PeriodicBoundaryPhysics("PBC", true, true, false); // Turn off pbc in Z direction
