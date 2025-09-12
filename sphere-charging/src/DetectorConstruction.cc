@@ -260,7 +260,7 @@ if (!RootInput_.empty()) {
     tree->SetBranchAddress("Particle_Type", &particle_type);
 
     // Define the specific volume to filter
-    const std::string target_volume = "SiO2";  // Replace with the desired volume name
+    const std::string target_volume = "G4_SILICON_DIOXIDE";  // Replace with the desired volume name
 
     Long64_t nEntries = tree->GetEntries();
     for (Long64_t i = 0; i < nEntries; i++) {

@@ -297,16 +297,16 @@ PKG_CONFIG_EXECUTABLE:FILEPATH=/usr/bin/pkg-config
 PTL_DIR:PATH=/storage/coda1/p-zjiang33/0/shared/geant4-v11.3.0-vis-1/geant4-v11.3.0-vis/lib64/cmake/Geant4/PTL
 
 //The directory containing a CMake configuration file for Qt5Core.
-Qt5Core_DIR:PATH=/usr/local/pace-apps/manual/packages/anaconda3/2022.05.0.1/lib/cmake/Qt5Core
+Qt5Core_DIR:PATH=/usr/local/pace-apps/manual/packages/anaconda3/2023.03/lib/cmake/Qt5Core
 
 //The directory containing a CMake configuration file for Qt5Gui.
-Qt5Gui_DIR:PATH=/usr/local/pace-apps/manual/packages/anaconda3/2022.05.0.1/lib/cmake/Qt5Gui
+Qt5Gui_DIR:PATH=/usr/local/pace-apps/manual/packages/anaconda3/2023.03/lib/cmake/Qt5Gui
 
 //The directory containing a CMake configuration file for Qt5OpenGL.
-Qt5OpenGL_DIR:PATH=/usr/local/pace-apps/manual/packages/anaconda3/2022.05.0.1/lib/cmake/Qt5OpenGL
+Qt5OpenGL_DIR:PATH=/usr/local/pace-apps/manual/packages/anaconda3/2023.03/lib/cmake/Qt5OpenGL
 
 //The directory containing a CMake configuration file for Qt5Widgets.
-Qt5Widgets_DIR:PATH=/usr/local/pace-apps/manual/packages/anaconda3/2022.05.0.1/lib/cmake/Qt5Widgets
+Qt5Widgets_DIR:PATH=/usr/local/pace-apps/manual/packages/anaconda3/2023.03/lib/cmake/Qt5Widgets
 
 //Path to a library.
 ROOT_Core_LIBRARY:FILEPATH=/usr/local/pace-apps/manual/packages/root/6.30.04/gcc-12.3.0/lib/libCore.so
@@ -843,7 +843,10 @@ charging_sphere_IS_TOP_LEVEL:STATIC=ON
 charging_sphere_SOURCE_DIR:STATIC=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging
 
 //No help, variable specified on the command line.
-g4pbc_DIR:UNINITIALIZED=/storage/home/hcoda1/5/avira7/p-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/lib/cmake/g4pbc
+g4pbc_DIR:UNINITIALIZED=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/lib/cmake/g4pbc
+
+//No help, variable specified on the command line.
+g4ppbc_DIR:UNINITIALIZED=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/lib/cmake/g4pbc
 
 //The directory containing a CMake configuration file for nlohmann_json.
 nlohmann_json_DIR:PATH=/usr/share/cmake/nlohmann_json

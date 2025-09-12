@@ -32,6 +32,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('/process/had/verbose 0\n')
     f.write('/process/em/verbose 0\n')
     f.write('/cuts/setLowEdge 5 eV\n')
+    #f.write('/run/setCut 5 nm')
     f.write('#\n')
     f.write(f'/random/setSeeds {seedIN[0]} {seedIN[1]}\n')
     f.write('/random/setSavingFlag 1\n')
@@ -75,6 +76,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('#\n')
     f.write('/gps/source/add 1\n')
     f.write('/gps/particle e-\n')
+    f.write('/gps/source/intensity 1 # Relative intensity of the gamma source\n')
     f.write('/gps/ene/type Mono\n')
     f.write('/gps/energy 120 eV\n')
     f.write('/gps/pos/type Plane\n')
@@ -105,7 +107,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
 output_files = []
 i = 0
 
-for incrementIN in range(8):
+for incrementIN in range(12):
 
     if incrementIN == 0:
         # Iteration 0 with selected_num
