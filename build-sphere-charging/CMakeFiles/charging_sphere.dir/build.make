@@ -125,19 +125,19 @@ CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.s"
 	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/DetectorMessenger.cc -o CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.s
 
-CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o: CMakeFiles/charging_sphere.dir/flags.make
-CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysListEmLivermore.cc
-CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o -MF CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o.d -o CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysListEmLivermore.cc
+CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.o: CMakeFiles/charging_sphere.dir/flags.make
+CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/G4EmStandardPhysics_option4_modified.cc
+CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.o: CMakeFiles/charging_sphere.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-sphere-charging/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.o"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.o -MF CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.o.d -o CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.o -c /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/G4EmStandardPhysics_option4_modified.cc
 
-CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.i"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysListEmLivermore.cc > CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.i
+CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.i"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/G4EmStandardPhysics_option4_modified.cc > CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.i
 
-CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.s"
-	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysListEmLivermore.cc -o CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.s
+CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.s"
+	/usr/local/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-11.3.1/gcc-12.3.0-ukkkutsxfl5kpnnaxflpkq2jtliwthfz/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/G4EmStandardPhysics_option4_modified.cc -o CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.s
 
 CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o: CMakeFiles/charging_sphere.dir/flags.make
 CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o: /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/src/PhysicsList.cc
@@ -257,7 +257,7 @@ charging_sphere_OBJECTS = \
 "CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o" \
 "CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o" \
 "CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o" \
-"CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o" \
+"CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.o" \
 "CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o" \
 "CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o" \
 "CMakeFiles/charging_sphere.dir/src/Run.cc.o" \
@@ -274,7 +274,7 @@ charging_sphere: CMakeFiles/charging_sphere.dir/charging_sphere.cc.o
 charging_sphere: CMakeFiles/charging_sphere.dir/src/ActionInitialization.cc.o
 charging_sphere: CMakeFiles/charging_sphere.dir/src/DetectorConstruction.cc.o
 charging_sphere: CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.o
-charging_sphere: CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o
+charging_sphere: CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.o
 charging_sphere: CMakeFiles/charging_sphere.dir/src/PhysicsList.cc.o
 charging_sphere: CMakeFiles/charging_sphere.dir/src/PrimaryGeneratorAction.cc.o
 charging_sphere: CMakeFiles/charging_sphere.dir/src/Run.cc.o

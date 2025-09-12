@@ -23,27 +23,42 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file electromagnetic/TestEm18/include/PhysListEmLivermore.hh
-/// \brief Definition of the PhysListEmLivermore class
 //
+//
+//---------------------------------------------------------------------------
+//
+// ClassName:   G4EmStandardPhysics_option4
+//
+// Author:      V.Ivanchenko 28.09.2012
+//
+// Modified:
+//
+//----------------------------------------------------------------------------
+//
+// This class provides construction of EM physics using the best models
+// of standard and low-energy packages and set of 
+// the most adavced options allowing precise simulation at low
+// and intermediate energies
 //
 
-#ifndef PhysListEmLivermore_h
-#define PhysListEmLivermore_h 1
+#ifndef G4EmStandardPhysics_option4_modified_h
+#define G4EmStandardPhysics_option4_modified_h 1
 
 #include "G4VPhysicsConstructor.hh"
 #include "globals.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-class PhysListEmLivermore : public G4VPhysicsConstructor
+class G4EmStandardPhysics_option4_modified : public G4VPhysicsConstructor
 {
-  public:
-    PhysListEmLivermore(const G4String& name = "Livermore");
-    ~PhysListEmLivermore() override = default;
+public:
 
-    void ConstructParticle() override {};
-    void ConstructProcess() override;
+  explicit G4EmStandardPhysics_option4_modified(G4int ver=1, const G4String& name="");
+
+  ~G4EmStandardPhysics_option4_modified() override;
+
+  void ConstructParticle() override;
+  void ConstructProcess() override;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

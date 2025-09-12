@@ -270,29 +270,29 @@ src/DetectorMessenger.cc.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/charging_sphere.dir/build.make CMakeFiles/charging_sphere.dir/src/DetectorMessenger.cc.s
 .PHONY : src/DetectorMessenger.cc.s
 
-src/PhysListEmLivermore.o: src/PhysListEmLivermore.cc.o
-.PHONY : src/PhysListEmLivermore.o
+src/G4EmStandardPhysics_option4_modified.o: src/G4EmStandardPhysics_option4_modified.cc.o
+.PHONY : src/G4EmStandardPhysics_option4_modified.o
 
 # target to build an object file
-src/PhysListEmLivermore.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/charging_sphere.dir/build.make CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.o
-.PHONY : src/PhysListEmLivermore.cc.o
+src/G4EmStandardPhysics_option4_modified.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/charging_sphere.dir/build.make CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.o
+.PHONY : src/G4EmStandardPhysics_option4_modified.cc.o
 
-src/PhysListEmLivermore.i: src/PhysListEmLivermore.cc.i
-.PHONY : src/PhysListEmLivermore.i
+src/G4EmStandardPhysics_option4_modified.i: src/G4EmStandardPhysics_option4_modified.cc.i
+.PHONY : src/G4EmStandardPhysics_option4_modified.i
 
 # target to preprocess a source file
-src/PhysListEmLivermore.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/charging_sphere.dir/build.make CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.i
-.PHONY : src/PhysListEmLivermore.cc.i
+src/G4EmStandardPhysics_option4_modified.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/charging_sphere.dir/build.make CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.i
+.PHONY : src/G4EmStandardPhysics_option4_modified.cc.i
 
-src/PhysListEmLivermore.s: src/PhysListEmLivermore.cc.s
-.PHONY : src/PhysListEmLivermore.s
+src/G4EmStandardPhysics_option4_modified.s: src/G4EmStandardPhysics_option4_modified.cc.s
+.PHONY : src/G4EmStandardPhysics_option4_modified.s
 
 # target to generate assembly for a file
-src/PhysListEmLivermore.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/charging_sphere.dir/build.make CMakeFiles/charging_sphere.dir/src/PhysListEmLivermore.cc.s
-.PHONY : src/PhysListEmLivermore.cc.s
+src/G4EmStandardPhysics_option4_modified.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/charging_sphere.dir/build.make CMakeFiles/charging_sphere.dir/src/G4EmStandardPhysics_option4_modified.cc.s
+.PHONY : src/G4EmStandardPhysics_option4_modified.cc.s
 
 src/PhysicsList.o: src/PhysicsList.cc.o
 .PHONY : src/PhysicsList.o
@@ -511,9 +511,9 @@ help:
 	@echo "... src/DetectorMessenger.o"
 	@echo "... src/DetectorMessenger.i"
 	@echo "... src/DetectorMessenger.s"
-	@echo "... src/PhysListEmLivermore.o"
-	@echo "... src/PhysListEmLivermore.i"
-	@echo "... src/PhysListEmLivermore.s"
+	@echo "... src/G4EmStandardPhysics_option4_modified.o"
+	@echo "... src/G4EmStandardPhysics_option4_modified.i"
+	@echo "... src/G4EmStandardPhysics_option4_modified.s"
 	@echo "... src/PhysicsList.o"
 	@echo "... src/PhysicsList.i"
 	@echo "... src/PhysicsList.s"

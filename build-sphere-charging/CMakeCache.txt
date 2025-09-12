@@ -845,9 +845,6 @@ charging_sphere_SOURCE_DIR:STATIC=/storage/home/hcoda1/5/avira7/r-zjiang33-0/gea
 //No help, variable specified on the command line.
 g4pbc_DIR:UNINITIALIZED=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/lib/cmake/g4pbc
 
-//No help, variable specified on the command line.
-g4ppbc_DIR:UNINITIALIZED=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/lib/cmake/g4pbc
-
 //The directory containing a CMake configuration file for nlohmann_json.
 nlohmann_json_DIR:PATH=/usr/share/cmake/nlohmann_json
 

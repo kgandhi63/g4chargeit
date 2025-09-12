@@ -80,6 +80,7 @@
 #include "G4SystemOfUnits.hh"
 #include "G4ProductionCutsTable.hh"
 #include "G4EmParameters.hh"
+#include "G4EmStandardPhysics_option4_modified.hh"
 //#include "G4PeriodicBoundaryPhysics.hh"
  
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -104,47 +105,20 @@ int main(int argc,char** argv) {
   // Use PhysListFactory to get a reference physics list
   G4PhysListFactory factory;
   G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT_EMX"); //FTFP_BERT_EMX
-  physList->ReplacePhysics(new G4EmStandardPhysics_option4);
-    //physList->ReplacePhysics(new G4EmLivermorePhysics);
-    //physList->RegisterPhysics(new G4EmExtraPhysics);
+  //physList->ReplacePhysics(new G4EmStandardPhysics_option4);
+  physList->ReplacePhysics(new G4EmStandardPhysics_option4_modified);
+  //physList->ReplacePhysics(new G4EmLivermorePhysics);
+  //physList->RegisterPhysics(new G4EmExtraPhysics);
 
-
-    // Add step limiter to all particles
-   //auto* stepLimitPhys = new G4StepLimiterPhysics();
-   //stepLimitPhys->SetApplyToAll(true); // apply to all particles, not just charged
-   //physList->RegisterPhysics(stepLimitPhys);
+  // Add step limiter to all particles
+  //auto* stepLimitPhys = new G4StepLimiterPhysics();
+  //stepLimitPhys->SetApplyToAll(true); // apply to all particles, not just charged
+  //physList->RegisterPhysics(stepLimitPhys);
  
   // Add periodic boundary conditions
   G4PeriodicBoundaryPhysics* pbc = new G4PeriodicBoundaryPhysics("PBC", true, true, false); // Turn off pbc in Z direction
   pbc->SetVerboseLevel(0);
   physList->RegisterPhysics(pbc);
-
- 
-  //pbc->SetVerboseLevel(0);
-  //physList->RegisterPhysics(pbc);
- 
-// load all physics that we defined
-// PhysicsList* physList = new PhysicsList; auto* stepLimitPhys = new G4StepLimiterPhysics();
-  // auto* stepLimitPhys = new G4StepLimiterPhysics();
-  // stepLimitPhys->SetApplyToAll(true); // apply to all particles, not just charged
-  // G4PhysListFactory factory;
-  // G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT_EMX");
-  // physList->ReplacePhysics(new G4EmStandardPhysics_option4);
-  // G4PeriodicBoundaryPhysics* pbc = new G4PeriodicBoundaryPhysics("PBC", true, true, false); // Turn off pbc in Z direction
-  // pbc->SetVerboseLevel(0);
-  // physList->RegisterPhysics(pbc);
-  // physList->RegisterPhysics(stepLimitPhys);
- 
-//   {
-//     auto* nuclearStopping = new G4NuclearStopping();
-//     nuclearStopping->SetBuildTableFlag(true);
- 
-//     auto* pManager = G4Proton::Proton()->GetProcessManager();
-//     if (pManager) {
-//         pManager->AddProcess(nuclearStopping);
-//     }
-// }
- 
  
   runManager->SetUserInitialization(physList);
   runManager->SetUserInitialization(new ActionInitialization());
