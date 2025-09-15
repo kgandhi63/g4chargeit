@@ -154,9 +154,9 @@ G4SolidStore::GetInstance()->Clean();
   //     
   // World Characteristics
   //
-  G4double world_sizeX = 200*um;
-  G4double world_sizeY = 200 *um;
-  G4double world_sizeZ  = 200*um;
+  G4double world_sizeX = 800*um;
+  G4double world_sizeY = 800 *um;
+  G4double world_sizeZ  = 800*um;
 
 
   // define vacuum 
