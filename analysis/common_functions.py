@@ -196,11 +196,17 @@ def plot_positions_slice(
     if df2 is not None:
         ax.scatter(xdata2, ydata2, s=2, c="blue", alpha=0.6, label='protons')
 
+    
+    if stacked_spheres is not None: 
+        for contour in stacked_spheres.discrete:
+            ax.plot(contour[:, 1], contour[:, 0], 'k-')  # black solid line
+
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(f"{iteration} — {plane.upper()} slice")
     ax.set_aspect('equal', adjustable='box')
     ax.legend()
+
     
     plt.show()
     return fig, ax
