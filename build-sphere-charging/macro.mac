@@ -31,8 +31,8 @@
 
 
 #/sphere/rootinput/file iteration0.root
-/sphere/cadinput/file stacked_spheres.stl
-/sphere/cadinput/scale  .001
+/sphere/cadinput/file stacked_spheres_frompython.stl
+#/sphere/cadinput/scale  .001
 /sphere/epsilon 3.9
 
 /sphere/filename root/test_iteration0.root
