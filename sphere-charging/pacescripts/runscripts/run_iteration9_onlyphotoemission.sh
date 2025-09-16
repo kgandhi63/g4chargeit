@@ -1,1 +1,0 @@
-./charging_sphere macros/09_stackediteration9_onlyphotoemission_from_00_num10000.mac

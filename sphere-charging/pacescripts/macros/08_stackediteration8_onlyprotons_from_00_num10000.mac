@@ -1,0 +1,50 @@
+# Macro file for 08_stackediteration8_onlyprotons_from_00_num10000
+#
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+/process/verbose 0
+/process/had/verbose 0
+/process/em/verbose 0
+/cuts/setLowEdge 5 eV
+#
+/random/setSeeds 10008859 10005380
+/random/setSavingFlag 1
+#
+/process/em/fluo true
+/process/em/auger true
+/process/em/augerCascade true
+/process/em/deexcitationIgnoreCut true
+/process/em/Polarisation true
+/process/em/PhotoeffectBelowKShell true
+#
+/process/em/lowestElectronEnergy 10 eV
+/process/em/lowestMuHadEnergy 10 eV
+/process/em/enableSamplingTable 1
+#
+/process/eLoss/CSDARange 1
+/process/eLoss/UseICRU90 1
+/process/eLoss/UseAngularGenerator true
+#
+/sphere/rootinput/file 00_stackediteration0_onlyprotons_num10000.root 01_stackediteration1_onlyprotons_from_00_num10000.root 02_stackediteration2_onlyprotons_from_00_num10000.root 03_stackediteration3_onlyprotons_from_00_num10000.root 04_stackediteration4_onlyprotons_from_00_num10000.root 05_stackediteration5_onlyprotons_from_00_num10000.root 06_stackediteration6_onlyprotons_from_00_num10000.root 07_stackediteration7_onlyprotons_from_00_num10000.root
+/sphere/filename root/08_stackediteration8_onlyprotons_from_00_num10000.root
+/sphere/cadinput/file stacked_spheres_frompython.stl
+/sphere/epsilon 3.9
+/sphere/PBC false
+#
+/run/initialize
+#
+/gps/particle proton
+/gps/ene/type Mono
+/gps/energy 1 keV
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 400 um
+/gps/pos/halfy 400 um
+/gps/pos/centre 300 -300 800 um
+/gps/direction 0 0 -1
+#
+#
+/run/printProgress 100
+/run/beamOn 10000

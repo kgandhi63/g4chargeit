@@ -94,7 +94,7 @@ def plot_electron_positions(df,world_dimensions = (-0.05, 0.05), n_bins=100, ite
 
     return fig, ax 
 
-def plot_surface_potential(electrons, protons, convex_combined, vmin=-0.01,vmax=0.01):
+def plot_surface_potential_electrons_protons(electrons, protons, convex_combined, vmin=-0.01,vmax=0.01):
 
     point = np.array(electrons["Pre_Step_Position_mm"].tolist())  # Your point coordinate
     _, distance_e, face_id_e = convex_combined.nearest.on_surface(point)
@@ -160,6 +160,53 @@ def plot_surface_potential(electrons, protons, convex_combined, vmin=-0.01,vmax=
     convex_combined.visual.face_colors = colors_rgba
 
     return convex_combined
+
+def plot_surface_potential_electrons(electrons, convex_combined, vmin=-0.01,vmax=0.01):
+
+    point = np.array(electrons["Pre_Step_Position_mm"].tolist())  # Your point coordinate
+    _, distance_e, face_id_e = convex_combined.nearest.on_surface(point)
+
+    # Compute potential at each surface point due to each electron
+    q = -1.602e-19  # electron charge in Coulombs
+    potentials_e = 1 / (4 * np.pi * epsilon_0) * q / (distance_e + 1e-12)  # result is an array of potentials
+
+    # Find unique face IDs and inverse indices for electrons
+    unique_faces_e, inverse_indices_e = np.unique(face_id_e, return_inverse=True)
+
+    # Initialize array to sum potentials for each unique face (electrons)
+    potentials_sum_e = np.zeros(len(unique_faces_e))
+
+    # Accumulate potentials for each face using inverse indices
+    np.add.at(potentials_sum_e, inverse_indices_e, potentials_e)
+
+    # --- Combine electron and proton potentials per face ---
+
+    # Initialize full array for face potentials (length = total number of faces)
+    face_potentials = np.zeros(len(convex_combined.faces))
+
+    # Add electron potentials to their respective faces
+    face_potentials[unique_faces_e] += potentials_sum_e
+
+    # Prepare RGBA array initialized to transparent
+    colors_rgba = np.zeros((len(face_potentials), 4), dtype=np.uint8)
+
+    # Normalize only non-zero potentials
+    norm = np.zeros_like(face_potentials)
+    norm = (face_potentials - vmin) / (vmax - vmin)
+    norm = np.clip(norm, 0, 1)
+
+    # Map normalized potentials to RGB
+    cmap = plt.cm.seismic
+    colors_rgb = cmap(norm)[:, :3]
+
+    # Assign RGB to all faces
+    colors_rgba[:, :3] = (colors_rgb * 255).astype(np.uint8)
+
+    # Apply colors to mesh
+    convex_combined.visual.face_colors = colors_rgba
+
+    return convex_combined
+
 
 def plot_electron_positions_slice(
     df,

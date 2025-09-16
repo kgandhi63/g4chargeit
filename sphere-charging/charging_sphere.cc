@@ -105,8 +105,8 @@ int main(int argc,char** argv) {
   // Use PhysListFactory to get a reference physics list
   G4PhysListFactory factory;
   G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT_EMX"); //FTFP_BERT_EMX
-  //physList->ReplacePhysics(new G4EmStandardPhysics_option4);
-  physList->ReplacePhysics(new G4EmStandardPhysics_option4_modified);
+  physList->ReplacePhysics(new G4EmStandardPhysics_option4);
+  //physList->ReplacePhysics(new G4EmStandardPhysics_option4_modified);
   //physList->ReplacePhysics(new G4EmLivermorePhysics);
   //physList->RegisterPhysics(new G4EmExtraPhysics);
 

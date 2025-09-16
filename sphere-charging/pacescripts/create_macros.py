@@ -36,13 +36,13 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('#\n')
     f.write(f'/random/setSeeds {seedIN[0]} {seedIN[1]}\n')
     f.write('/random/setSavingFlag 1\n')
-    # f.write('#\n')
-    # f.write('/process/em/fluo true\n')
-    # f.write('/process/em/auger true\n')
-    # f.write('/process/em/augerCascade true\n')
-    # f.write('/process/em/deexcitationIgnoreCut true\n')
-    # f.write('/process/em/Polarisation true\n')
-    # f.write('/process/em/PhotoeffectBelowKShell true\n')
+    f.write('#\n')
+    f.write('/process/em/fluo true\n')
+    f.write('/process/em/auger true\n')
+    f.write('/process/em/augerCascade true\n')
+    f.write('/process/em/deexcitationIgnoreCut true\n')
+    f.write('/process/em/Polarisation true\n')
+    f.write('/process/em/PhotoeffectBelowKShell true\n')
     f.write('#\n')
     f.write('/process/em/lowestElectronEnergy 10 eV\n')
     f.write('/process/em/lowestMuHadEnergy 10 eV\n')
@@ -62,43 +62,83 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('#\n')
     f.write('/run/initialize\n')
     f.write('#\n')
-    # f.write('/gps/particle proton\n')
-    # f.write('/gps/ene/type Mono\n')
-    # f.write('/gps/energy 1 keV\n')
-    # f.write('/gps/pos/type Plane\n')
-    # f.write('/gps/pos/shape Square\n')
-    # f.write('/gps/pos/halfx 400 um\n') # ADV: changes this to 50 um to match other sources
-    # f.write('/gps/pos/halfy 400 um\n')
-    # f.write('/gps/pos/centre 300 -300 800 um\n')
-    # #f.write('/gps/direction 0.707 0 -0.707 \n')
-    # f.write('/gps/direction 0 0 -1\n')
-    # f.write('#\n')
-    # f.write('/gps/source/add 1\n')
-    f.write('/gps/particle e-\n')
-    f.write('/gps/source/intensity 1 # Relative intensity of the gamma source\n')
-    f.write('/gps/ene/type Mono\n')
-    f.write('/gps/energy 120 eV\n')
-    f.write('/gps/pos/type Plane\n')
-    f.write('/gps/pos/shape Square\n')
-    f.write('/gps/pos/halfx 400 um\n')
-    f.write('/gps/pos/halfy 400 um\n')
-    f.write('/gps/pos/centre 300 -300 800 um\n')
-    f.write('/gps/direction 0 0 -1\n')
-    f.write('/gps/ang/type planar\n') # ADV: not sure if this is necessary?
-    f.write('#\n')
-    #f.write('/gps/source/add 2\n')
-    f.write('/gps/source/add 1\n')
-    f.write('/gps/source/intensity 100 # Relative intensity of the gamma source\n')
-    f.write('/gps/particle gamma\n')
-    f.write('/gps/ene/type Mono\n')
-    f.write('/gps/energy 10 eV\n')
-    f.write('/gps/pos/type Plane\n')
-    f.write('/gps/pos/shape Square\n')
-    f.write('/gps/pos/halfx 400 um\n')
-    f.write('/gps/pos/halfy 400 um\n')
-    f.write('/gps/pos/centre 300 -300 800 um\n')
-    f.write('/gps/direction 0 0 -1\n')
-    f.write('/gps/ang/type planar\n')
+    if "onlyprotons" in increment_filename:
+        f.write('/gps/particle proton\n')
+        f.write('/gps/ene/type Mono\n')
+        f.write('/gps/energy 1 keV\n')
+        f.write('/gps/pos/type Plane\n')
+        f.write('/gps/pos/shape Square\n')
+        f.write('/gps/pos/halfx 400 um\n') # ADV: changes this to 50 um to match other sources
+        f.write('/gps/pos/halfy 400 um\n')
+        f.write('/gps/pos/centre 300 -300 800 um\n')
+        #f.write('/gps/direction 0.707 0 -0.707 \n')
+        f.write('/gps/direction 0 0 -1\n')
+        f.write('#\n')
+    elif "onlyphotoemission" in increment_filename:
+        f.write('/gps/particle e-\n')
+        f.write('/gps/source/intensity 1 # Relative intensity of the gamma source\n')
+        f.write('/gps/ene/type Mono\n')
+        f.write('/gps/energy 120 eV\n')
+        f.write('/gps/pos/type Plane\n')
+        f.write('/gps/pos/shape Square\n')
+        f.write('/gps/pos/halfx 400 um\n')
+        f.write('/gps/pos/halfy 400 um\n')
+        f.write('/gps/pos/centre 300 -300 800 um\n')
+        f.write('/gps/direction 0 0 -1\n')
+        f.write('/gps/ang/type planar\n') # ADV: not sure if this is necessary?
+        f.write('#\n')
+        #f.write('/gps/source/add 2\n')
+        f.write('/gps/source/add 1\n')
+        f.write('/gps/source/intensity 100 # Relative intensity of the gamma source\n')
+        f.write('/gps/particle gamma\n')
+        f.write('/gps/ene/type Mono\n')
+        f.write('/gps/energy 10 eV\n')
+        f.write('/gps/pos/type Plane\n')
+        f.write('/gps/pos/shape Square\n')
+        f.write('/gps/pos/halfx 400 um\n')
+        f.write('/gps/pos/halfy 400 um\n')
+        f.write('/gps/pos/centre 300 -300 800 um\n')
+        f.write('/gps/direction 0 0 -1\n')
+        f.write('/gps/ang/type planar\n')
+    elif "allparticles" in increment_filename:
+        f.write('/gps/particle proton\n')
+        f.write('/gps/ene/type Mono\n')
+        f.write('/gps/energy 1 keV\n')
+        f.write('/gps/pos/type Plane\n')
+        f.write('/gps/pos/shape Square\n')
+        f.write('/gps/pos/halfx 400 um\n') # ADV: changes this to 50 um to match other sources
+        f.write('/gps/pos/halfy 400 um\n')
+        f.write('/gps/pos/centre 300 -300 800 um\n')
+        #f.write('/gps/direction 0.707 0 -0.707 \n')
+        f.write('/gps/direction 0 0 -1\n')
+        f.write('#\n')
+        f.write('/gps/source/add 1\n')
+        f.write('/gps/particle e-\n')
+        f.write('/gps/source/intensity 1 # Relative intensity of the gamma source\n')
+        f.write('/gps/ene/type Mono\n')
+        f.write('/gps/energy 120 eV\n')
+        f.write('/gps/pos/type Plane\n')
+        f.write('/gps/pos/shape Square\n')
+        f.write('/gps/pos/halfx 400 um\n')
+        f.write('/gps/pos/halfy 400 um\n')
+        f.write('/gps/pos/centre 300 -300 800 um\n')
+        f.write('/gps/direction 0 0 -1\n')
+        f.write('/gps/ang/type planar\n') # ADV: not sure if this is necessary?
+        f.write('#\n')
+        f.write('/gps/source/add 2\n')
+        f.write('/gps/source/intensity 100 # Relative intensity of the gamma source\n')
+        f.write('/gps/particle gamma\n')
+        f.write('/gps/ene/type Mono\n')
+        f.write('/gps/energy 10 eV\n')
+        f.write('/gps/pos/type Plane\n')
+        f.write('/gps/pos/shape Square\n')
+        f.write('/gps/pos/halfx 400 um\n')
+        f.write('/gps/pos/halfy 400 um\n')
+        f.write('/gps/pos/centre 300 -300 800 um\n')
+        f.write('/gps/direction 0 0 -1\n')
+        f.write('/gps/ang/type planar\n')
+    else: 
+        Warning("need to select from: onlyprotons, onlyphotoemission, allparticles")
     f.write('#\n')
     f.write('/run/printProgress 100\n')
     f.write(f'/run/beamOn {event_num}\n')
@@ -107,73 +147,33 @@ def write_macro(f, increment_filename, event_num, input_files=None):
 output_files = []
 i = 0
 
-for incrementIN in range(12):
+for optionIN in ["onlyprotons", "onlyphotoemission", "allparticles"]:
 
-    if incrementIN == 0:
-        # Iteration 0 with selected_num
-        increment_filename = f"{i:02d}_stackediteration0_onlyphotoemission_num{selected_num}"
-        with open(f"macros/{increment_filename}.mac", 'w') as f:
-            write_macro(f, increment_filename, selected_num)
-        output_files.append((increment_filename + ".root", selected_num, incrementIN))
-        i += 1
+    for incrementIN in range(12):
 
-    # elif incrementIN == 1:
-    #     # Iteration 1 using various event numbers from iteration 0 output
-    #     filtered = [fname for fname, evnum, iterID in output_files if iterID == 0]
-    #     for inputfile in filtered:
-    #         input_name_prefix = inputfile.split('_')[0]
-    #         increment_filename = f"{i:02d}_iteration1_from_{input_name_prefix}_num{selected_num}"
-    #         with open(f"macros/{increment_filename}.mac", 'w') as f:
-    #             write_macro(f, increment_filename, selected_num, input_files=[inputfile])
-    #         output_files.append((increment_filename + ".root", selected_num, incrementIN))
-    #         i += 1
+        if incrementIN == 0:
+            # Iteration 0 with selected_num
+            increment_filename = f"{i:02d}_stackediteration0_{optionIN}_num{selected_num}"
+            with open(f"macros/{increment_filename}.mac", 'w') as f:
+                write_macro(f, increment_filename, selected_num)
+            output_files.append((increment_filename + ".root", selected_num, incrementIN, optionIN))
+            i += 1
 
-    elif incrementIN > 0:
-        # Iteration 2+ using only iteration 1 files with 1000000 particles
-        filtered = [fname for fname, evnum, iterID in output_files if iterID ==0 or evnum == selected_num]
-        input_list = ' '.join(filtered)
-        print(input_list)
-  
-        increment_filename = f"{i:02d}_stackediteration{incrementIN}_onlyphotoemission_from_00_num{selected_num}"
-        with open(f"macros/{increment_filename}.mac", 'w') as f:
-            write_macro(f, increment_filename, selected_num, input_files=[input_list])
-        output_files.append((increment_filename + ".root", selected_num, incrementIN))
-        i += 1
+        elif incrementIN > 0:
+            # Iteration 2+ using only iteration 1 files with 1000000 particles
+            #filtered = [fname for fname, evnum, iterID in output_files if iterID ==0 or evnum == selected_num]
+            filtered = [fname for fname, evnum, iterID, option in output_files if option == optionIN] # or (evnum == selected_num)
 
-# for incrementIN in [0, 1, 2, 3, 4, 5]:
-# 	if incrementIN == 0:
-# 		#event_num_list = [10000, 50000, 100000, 500000, 1000000]
-# 		#for event_num in event_num_list:
-#         increment_filename = f"{i:02d}_iteration0_num{selected_num}"
-#         with open(f"macros/{increment_filename}.mac", 'w') as f:
-#             write_macro(f, increment_filename, selected_num)
-#         output_files.append((increment_filename + ".root", selected_num, incrementIN))
-#         i += 1
+            input_list = ' '.join(filtered)
+            print(input_list)
+    
+            increment_filename = f"{i:02d}_stackediteration{incrementIN}_{optionIN}_from_00_num{selected_num}"
+            with open(f"macros/{increment_filename}.mac", 'w') as f:
+                write_macro(f, increment_filename, selected_num, input_files=[input_list])
+            output_files.append((increment_filename + ".root", selected_num, incrementIN, optionIN))
+            i += 1
 
-# 	elif incrementIN == 1:
-#         event_num_list = [10000, 50000, 100000, 500000, 1000000]
-# 		for event_num in event_num_list:
-#             # Filter iteration0 files with 100000 particles
-#             filtered = [fname for fname, evnum, iterID in output_files if "iteration0" in fname]
-#             for inputfile in filtered:
-#                 increment_filename = f"{i:02d}_iteration1_from_{inputfile.split('_')[0]}_{inputfile.split('_')[-1].replace('.root', '')}"
-#                 with open(f"macros/{increment_filename}.mac", 'w') as f:
-#                     write_macro(f, increment_filename, event_num, input_files=[inputfile])
-#                 output_files.append((increment_filename + ".root", event_num, incrementIN))
-#                 i += 1
 
-# 	elif incrementIN >= 2:
-
-# 		# Filter iteration0 files with 100000 particles
-# 		filtered = [fname for fname, evnum, iterID in output_files if "_num1000000" in fname]
-            
-# 		input_list = ' '.join(filtered)
-
-# 		increment_filename = f"{i:02d}_iteration{incrementIN}_from_num1000000"
-# 		with open(f"macros/{increment_filename}.mac", 'w') as f:
-# 				write_macro(f, increment_filename, 100, input_files=[input_list])
-# 		output_files.append((increment_filename + ".root", 100, incrementIN))
-# 		i += 1
 		
 #############################################################
 
@@ -199,7 +199,7 @@ for fname in sorted(os.listdir(macro_dir)):
 
 # Write out a script per iteration
 for iteration_num, commands in iteration_commands.items():
-    script_filename = os.path.join(run_dir, f"run_iteration{iteration_num}_onlyphotoemission.sh")
+    script_filename = os.path.join(run_dir, f"run_iteration{iteration_num}.sh")
     with open(script_filename, "w") as f:
         f.write("\n".join(commands))
     print(f"Created: {script_filename}")
@@ -221,7 +221,7 @@ batch_template_serial = """#!/bin/bash
 #SBATCH --ntasks-per-node=16
 #SBATCH --mem=32gb
 #SBATCH --time=15:00:00
-#SBATCH --output=outputlogs/iteration{iter}_onlyphotoemission_%A.out
+#SBATCH --output=outputlogs/iteration{iter}_{option}_%A.out
 
 echo "Starting iteration{iter} runs"
 bash {run_script}
@@ -237,7 +237,7 @@ batch_template_array = """#!/bin/bash
 #SBATCH --ntasks-per-node=16
 #SBATCH --mem=32gb
 #SBATCH --time=15:00:00
-#SBATCH --output=outputlogs/iteration{iter}__onlyphotoemission_%A_%a.out
+#SBATCH --output=outputlogs/iteration{iter}_%A_%a.out
 #SBATCH --array=1-{array_size}
 
 # Read in the array of commands
@@ -253,11 +253,11 @@ date
 
 # Loop over each run script and create corresponding SLURM script
 for fname in os.listdir(run_dir):
-    match = re.match(r'run_iteration(\d+)\_onlyphotoemission.sh', fname)
+    match = re.match(r'run_iteration(\d+)\.sh', fname)
     if match:
         iter_num = int(match.group(1))
         run_script_path = os.path.join(run_dir, fname)
-        batch_filename = f"submit_iteration{iter_num}_onlyphotoemission.sh"
+        batch_filename = f"submit_iteration{iter_num}.sh"
         batch_path = os.path.join(batch_dir, batch_filename)
 
         # Read number of lines in run script for --array
@@ -266,20 +266,20 @@ for fname in os.listdir(run_dir):
 
         # Use job array for iteration0 and iteration1
         # if iter_num in [0, 1]:
-        #     batch_script = batch_template_array.format(
-        #         iter=iter_num,
-        #         run_script=run_script_path,
-        #         array_size=num_lines,                
-        #         account=account, 
-        #         username=username
-        #     )
+            batch_script = batch_template_array.format(
+                iter=iter_num,
+                run_script=run_script_path,
+                array_size=num_lines,                
+                account=account, 
+                username=username
+            )
         # else:
-        batch_script = batch_template_serial.format(
-            iter=iter_num,
-            run_script=run_script_path, 
-            account=account, 
-            username=username
-        )
+        # batch_script = batch_template_serial.format(
+        #     iter=iter_num,
+        #     run_script=run_script_path, 
+        #     account=account, 
+        #     username=username
+        # )
 
         with open(batch_path, "w") as f:
             f.write(batch_script)
@@ -290,12 +290,12 @@ for fname in os.listdir(run_dir):
 
 # Directories
 batch_dir = "batchscripts"
-output_script = "submit_all_iterations_onlyphotoemission.sh"
+output_script = "submit_all_iterations.sh"
 
 # Get and sort all batch submission scripts by iteration number
 batch_scripts = []
 for fname in os.listdir(batch_dir):
-    match = re.match(r"submit_iteration(\d+)\_onlyphotoemission.sh", fname)
+    match = re.match(r"submit_iteration(\d+)\.sh", fname)
     if match:
         batch_scripts.append((int(match.group(1)), fname))
 
@@ -320,5 +320,5 @@ with open(output_script, "w") as f:
             previous_job_var = f"$jid{i}"
 
 # Make the script executable
-os.chmod("submit_all_iterations_onlyphotoemission.sh", 0o755)
+os.chmod("submit_all_iterations.sh", 0o755)
 print(f"Created chained submission script: {output_script}")
