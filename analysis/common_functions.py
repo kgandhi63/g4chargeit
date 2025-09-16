@@ -260,7 +260,8 @@ def plot_positions_slice(
     df2=None,
     iteration="Plot",
     stacked_spheres=None,
-    plane="zx"  # "zx" or "zy"
+    plane="zx",  # "zx" or "zy"
+    labels=["e-","protons"]
 ):
     """
     Plots a 2D slice of electron positions from one or two dataframes.
@@ -303,11 +304,11 @@ def plot_positions_slice(
     fig, ax = plt.subplots(figsize=(7, 6))
 
     # Plot first dataset
-    ax.scatter(xdata1, ydata1, s=2, c="red", alpha=0.6, label='e-')
+    ax.scatter(xdata1, ydata1, s=2, c="red", alpha=0.6, label=labels[0])
 
     # Optionally overlay second dataset
     if df2 is not None:
-        ax.scatter(xdata2, ydata2, s=2, c="blue", alpha=0.6, label='protons')
+        ax.scatter(xdata2, ydata2, s=2, c="blue", alpha=0.6, label=labels[1])
 
     
     if stacked_spheres is not None: 
@@ -415,6 +416,10 @@ def calculate_stats(df):
         (df["Parent_ID"] == 0.0)
     ].drop_duplicates(subset="Event_Number", keep="last")
 
+    electrons_ejected = df[(df["Particle_Type"] == "e-") & \
+                           ((df["Volume_Name_Post"] == "World") | (df["Volume_Name_Post"] == "NaN"))].\
+                            drop_duplicates(subset="Event_Number", keep="last")
+
     electrons_capture_fraction = len(electrons_inside) / len(electrons_incident) if len(electrons_incident) > 0 else 0
 
     # --- All electrons in SiO2, regardless of origin ---
@@ -426,9 +431,11 @@ def calculate_stats(df):
     # --- Print outputs ---
     print(f"Photoelectric yield (e⁻ / γ): {photoelectric_yield:.4f} "
           f"({len(photelec_generated)} / {len(gamma_incident)})")
-    print(f"Protons captured in material: {protons_capture_fraction:.2%} "
-          f"({len(protons_inside)} / {len(protons_incident)})")
+    if len(protons_incident) > 0:
+        print(f"Protons captured in material: {protons_capture_fraction:.2%} "
+            f"({len(protons_inside)} / {len(protons_incident)})")
     print(f"Electrons captured in material: {electrons_capture_fraction:.2%} "
-          f"({len(electrons_inside)} / {len(electrons_incident)})\n")
+          f"({len(electrons_inside)} / {len(electrons_incident)})")
+    print(f"Electrons ejected in material: {len(electrons_ejected)}\n")
 
-    return all_electrons_inside, protons_inside
+    return all_electrons_inside, electrons_ejected, protons_inside
