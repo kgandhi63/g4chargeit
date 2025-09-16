@@ -58,7 +58,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('/sphere/cadinput/file stacked_spheres_frompython.stl\n')
     #f.write('/sphere/cadinput/scale 0.001\n')
     f.write('/sphere/epsilon 3.9\n')
-    f.write('/sphere/PBC true\n')
+    f.write('/sphere/PBC false\n')
     f.write('#\n')
     f.write('/run/initialize\n')
     f.write('#\n')
