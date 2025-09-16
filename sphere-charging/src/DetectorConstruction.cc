@@ -175,7 +175,8 @@ G4SolidStore::GetInstance()->Clean();
    {
     G4PeriodicBoundaryBuilder* pbb = new G4PeriodicBoundaryBuilder();
       logicWorld_ = pbb->Construct(logicWorld_);
-    }
+    std::cout << "PBC set to logicWorld_" << std::endl;
+   }
 
 
   G4VPhysicalVolume* physWorld = 

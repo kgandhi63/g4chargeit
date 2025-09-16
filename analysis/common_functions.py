@@ -388,6 +388,10 @@ def calculate_stats(df):
         (df["Particle_Type"] == "e-") & (df["Parent_ID"] == 1.0)
     ].drop_duplicates(subset="Event_Number", keep="last")
 
+    photelec_holes = df[
+        (df["Particle_Type"] == "e-") & (df["Parent_ID"] == 1.0)
+    ].drop_duplicates(subset="Event_Number", keep="first")
+
     photelec_generated = photelec_generated[
         photelec_generated["Event_Number"].isin(gamma_incident["Event_Number"])
     ]
@@ -440,4 +444,4 @@ def calculate_stats(df):
           f"({len(electrons_inside)} / {len(electrons_incident)})")
     print(f"Electrons ejected in material: {len(electrons_ejected)}\n")
 
-    return all_electrons_inside, electrons_ejected, protons_inside
+    return all_electrons_inside, photelec_holes, electrons_ejected, protons_inside

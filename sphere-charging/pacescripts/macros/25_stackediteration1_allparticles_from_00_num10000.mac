@@ -31,7 +31,7 @@
 /sphere/filename root/25_stackediteration1_allparticles_from_00_num10000.root
 /sphere/cadinput/file stacked_spheres_frompython.stl
 /sphere/epsilon 3.9
-/sphere/PBC false
+/sphere/PBC true
 #
 /run/initialize
 #
