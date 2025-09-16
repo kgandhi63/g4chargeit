@@ -161,13 +161,12 @@ def plot_surface_potential_electrons_protons(electrons, protons, convex_combined
 
     return convex_combined
 
-def plot_surface_potential_electrons(electrons, convex_combined, vmin=-0.01,vmax=0.01):
+def plot_surface_potential_electrons_or_protons(electrons, convex_combined, vmin=-0.01,vmax=0.01, q = -1.602e-19 ):
 
     point = np.array(electrons["Pre_Step_Position_mm"].tolist())  # Your point coordinate
     _, distance_e, face_id_e = convex_combined.nearest.on_surface(point)
 
     # Compute potential at each surface point due to each electron
-    q = -1.602e-19  # electron charge in Coulombs
     potentials_e = 1 / (4 * np.pi * epsilon_0) * q / (distance_e + 1e-12)  # result is an array of potentials
 
     # Find unique face IDs and inverse indices for electrons
