@@ -51,7 +51,7 @@ SensitiveDetectorHit::SensitiveDetectorHit(const G4Step* step) // no need for st
    if (currentProcess != 0){ // save the step process if it exists
 	processPre_ = step -> GetPreStepPoint() -> GetProcessDefinedStep() -> GetProcessName();
    }
-   else processPre_ = "NaN"; // otherwise print a NaN as a place holder
+   else processPre_ = "initStep"; // otherwise show that it is an initial step (particle creation)
 
    processPost_ = step -> GetPostStepPoint() -> GetProcessDefinedStep() -> GetProcessName();
    particleType_ = step -> GetTrack() -> GetParticleDefinition() -> GetParticleName();
@@ -60,7 +60,7 @@ SensitiveDetectorHit::SensitiveDetectorHit(const G4Step* step) // no need for st
    if (step -> GetPostStepPoint() -> GetPhysicalVolume() != 0){ // save the post volume name if it exists
 	volumePost_ = step -> GetPostStepPoint() -> GetPhysicalVolume() -> GetName();
    }
-   else volumePost_ = "NaN"; // otherwise print a NaN as a place holder
+   else volumePost_ = "OutOfWorld"; // otherwise show that the particle went out of the world
 
    // step info for energy tree
    //eDep_ = step -> GetTotalEnergyDeposit(); // get energy deposition from the step, extract the parent ID
