@@ -102,13 +102,15 @@ def plot_surface_potential_electrons_protons(electrons, protons, convex_combined
     # Compute potential at each surface point due to each electron
     q = -1.602e-19  # electron charge in Coulombs
     potentials_e = 1 / (4 * np.pi * epsilon_0) * q / (distance_e + 1e-12)  # result is an array of potentials
-
+    # for debugging: np.array([1]*len(distance_e)) 
+    
     point = np.array(protons["Pre_Step_Position_mm"].tolist())  # Your point coordinate
     _, distance_p, face_id_p = convex_combined.nearest.on_surface(point)
 
     # Compute potential at each surface point due to each electron
     q = +1.602e-19  # electron charge in Coulombs
     potentials_p = 1 / (4 * np.pi * epsilon_0) * q / (distance_p + 1e-12)  # result is an array of potentials
+    # for debugging: np.array([1]*len(distance_p))#
 
     # Find unique face IDs and inverse indices for electrons
     unique_faces_e, inverse_indices_e = np.unique(face_id_e, return_inverse=True)
@@ -417,7 +419,7 @@ def calculate_stats(df):
     ].drop_duplicates(subset="Event_Number", keep="last")
 
     electrons_ejected = df[(df["Particle_Type"] == "e-") & \
-                           ((df["Volume_Name_Post"] == "World") | (df["Volume_Name_Post"] == "NaN"))].\
+                           (df["Volume_Name_Post"] == "World")].\
                             drop_duplicates(subset="Event_Number", keep="last")
 
     electrons_capture_fraction = len(electrons_inside) / len(electrons_incident) if len(electrons_incident) > 0 else 0
