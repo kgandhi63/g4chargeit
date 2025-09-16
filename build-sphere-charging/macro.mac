@@ -84,13 +84,13 @@
 /gps/pos/shape Square
 /gps/pos/halfx 400 um
 /gps/pos/halfy 400 um
-/gps/pos/centre 300 -300 800 um
+/gps/pos/centre 0 0 800 um
 ##/gps/pos/rot1 1 0 0  # This aligns the X-axis with the world X-axis
 ##/gps/pos/rot2 0 0 1  # This aligns the Z-axis with the world Z-axis
 ##/gps/direction 0.707 -0.707 0
 /gps/direction 0 0 -1
 
-#/control/execute vis.mac
+/control/execute vis.mac
 
 /run/printProgress 10000
 /run/beamOn 175

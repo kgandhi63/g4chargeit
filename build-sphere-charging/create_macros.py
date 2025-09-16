@@ -70,7 +70,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/pos/shape Square\n')
         f.write('/gps/pos/halfx 400 um\n') # ADV: changes this to 50 um to match other sources
         f.write('/gps/pos/halfy 400 um\n')
-        f.write('/gps/pos/centre 300 -300 800 um\n')
+        f.write('/gps/pos/centre 0 0 800 um\n')
         #f.write('/gps/direction 0.707 0 -0.707 \n')
         f.write('/gps/direction 0 0 -1\n')
         f.write('#\n')
@@ -83,7 +83,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/pos/shape Square\n')
         f.write('/gps/pos/halfx 400 um\n')
         f.write('/gps/pos/halfy 400 um\n')
-        f.write('/gps/pos/centre 300 -300 800 um\n')
+        f.write('/gps/pos/centre 0 0 800 um\n')
         f.write('/gps/direction 0 0 -1\n')
         f.write('/gps/ang/type planar\n') # ADV: not sure if this is necessary?
         f.write('#\n')
@@ -97,7 +97,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/pos/shape Square\n')
         f.write('/gps/pos/halfx 400 um\n')
         f.write('/gps/pos/halfy 400 um\n')
-        f.write('/gps/pos/centre 300 -300 800 um\n')
+        f.write('/gps/pos/centre 0 0 800 um\n')
         f.write('/gps/direction 0 0 -1\n')
         f.write('/gps/ang/type planar\n')
     elif "allparticles" in increment_filename:
@@ -108,7 +108,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/pos/shape Square\n')
         f.write('/gps/pos/halfx 400 um\n') # ADV: changes this to 50 um to match other sources
         f.write('/gps/pos/halfy 400 um\n')
-        f.write('/gps/pos/centre 300 -300 800 um\n')
+        f.write('/gps/pos/centre 0 0 800 um\n')
         #f.write('/gps/direction 0.707 0 -0.707 \n')
         f.write('/gps/direction 0 0 -1\n')
         f.write('#\n')
@@ -121,7 +121,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/pos/shape Square\n')
         f.write('/gps/pos/halfx 400 um\n')
         f.write('/gps/pos/halfy 400 um\n')
-        f.write('/gps/pos/centre 300 -300 800 um\n')
+        f.write('/gps/pos/centre 0 0 800 um\n')
         f.write('/gps/direction 0 0 -1\n')
         f.write('/gps/ang/type planar\n') # ADV: not sure if this is necessary?
         f.write('#\n')
@@ -134,7 +134,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/pos/shape Square\n')
         f.write('/gps/pos/halfx 400 um\n')
         f.write('/gps/pos/halfy 400 um\n')
-        f.write('/gps/pos/centre 300 -300 800 um\n')
+        f.write('/gps/pos/centre 0 0 800 um\n')
         f.write('/gps/direction 0 0 -1\n')
         f.write('/gps/ang/type planar\n')
     else: 

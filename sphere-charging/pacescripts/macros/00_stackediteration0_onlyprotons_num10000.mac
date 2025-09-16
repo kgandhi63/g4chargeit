@@ -41,7 +41,7 @@
 /gps/pos/shape Square
 /gps/pos/halfx 400 um
 /gps/pos/halfy 400 um
-/gps/pos/centre 300 -300 800 um
+/gps/pos/centre 0 0 800 um
 /gps/direction 0 0 -1
 #
 #
