@@ -55,46 +55,48 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
     f.write(f'/sphere/filename root/{increment_filename}.root\n')
-    f.write('/sphere/cadinput/file stacked_spheres.stl\n')
-    f.write('/sphere/cadinput/scale 0.001\n')
+    f.write('/sphere/cadinput/file stacked_spheres_frompython.stl\n')
+    #f.write('/sphere/cadinput/scale 0.001\n')
     f.write('/sphere/epsilon 3.9\n')
-    f.write('/sphere/PBC false\n')
+    f.write('/sphere/PBC true\n')
     f.write('#\n')
     f.write('/run/initialize\n')
     f.write('#\n')
-    f.write('/gps/particle proton\n')
-    f.write('/gps/ene/type Mono\n')
-    f.write('/gps/energy 1 keV\n')
-    f.write('/gps/pos/type Plane\n')
-    f.write('/gps/pos/shape Square\n')
-    f.write('/gps/pos/halfx 50 um\n') # ADV: changes this to 50 um to match other sources
-    f.write('/gps/pos/halfy 50 um\n')
-    f.write('/gps/pos/centre 0 0 60 um\n')
-    f.write('/gps/direction 0.707 0 -0.707 \n')
-    f.write('#\n')
-    f.write('/gps/source/add 1\n')
+    # f.write('/gps/particle proton\n')
+    # f.write('/gps/ene/type Mono\n')
+    # f.write('/gps/energy 1 keV\n')
+    # f.write('/gps/pos/type Plane\n')
+    # f.write('/gps/pos/shape Square\n')
+    # f.write('/gps/pos/halfx 400 um\n') # ADV: changes this to 50 um to match other sources
+    # f.write('/gps/pos/halfy 400 um\n')
+    # f.write('/gps/pos/centre 300 -300 800 um\n')
+    # #f.write('/gps/direction 0.707 0 -0.707 \n')
+    # f.write('/gps/direction 0 0 -1\n')
+    # f.write('#\n')
+    # f.write('/gps/source/add 1\n')
     f.write('/gps/particle e-\n')
     f.write('/gps/source/intensity 1 # Relative intensity of the gamma source\n')
     f.write('/gps/ene/type Mono\n')
     f.write('/gps/energy 120 eV\n')
     f.write('/gps/pos/type Plane\n')
     f.write('/gps/pos/shape Square\n')
-    f.write('/gps/pos/halfx 50 um\n')
-    f.write('/gps/pos/halfy 50 um\n')
-    f.write('/gps/pos/centre 0 0 60 um\n')
+    f.write('/gps/pos/halfx 400 um\n')
+    f.write('/gps/pos/halfy 400 um\n')
+    f.write('/gps/pos/centre 300 -300 800 um\n')
     f.write('/gps/direction 0 0 -1\n')
     f.write('/gps/ang/type planar\n') # ADV: not sure if this is necessary?
     f.write('#\n')
-    f.write('/gps/source/add 2\n')
+    #f.write('/gps/source/add 2\n')
+    f.write('/gps/source/add 1\n')
     f.write('/gps/source/intensity 100 # Relative intensity of the gamma source\n')
     f.write('/gps/particle gamma\n')
     f.write('/gps/ene/type Mono\n')
     f.write('/gps/energy 10 eV\n')
     f.write('/gps/pos/type Plane\n')
     f.write('/gps/pos/shape Square\n')
-    f.write('/gps/pos/halfx 50 um\n')
-    f.write('/gps/pos/halfy 50 um\n')
-    f.write('/gps/pos/centre 0 0 60 um\n')
+    f.write('/gps/pos/halfx 400 um\n')
+    f.write('/gps/pos/halfy 400 um\n')
+    f.write('/gps/pos/centre 300 -300 800 um\n')
     f.write('/gps/direction 0 0 -1\n')
     f.write('/gps/ang/type planar\n')
     f.write('#\n')
@@ -109,7 +111,7 @@ for incrementIN in range(12):
 
     if incrementIN == 0:
         # Iteration 0 with selected_num
-        increment_filename = f"{i:02d}_stackediteration0_num{selected_num}"
+        increment_filename = f"{i:02d}_stackediteration0_onlyphotoemission_num{selected_num}"
         with open(f"macros/{increment_filename}.mac", 'w') as f:
             write_macro(f, increment_filename, selected_num)
         output_files.append((increment_filename + ".root", selected_num, incrementIN))
@@ -132,7 +134,7 @@ for incrementIN in range(12):
         input_list = ' '.join(filtered)
         print(input_list)
   
-        increment_filename = f"{i:02d}_stackediteration{incrementIN}_from_00_num{selected_num}"
+        increment_filename = f"{i:02d}_stackediteration{incrementIN}_onlyphotoemission_from_00_num{selected_num}"
         with open(f"macros/{increment_filename}.mac", 'w') as f:
             write_macro(f, increment_filename, selected_num, input_files=[input_list])
         output_files.append((increment_filename + ".root", selected_num, incrementIN))
@@ -197,7 +199,7 @@ for fname in sorted(os.listdir(macro_dir)):
 
 # Write out a script per iteration
 for iteration_num, commands in iteration_commands.items():
-    script_filename = os.path.join(run_dir, f"run_iteration{iteration_num}.sh")
+    script_filename = os.path.join(run_dir, f"run_iteration{iteration_num}_onlyphotoemission.sh")
     with open(script_filename, "w") as f:
         f.write("\n".join(commands))
     print(f"Created: {script_filename}")
@@ -219,7 +221,7 @@ batch_template_serial = """#!/bin/bash
 #SBATCH --ntasks-per-node=16
 #SBATCH --mem=32gb
 #SBATCH --time=15:00:00
-#SBATCH --output=outputlogs/iteration{iter}_%A.out
+#SBATCH --output=outputlogs/iteration{iter}_onlyphotoemission_%A.out
 
 echo "Starting iteration{iter} runs"
 bash {run_script}
@@ -235,7 +237,7 @@ batch_template_array = """#!/bin/bash
 #SBATCH --ntasks-per-node=16
 #SBATCH --mem=32gb
 #SBATCH --time=15:00:00
-#SBATCH --output=outputlogs/iteration{iter}_%A_%a.out
+#SBATCH --output=outputlogs/iteration{iter}__onlyphotoemission_%A_%a.out
 #SBATCH --array=1-{array_size}
 
 # Read in the array of commands
@@ -251,11 +253,11 @@ date
 
 # Loop over each run script and create corresponding SLURM script
 for fname in os.listdir(run_dir):
-    match = re.match(r'run_iteration(\d+)\.sh', fname)
+    match = re.match(r'run_iteration(\d+)\_onlyphotoemission.sh', fname)
     if match:
         iter_num = int(match.group(1))
         run_script_path = os.path.join(run_dir, fname)
-        batch_filename = f"submit_iteration{iter_num}.sh"
+        batch_filename = f"submit_iteration{iter_num}_onlyphotoemission.sh"
         batch_path = os.path.join(batch_dir, batch_filename)
 
         # Read number of lines in run script for --array
@@ -288,12 +290,12 @@ for fname in os.listdir(run_dir):
 
 # Directories
 batch_dir = "batchscripts"
-output_script = "submit_all_iterations.sh"
+output_script = "submit_all_iterations_onlyphotoemission.sh"
 
 # Get and sort all batch submission scripts by iteration number
 batch_scripts = []
 for fname in os.listdir(batch_dir):
-    match = re.match(r"submit_iteration(\d+)\.sh", fname)
+    match = re.match(r"submit_iteration(\d+)\_onlyphotoemission.sh", fname)
     if match:
         batch_scripts.append((int(match.group(1)), fname))
 
@@ -318,5 +320,5 @@ with open(output_script, "w") as f:
             previous_job_var = f"$jid{i}"
 
 # Make the script executable
-os.chmod("submit_all_iterations.sh", 0o755)
+os.chmod("submit_all_iterations_onlyphotoemission.sh", 0o755)
 print(f"Created chained submission script: {output_script}")

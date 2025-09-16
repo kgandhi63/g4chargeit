@@ -1,1 +1,0 @@
-./charging_sphere macros/00_stackediteration0_num10000.mac
