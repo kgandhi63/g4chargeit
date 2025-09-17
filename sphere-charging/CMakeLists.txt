@@ -58,6 +58,7 @@ target_link_libraries(charging_sphere ${ROOT_LIBRARIES})
 set(charging_scripts
     macro.mac
     vis.mac
+    electron_maxwellian_distribution.txt
   )
 
 

@@ -154,8 +154,8 @@ G4SolidStore::GetInstance()->Clean();
   //     
   // World Characteristics
   //
-  G4double world_sizeX = 800*um;
-  G4double world_sizeY = 800 *um;
+  G4double world_sizeX = 900*um;
+  G4double world_sizeY = 900 *um;
   G4double world_sizeZ  = 800*um;
 
 
@@ -300,7 +300,7 @@ new G4PVPlacement(0,                          	//no rotation
 
 
 
-//logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
+logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
 
 //G4double step = 1 * nm;
 //G4UserLimits* userLimits = new G4UserLimits(step);

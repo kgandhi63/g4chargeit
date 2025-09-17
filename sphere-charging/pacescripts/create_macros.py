@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+import numpy as np
 from collections import defaultdict
 
 # Overwrite the "macros" folder
@@ -16,6 +17,15 @@ selected_num = 10000
 
 # Define a list of random seeds
 seedIN = [10008859, 10005380]
+
+worldZ = 800 # microns
+worldXY = 900 # microns
+
+# calculate offset for SW ions at 45 degrees
+particle_position = 200 # place all particles 200 microns above the geometry
+ions_offset = np.sin(45*np.pi/180)*particle_position
+ion_rotation = np.sin(45*np.pi/180)
+
 
 # Output files tracking
 output_files = []
@@ -44,7 +54,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('/process/em/Polarisation true\n')
     f.write('/process/em/PhotoeffectBelowKShell true\n')
     f.write('#\n')
-    f.write('/process/em/lowestElectronEnergy 10 eV\n')
+    f.write('/process/em/lowestElectronEnergy 0 eV\n')
     f.write('/process/em/lowestMuHadEnergy 10 eV\n')
     f.write('/process/em/enableSamplingTable 1\n')
     f.write('#\n')
@@ -57,60 +67,61 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/sphere/filename root/{increment_filename}.root\n')
     f.write('/sphere/cadinput/file stacked_spheres_frompython.stl\n')
     #f.write('/sphere/cadinput/scale 0.001\n')
-    f.write('/sphere/epsilon 3.9\n')
+    f.write('/sphere/epsilon 4\n') 
     f.write('/sphere/PBC true\n')
     f.write('#\n')
     f.write('/run/initialize\n')
     f.write('#\n')
-    if "onlyprotons" in increment_filename:
+    # only include the SW plasma (ions and electrons)
+    if "onlysolarwind" in increment_filename:
         f.write('/gps/particle proton\n')
         f.write('/gps/ene/type Mono\n')
-        f.write('/gps/energy 1 keV\n')
+        f.write('/gps/energy 1 keV\n') 
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
-        f.write('/gps/pos/halfx 400 um\n') # ADV: changes this to 50 um to match other sources
-        f.write('/gps/pos/halfy 400 um\n')
-        f.write('/gps/pos/centre 0 0 800 um\n')
-        #f.write('/gps/direction 0.707 0 -0.707 \n')
-        f.write('/gps/direction 0 0 -1\n')
+        f.write(f'/gps/pos/halfx {worldXY/2} um\n')
+        f.write(f'/gps/pos/halfy {worldXY/2} um\n')
+        f.write(f'/gps/pos/centre -{ions_offset} -{ions_offset} {worldZ-particle_position} um\n')
+        f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
         f.write('#\n')
-    elif "onlyphotoemission" in increment_filename:
-        f.write('/gps/particle e-\n')
-        f.write('/gps/source/intensity 1 # Relative intensity of the gamma source\n')
-        f.write('/gps/ene/type Mono\n')
-        f.write('/gps/energy 120 eV\n')
-        f.write('/gps/pos/type Plane\n')
-        f.write('/gps/pos/shape Square\n')
-        f.write('/gps/pos/halfx 400 um\n')
-        f.write('/gps/pos/halfy 400 um\n')
-        f.write('/gps/pos/centre 0 0 800 um\n')
-        f.write('/gps/direction 0 0 -1\n')
-        f.write('/gps/ang/type planar\n') # ADV: not sure if this is necessary?
-        f.write('#\n')
-        #f.write('/gps/source/add 2\n')
         f.write('/gps/source/add 1\n')
-        f.write('/gps/source/intensity 100 # Relative intensity of the gamma source\n')
+        f.write("/gps/particle e-\n")
+        f.write("/gps/source/intensity 3.55\n")
+        f.write("/gps/ene/type Arb\n")
+        f.write("/gps/hist/type arb\n")
+        f.write("/gps/ene/diffspec true\n")
+        f.write("/gps/hist/file electron_maxwellian_distribution.txt\n")
+        f.write("/gps/hist/inter Lin\n")
+        f.write("/gps/pos/type Plane\n")
+        f.write("/gps/pos/shape Square\n")
+        f.write(f'/gps/pos/halfx {worldXY/2} um\n')
+        f.write(f'/gps/pos/halfy {worldXY/2} um\n')
+        f.write(f"/gps/pos/centre 0 0 {worldZ-particle_position} um\n")
+        f.write("/gps/ang/type iso\n")
+        f.write('#\n') 
+    # include only the photons   
+    elif "onlyphotoemission" in increment_filename:
         f.write('/gps/particle gamma\n')
         f.write('/gps/ene/type Mono\n')
         f.write('/gps/energy 10 eV\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
-        f.write('/gps/pos/halfx 400 um\n')
-        f.write('/gps/pos/halfy 400 um\n')
-        f.write('/gps/pos/centre 0 0 800 um\n')
+        f.write(f'/gps/pos/halfx {worldXY/2} um\n')
+        f.write(f'/gps/pos/halfy {worldXY/2} um\n')
+        f.write(f"/gps/pos/centre 0 0 {worldZ-particle_position} um\n")
         f.write('/gps/direction 0 0 -1\n')
-        f.write('/gps/ang/type planar\n')
+        f.write('/gps/ang/type iso\n')
     elif "allparticles" in increment_filename:
         f.write('/gps/particle proton\n')
         f.write('/gps/ene/type Mono\n')
         f.write('/gps/energy 1 keV\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
-        f.write('/gps/pos/halfx 400 um\n') # ADV: changes this to 50 um to match other sources
-        f.write('/gps/pos/halfy 400 um\n')
-        f.write('/gps/pos/centre 0 0 800 um\n')
-        #f.write('/gps/direction 0.707 0 -0.707 \n')
-        f.write('/gps/direction 0 0 -1\n')
+        f.write(f'/gps/pos/halfx {worldXY/2} um\n')
+        f.write(f'/gps/pos/halfy {worldXY/2} um\n')
+        f.write(f"/gps/pos/centre 0 0 {worldZ-particle_position} um\n")
+        f.write('/gps/direction 0.707 0 -0.707 \n')
+        #f.write('/gps/direction 0 0 -1\n')
         f.write('#\n')
         f.write('/gps/source/add 1\n')
         f.write('/gps/particle e-\n')
@@ -138,7 +149,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/direction 0 0 -1\n')
         f.write('/gps/ang/type planar\n')
     else: 
-        Warning("need to select from: onlyprotons, onlyphotoemission, allparticles")
+        Warning("need to select from: onlysolarwind, onlyphotoemission, allparticles")
     f.write('#\n')
     f.write('/run/printProgress 100\n')
     f.write(f'/run/beamOn {event_num}\n')
@@ -147,9 +158,9 @@ def write_macro(f, increment_filename, event_num, input_files=None):
 output_files = []
 i = 0
 
-for optionIN in ["onlyprotons", "onlyphotoemission", "allparticles"]:
+for optionIN in ["onlysolarwind", "onlyphotoemission", "allparticles"]:
 
-    for incrementIN in range(12):
+    for incrementIN in range(1):
 
         if incrementIN == 0:
             # Iteration 0 with selected_num

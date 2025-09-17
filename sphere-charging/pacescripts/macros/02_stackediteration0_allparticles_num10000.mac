@@ -1,0 +1,74 @@
+# Macro file for 02_stackediteration0_allparticles_num10000
+#
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+/process/verbose 0
+/process/had/verbose 0
+/process/em/verbose 0
+/cuts/setLowEdge 5 eV
+#
+/random/setSeeds 10008859 10005380
+/random/setSavingFlag 1
+#
+/process/em/fluo true
+/process/em/auger true
+/process/em/augerCascade true
+/process/em/deexcitationIgnoreCut true
+/process/em/Polarisation true
+/process/em/PhotoeffectBelowKShell true
+#
+/process/em/lowestElectronEnergy 0 eV
+/process/em/lowestMuHadEnergy 10 eV
+/process/em/enableSamplingTable 1
+#
+/process/eLoss/CSDARange 1
+/process/eLoss/UseICRU90 1
+/process/eLoss/UseAngularGenerator true
+#
+/sphere/filename root/02_stackediteration0_allparticles_num10000.root
+/sphere/cadinput/file stacked_spheres_frompython.stl
+/sphere/epsilon 4
+/sphere/PBC true
+#
+/run/initialize
+#
+/gps/particle proton
+/gps/ene/type Mono
+/gps/energy 1 keV
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 450.0 um
+/gps/pos/halfy 450.0 um
+/gps/pos/centre 0 0 600 um
+/gps/direction 0.707 0 -0.707 
+#
+/gps/source/add 1
+/gps/particle e-
+/gps/source/intensity 1 # Relative intensity of the gamma source
+/gps/ene/type Mono
+/gps/energy 120 eV
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 400 um
+/gps/pos/halfy 400 um
+/gps/pos/centre 0 0 800 um
+/gps/direction 0 0 -1
+/gps/ang/type planar
+#
+/gps/source/add 2
+/gps/source/intensity 100 # Relative intensity of the gamma source
+/gps/particle gamma
+/gps/ene/type Mono
+/gps/energy 10 eV
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 400 um
+/gps/pos/halfy 400 um
+/gps/pos/centre 0 0 800 um
+/gps/direction 0 0 -1
+/gps/ang/type planar
+#
+/run/printProgress 100
+/run/beamOn 10000
