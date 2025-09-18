@@ -1,4 +1,4 @@
-# Macro file for 00_stackediteration0_onlysolarwind_num10000
+# Macro file for 04_stackediteration4_onlysolarwind_from_00_num10000
 #
 /control/verbose 0
 /run/verbose 0
@@ -27,7 +27,8 @@
 /process/eLoss/UseICRU90 1
 /process/eLoss/UseAngularGenerator true
 #
-/sphere/filename root/00_stackediteration0_onlysolarwind_num10000.root
+/sphere/rootinput/file 00_stackediteration0_onlysolarwind_num10000.root 01_stackediteration1_onlysolarwind_from_00_num10000.root 02_stackediteration2_onlysolarwind_from_00_num10000.root 03_stackediteration3_onlysolarwind_from_00_num10000.root
+/sphere/filename root/04_stackediteration4_onlysolarwind_from_00_num10000.root
 /sphere/cadinput/file stacked_spheres_frompython.stl
 /sphere/epsilon 4
 /sphere/PBC true

@@ -1,3 +1,2 @@
-./charging_sphere macros/02_stackediteration2_onlyprotons_from_00_num10000.mac
+./charging_sphere macros/02_stackediteration2_onlysolarwind_from_00_num10000.mac
 ./charging_sphere macros/14_stackediteration2_onlyphotoemission_from_00_num10000.mac
-./charging_sphere macros/26_stackediteration2_allparticles_from_00_num10000.mac

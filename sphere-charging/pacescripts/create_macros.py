@@ -90,7 +90,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
         f.write("/gps/ene/diffspec true\n")
-        f.write("/gps/hist/file electron_maxwellian_distribution.txt\n")
+        f.write("/gps/hist/file electron_distribution.txt\n")
         f.write("/gps/hist/inter Lin\n")
         f.write("/gps/pos/type Plane\n")
         f.write("/gps/pos/shape Square\n")
@@ -102,13 +102,18 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     # include only the photons   
     elif "onlyphotoemission" in increment_filename:
         f.write('/gps/particle gamma\n')
-        f.write('/gps/ene/type Mono\n')
-        f.write('/gps/energy 10 eV\n')
+        # f.write('/gps/ene/type Mono\n')
+        # f.write('/gps/energy 10 eV\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
         f.write(f'/gps/pos/halfx {worldXY/2} um\n')
         f.write(f'/gps/pos/halfy {worldXY/2} um\n')
         f.write(f"/gps/pos/centre 0 0 {worldZ-particle_position} um\n")
+        f.write("/gps/ene/type Arb\n")
+        f.write("/gps/hist/type arb\n")
+        f.write("/gps/ene/diffspec true\n")
+        f.write("/gps/hist/file photon_distribution.txt\n")
+        f.write("/gps/hist/inter Log\n")
         f.write('/gps/direction 0 0 -1\n')
         f.write('/gps/ang/type iso\n')
     elif "allparticles" in increment_filename:
@@ -158,9 +163,9 @@ def write_macro(f, increment_filename, event_num, input_files=None):
 output_files = []
 i = 0
 
-for optionIN in ["onlysolarwind", "onlyphotoemission", "allparticles"]:
+for optionIN in ["onlysolarwind", "onlyphotoemission"]: #, "allparticles"]:
 
-    for incrementIN in range(1):
+    for incrementIN in range(12):
 
         if incrementIN == 0:
             # Iteration 0 with selected_num

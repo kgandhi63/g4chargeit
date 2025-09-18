@@ -1,4 +1,4 @@
-# Macro file for 00_stackediteration0_onlysolarwind_num10000
+# Macro file for 12_stackediteration0_onlyphotoemission_num10000
 #
 /control/verbose 0
 /run/verbose 0
@@ -27,38 +27,26 @@
 /process/eLoss/UseICRU90 1
 /process/eLoss/UseAngularGenerator true
 #
-/sphere/filename root/00_stackediteration0_onlysolarwind_num10000.root
+/sphere/filename root/12_stackediteration0_onlyphotoemission_num10000.root
 /sphere/cadinput/file stacked_spheres_frompython.stl
 /sphere/epsilon 4
 /sphere/PBC true
 #
 /run/initialize
 #
-/gps/particle proton
-/gps/ene/type Mono
-/gps/energy 1 keV
-/gps/pos/type Plane
-/gps/pos/shape Square
-/gps/pos/halfx 450.0 um
-/gps/pos/halfy 450.0 um
-/gps/pos/centre -141.42135623730948 -141.42135623730948 600 um
-/gps/direction 0.7071067811865475 0 -0.7071067811865475 
-#
-/gps/source/add 1
-/gps/particle e-
-/gps/source/intensity 3.55
-/gps/ene/type Arb
-/gps/hist/type arb
-/gps/ene/diffspec true
-/gps/hist/file electron_distribution.txt
-/gps/hist/inter Lin
+/gps/particle gamma
 /gps/pos/type Plane
 /gps/pos/shape Square
 /gps/pos/halfx 450.0 um
 /gps/pos/halfy 450.0 um
 /gps/pos/centre 0 0 600 um
+/gps/ene/type Arb
+/gps/hist/type arb
+/gps/ene/diffspec true
+/gps/hist/file photon_distribution.txt
+/gps/hist/inter Log
+/gps/direction 0 0 -1
 /gps/ang/type iso
-#
 #
 /run/printProgress 100
 /run/beamOn 10000
