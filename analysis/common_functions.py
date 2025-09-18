@@ -1,6 +1,7 @@
 import uproot
 from scipy.constants import epsilon_0, e as q_e
 from matplotlib.colors import LogNorm
+from matplotlib.colors import Normalize
 import matplotlib.colors as mcolors
 import numpy as np
 import matplotlib.pyplot as plt
@@ -94,6 +95,38 @@ def plot_electron_positions(df,world_dimensions = (-0.05, 0.05), n_bins=100, ite
 
     return fig, ax 
 
+def plot_face_illumination(incident_particles, convex_combined, vmin=0, vmax=1):
+    """
+    Colors the mesh faces based on how many particles are nearest to each face.
+    """
+    # Step 1: Get particle positions as Nx3 array
+    points = np.array(incident_particles["Pre_Step_Position_mm"].tolist())
+
+    # Step 2: Get nearest face indices
+    _, _, face_ids = convex_combined.nearest.on_surface(points)
+
+    # Step 3: Accumulate per-face "illumination"
+    face_illum = np.zeros(len(convex_combined.faces))
+    np.add.at(face_illum, face_ids, 1)
+
+    # Step 4: Normalize face illumination (optional)
+    norm_f = face_illum.astype(float)
+
+    # Step 5: Apply colormap
+    cmap = plt.cm.OrRd
+    norm_func = Normalize(vmin=vmin, vmax=vmax)
+    rgb_f = cmap(norm_func(norm_f))[:, :3]
+
+    # Step 6: Build RGBA face colors
+    colors_f = np.zeros((len(face_illum), 4), dtype=np.uint8)
+    colors_f[:, :3] = (rgb_f * 255).astype(np.uint8)
+    colors_f[:, 3] = 255  # Fully opaque
+
+    # Step 7: Apply colors to faces
+    convex_combined.visual.face_colors = colors_f
+
+    return convex_combined, face_illum
+
 def plot_surface_potential_electrons_protons(electrons, protons, convex_combined, vmin=-0.01,vmax=0.01):
 
     point = np.array(electrons["Pre_Step_Position_mm"].tolist())  # Your point coordinate
@@ -101,15 +134,15 @@ def plot_surface_potential_electrons_protons(electrons, protons, convex_combined
 
     # Compute potential at each surface point due to each electron
     q = -1.602e-19  # electron charge in Coulombs
-    potentials_e = 1 / (4 * np.pi * epsilon_0) * q / (distance_e + 1e-12)  # result is an array of potentials
-    # for debugging: np.array([1]*len(distance_e)) 
+    potentials_e = 1 / (4 * np.pi * epsilon_0) * q / (abs(distance_e - 0.1)*0.001 + 1e-12) * 1000 # result is an array of potentials, in mV
+    # for debugging: np.array([-1]*len(distance_e)) 
     
     point = np.array(protons["Pre_Step_Position_mm"].tolist())  # Your point coordinate
     _, distance_p, face_id_p = convex_combined.nearest.on_surface(point)
 
     # Compute potential at each surface point due to each electron
     q = +1.602e-19  # electron charge in Coulombs
-    potentials_p = 1 / (4 * np.pi * epsilon_0) * q / (distance_p + 1e-12)  # result is an array of potentials
+    potentials_p =1 / (4 * np.pi * epsilon_0) * q / (abs(distance_p - 0.1)*0.001 + 1e-12) * 1000 # result is an array of potentials, in mV
     # for debugging: np.array([1]*len(distance_p))#
 
     # Find unique face IDs and inverse indices for electrons
@@ -161,7 +194,7 @@ def plot_surface_potential_electrons_protons(electrons, protons, convex_combined
     # Apply colors to mesh
     convex_combined.visual.face_colors = colors_rgba
 
-    return convex_combined
+    return convex_combined, face_potentials
 
 def plot_surface_potential_electrons_or_protons(electrons, convex_combined, vmin=-0.01,vmax=0.01, q = -1.602e-19 ):
 
@@ -169,7 +202,8 @@ def plot_surface_potential_electrons_or_protons(electrons, convex_combined, vmin
     _, distance_e, face_id_e = convex_combined.nearest.on_surface(point)
 
     # Compute potential at each surface point due to each electron
-    potentials_e = 1 / (4 * np.pi * epsilon_0) * q / (distance_e + 1e-12)  # result is an array of potentials
+    potentials_e = 1 / (4 * np.pi * epsilon_0) * q / (abs(distance_e - 0.1)*0.001 + 1e-12) * 1000 # result is an array of potentials, in mV
+    # for debugging: np.array([-1]*len(distance_e)) 
 
     # Find unique face IDs and inverse indices for electrons
     unique_faces_e, inverse_indices_e = np.unique(face_id_e, return_inverse=True)

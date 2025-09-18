@@ -13,7 +13,7 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-selected_num = 10000
+selected_num = 30000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 
 # Define a list of random seeds
 seedIN = [10008859, 10005380]
@@ -144,7 +144,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write("/gps/ang/type iso\n")
         f.write('#\n')
         f.write('/gps/source/add 2\n')
-        f.write('/gps/source/intensity 310 \n') # trial and error to determine this intensity based on desired bulk concentration
+        f.write('/gps/source/intensity 100 \n') # trial and error to determine this intensity based on desired bulk concentration
         f.write('/gps/particle gamma\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')

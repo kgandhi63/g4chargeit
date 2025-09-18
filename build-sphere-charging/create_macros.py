@@ -13,7 +13,7 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-selected_num = 10000
+selected_num = 30000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 
 # Define a list of random seeds
 seedIN = [10008859, 10005380]
@@ -102,8 +102,6 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     # include only the photons   
     elif "onlyphotoemission" in increment_filename:
         f.write('/gps/particle gamma\n')
-        # f.write('/gps/ene/type Mono\n')
-        # f.write('/gps/energy 10 eV\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
         f.write(f'/gps/pos/halfx {worldXY/2} um\n')
@@ -114,8 +112,11 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write("/gps/ene/diffspec true\n")
         f.write("/gps/hist/file photon_distribution.txt\n")
         f.write("/gps/hist/inter Lin\n")
-        #f.write('/gps/direction 0 0 -1\n')
         f.write('/gps/ang/type iso\n')
+        # f.write('/gps/ene/type Mono\n')
+        # f.write('/gps/energy 10 eV\n')
+        #f.write('/gps/direction 0 0 -1\n')
+    # all particles (photons and SW ions and electrons)
     elif "allparticles" in increment_filename:
         f.write('/gps/particle proton\n')
         f.write('/gps/ene/type Mono\n')
@@ -143,7 +144,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write("/gps/ang/type iso\n")
         f.write('#\n')
         f.write('/gps/source/add 2\n')
-        f.write('/gps/source/intensity 1000 \n') #ADV: correct this relative value to get the appropriate amount!!
+        f.write('/gps/source/intensity 100 \n') # trial and error to determine this intensity based on desired bulk concentration
         f.write('/gps/particle gamma\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')

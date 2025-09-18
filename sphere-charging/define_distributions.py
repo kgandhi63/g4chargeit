@@ -43,8 +43,8 @@ print(f"Exported {len(lines)} lines to {output_path}")
 ## write the photon distribution ## 
 
 # Maxwellian parameters
-vth = 1  # Thermal velocity
-phi = 8.14  # Shift (e.g., bandgap energy in eV)
+vth = 1 #1  # Thermal velocity
+phi = 13.5 #8.14  # Shift (e.g., bandgap energy in eV)
 
 # Shifted Maxwellian distribution function
 def f(v):
