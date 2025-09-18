@@ -7,7 +7,6 @@
 /process/verbose 0
 /process/had/verbose 0
 /process/em/verbose 0
-/cuts/setLowEdge 5 eV
 #
 /random/setSeeds 10008859 10005380
 /random/setSavingFlag 1
@@ -43,10 +42,9 @@
 /gps/pos/centre 0 0 600 um
 /gps/ene/type Arb
 /gps/hist/type arb
-/gps/ene/diffspec false
+/gps/ene/diffspec true
 /gps/hist/file photon_distribution.txt
-/gps/hist/inter Log
-/gps/direction 0 0 -1
+/gps/hist/inter Lin
 /gps/ang/type iso
 #
 /run/printProgress 100
