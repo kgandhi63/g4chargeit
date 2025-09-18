@@ -111,7 +111,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write(f"/gps/pos/centre 0 0 {worldZ-particle_position} um\n")
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
-        f.write("/gps/ene/diffspec true\n")
+        f.write("/gps/ene/diffspec false\n")
         f.write("/gps/hist/file photon_distribution.txt\n")
         f.write("/gps/hist/inter Log\n")
         f.write('/gps/direction 0 0 -1\n')

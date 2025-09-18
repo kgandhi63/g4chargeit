@@ -43,7 +43,7 @@
 /gps/pos/centre 0 0 600 um
 /gps/ene/type Arb
 /gps/hist/type arb
-/gps/ene/diffspec true
+/gps/ene/diffspec false
 /gps/hist/file photon_distribution.txt
 /gps/hist/inter Log
 /gps/direction 0 0 -1
