@@ -178,15 +178,13 @@ def plot_surface_potential_electrons_protons(electrons, protons, convex_combined
 
     # Prepare RGBA array initialized to transparent
     colors_rgba = np.zeros((len(face_potentials), 4), dtype=np.uint8)
-
-    # Normalize only non-zero potentials
     norm = np.zeros_like(face_potentials)
-    norm = (face_potentials - vmin) / (vmax - vmin)
-    norm = np.clip(norm, 0, 1)
+    norm = face_potentials
 
-    # Map normalized potentials to RGB
+    # Step 5: Apply colormap
     cmap = plt.cm.seismic
-    colors_rgb = cmap(norm)[:, :3]
+    norm_func = Normalize(vmin=vmin, vmax=vmax)
+    colors_rgb = cmap(norm_func(norm))[:, :3]
 
     # Assign RGB to all faces
     colors_rgba[:, :3] = (colors_rgb * 255).astype(np.uint8)
@@ -433,28 +431,20 @@ def calculate_stats(df):
     photoelectric_yield = len(photelec_generated) / len(gamma_incident) if len(gamma_incident) > 0 else 0
 
     # --- Protons ---
-    protons_incident = df[
-        (df["Particle_Type"] == "proton") & (df["Parent_ID"] == 0.0)
-    ].drop_duplicates(subset="Event_Number", keep="first")
 
-    protons_inside = df[
-        (df["Volume_Name_Post"] == "G4_SILICON_DIOXIDE") &
-        (df["Particle_Type"] == "proton") &
-        (df["Kinetic_Energy_Post_MeV"] <= 1e-20)
-    ]
+    protons_incident = df[(df["Particle_Type"] == "proton") & (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="first")
+
+    last_protons = df[(df["Particle_Type"] == "proton")].drop_duplicates(subset="Event_Number", keep="last")
+    protons_inside = last_protons[(last_protons["Volume_Name_Post"] == "G4_SILICON_DIOXIDE")]
 
     protons_capture_fraction = len(protons_inside) / len(protons_incident) if len(protons_incident) > 0 else 0
 
     # --- Electrons ---
-    electrons_incident = df[
-        (df["Particle_Type"] == "e-") & (df["Parent_ID"] == 0.0)
-    ].drop_duplicates(subset="Event_Number", keep="first")
 
-    electrons_inside = df[
-        (df["Volume_Name_Post"] == "G4_SILICON_DIOXIDE") &
-        (df["Particle_Type"] == "e-") &
-        (df["Parent_ID"] == 0.0)
-    ].drop_duplicates(subset="Event_Number", keep="last")
+    electrons_incident = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="first")
+
+    last_electrons = df[(df["Particle_Type"] == "e-")].drop_duplicates(subset="Event_Number", keep="last")
+    electrons_inside = last_electrons[(last_electrons["Volume_Name_Post"] == "G4_SILICON_DIOXIDE")]
 
     electrons_ejected = df[(df["Particle_Type"] == "e-") & \
                            (df["Volume_Name_Post"] == "World")].\
@@ -478,4 +468,4 @@ def calculate_stats(df):
           f"({len(electrons_inside)} / {len(electrons_incident)})")
     print(f"Electrons ejected in material: {len(electrons_ejected)}\n")
 
-    return all_electrons_inside, photelec_holes, electrons_ejected, protons_inside, electrons_inside
+    return protons_inside, electrons_inside, photelec_holes, #all_electrons_inside, photelec_holes, electrons_ejected, 
