@@ -94,7 +94,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
-, PBC_(false), Epsilon_(0), CADFile_(""), RootInput_(""), Scale_(1)
+, PBC_(false), worldXY_(0), worldZ_(0), Epsilon_(0), CADFile_(""), RootInput_(""), Scale_(1)
 
 {
   // create commands for interactive definition of the detector 
@@ -154,9 +154,9 @@ G4SolidStore::GetInstance()->Clean();
   //     
   // World Characteristics
   //
-  G4double world_sizeX = 900*um;
-  G4double world_sizeY = 900 *um;
-  G4double world_sizeZ  = 800*um;
+  // G4double world_sizeX = 900*um;
+  // G4double world_sizeY = 900*um;
+  // G4double world_sizeZ  = 900*um;
 
 
   // define vacuum 
@@ -164,7 +164,7 @@ G4SolidStore::GetInstance()->Clean();
   
   G4Box* solidWorld =    
     new G4Box("World",                       //its name
-       world_sizeX/2, world_sizeY/2, world_sizeZ/2);     //its size
+       worldXY_/2*um, worldXY_/2*um, worldZ_/2*um);     //its size
 
   logicWorld_ =                         
     new G4LogicalVolume(solidWorld,          //its solid
@@ -174,8 +174,8 @@ G4SolidStore::GetInstance()->Clean();
   if (PBC_)
    {
     G4PeriodicBoundaryBuilder* pbb = new G4PeriodicBoundaryBuilder();
-      logicWorld_ = pbb->Construct(logicWorld_);
-    std::cout << "PBC set to logicWorld_" << std::endl;
+    logicWorld_ = pbb->Construct(logicWorld_);
+    std::cout << "PBC set to logicWorld" << std::endl;
    }
 
 
@@ -212,80 +212,113 @@ if (!CADFile_.empty()) {
   
  }
 
-//Create Electrons
-
+// Create Electrons
 if (!RootInput_.empty()) {
-  std::istringstream iss(RootInput_);
-  std::vector<std::string> file_list;
-  std::string file_name;
-  TFile* file;
-  TTree *tree;
-    
-  while (iss >> file_name) {
-    file_list.push_back(file_name);
-  }
-  
-  
-  for (const auto& fil : file_list) {
-    std::string folder_name = "root";
-  
-    std::ostringstream oss;
-    oss << folder_name << "/" << fil;
-    std::string full_path = oss.str();
+    std::istringstream iss(RootInput_);
+    std::vector<std::string> file_list;
+    std::string file_name;
+    TFile* file;
+    TTree* tree;
 
-  
-    file = TFile::Open(full_path.c_str(),"READ");
-    tree = nullptr;
+    while (iss >> file_name) {
+        file_list.push_back(file_name);
+    }
 
-    if (file && file->IsOpen()) {
-        file->GetObject("Hit Data", tree);
-        if (tree) {
-            std::cout << file << " successfully loaded!" << std::endl;
+    for (const auto& fil : file_list) {
+        std::string folder_name = "root";
+        std::ostringstream oss;
+        oss << folder_name << "/" << fil;
+        std::string full_path = oss.str();
+
+        file = TFile::Open(full_path.c_str(), "READ");
+        tree = nullptr;
+
+        if (file && file->IsOpen()) {
+            file->GetObject("Hit Data", tree);
+            if (tree) {
+                std::cout << full_path << " successfully loaded!" << std::endl;
+            } else {
+                std::cout << "Tree not found in file: " << full_path << std::endl;
+                continue;  // skip to next file
+            }
         } else {
-            std::cout << "Tree not found in file." << std::endl;
+            std::cout << "Failed to open file: " << full_path << std::endl;
+            continue;
         }
-    }
 
-    file->GetObject("Hit Data", tree); 
+        // Branch variables
+        int event_number;
+        std::vector<double>* post_step_position = nullptr;
+        Char_t volume_name_post[100];
+        double kinetic_energy_post_mev;
+        double parent_id;
+        Char_t particle_type[50];
 
-    // Declare pointers for branches
-    std::vector<double>* post_step_position = nullptr;
-    Char_t volume_name_post[100];
-    double kinetic_energy_post_mev;
-    Char_t particle_type[50];
-    
-    // Set branch addresses
-    tree->SetBranchAddress("Post_Step_Position_mm", &post_step_position);
-    tree->SetBranchAddress("Volume_Name_Post", &volume_name_post);
-    tree->SetBranchAddress("Kinetic_Energy_Post_MeV", &kinetic_energy_post_mev);
-    tree->SetBranchAddress("Particle_Type", &particle_type);
+        // Set branch addresses
+        tree->SetBranchAddress("Event_Number", &event_number);
+        tree->SetBranchAddress("Post_Step_Position_mm", &post_step_position);
+        tree->SetBranchAddress("Volume_Name_Post", &volume_name_post);
+        tree->SetBranchAddress("Parent_ID", &parent_id);
+        tree->SetBranchAddress("Kinetic_Energy_Post_MeV", &kinetic_energy_post_mev);
+        tree->SetBranchAddress("Particle_Type", &particle_type);
 
-    // Define the specific volume to filter
-    const std::string target_volume = "G4_SILICON_DIOXIDE";  // Replace with the desired volume name
+        // Define the specific volume to filter
+        const std::string target_volume = "G4_SILICON_DIOXIDE";
 
-    Long64_t nEntries = tree->GetEntries();
-    for (Long64_t i = 0; i < nEntries; i++) {
-        tree->GetEntry(i);
-        if (std::string(volume_name_post) == target_volume
-         && (std::string(particle_type) == "e-" || std::string(particle_type) == "proton")
-         && kinetic_energy_post_mev == 0.0) {
-          if (post_step_position && post_step_position->size() >= 3) { 
-              G4ThreeVector pos((*post_step_position)[0] * mm,
-                                (*post_step_position)[1] * mm,
-                                (*post_step_position)[2] * mm);
-              if (std::string(particle_type) == "e-") {
-                  fElectronPositions.push_back(pos);
-              } else if (std::string(particle_type) == "proton") {
-                  fProtonPositions.push_back(pos);
-              }
-          }
+        // Sets to track photon stops and unique holes
+        std::set<int> photonStops;
+        std::set<int> holeRecordedEvents;
+
+        Long64_t nEntries = tree->GetEntries();
+        for (Long64_t i = 0; i < nEntries; i++) {
+            tree->GetEntry(i);
+            if (std::string(volume_name_post) != target_volume) continue;
+            if (!post_step_position || post_step_position->size() < 3) continue;
+
+            std::string ptype = particle_type;
+
+            // Track photon stops (photon reaches zero kinetic energy)
+            if (ptype == "gamma" && kinetic_energy_post_mev == 0.0) {
+                photonStops.insert(event_number);
+            }
+
+            // Stopped electrons
+            if (ptype == "e-" && kinetic_energy_post_mev == 0.0) {
+                G4ThreeVector pos((*post_step_position)[0] * mm,
+                                  (*post_step_position)[1] * mm,
+                                  (*post_step_position)[2] * mm);
+                fElectronPositions.push_back(pos);
+            }
+
+            // Stopped protons
+            if (ptype == "proton" && kinetic_energy_post_mev == 0.0) {
+                G4ThreeVector pos((*post_step_position)[0] * mm,
+                                  (*post_step_position)[1] * mm,
+                                  (*post_step_position)[2] * mm);
+                fProtonPositions.push_back(pos);
+            }
+
+            // Hole = first secondary electron (parent_id == 1) in event where photon stopped
+            if (ptype == "e-" && parent_id == 1 && photonStops.count(event_number)) {
+                if (holeRecordedEvents.insert(event_number).second) {
+                    G4ThreeVector pos((*post_step_position)[0] * mm,
+                                      (*post_step_position)[1] * mm,
+                                      (*post_step_position)[2] * mm);
+                    fHolePositions.push_back(pos);
+                }
+            }
         }
-    }
 
-    G4cout << "electrons: " << fElectronPositions.size() << G4endl;
-    G4cout << "protons: " << fProtonPositions.size() << G4endl;
+        // Print results per file
+        G4cout << "File: " << full_path << G4endl;
+        G4cout << "  Electrons: " << fElectronPositions.size() << G4endl;
+        G4cout << "  Protons:   " << fProtonPositions.size() << G4endl;
+        G4cout << "  Holes:     " << fHolePositions.size() << G4endl;
+
+        file->Close();
+    }
 }
-}
+
 
 G4LogicalVolume*logicSphere= new G4LogicalVolume(sphere_solid, SiO2 , SiO2->GetName());  
 
@@ -300,7 +333,7 @@ new G4PVPlacement(0,                          	//no rotation
 
 
 
-logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
+//logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
 
 //G4double step = 1 * nm;
 //G4UserLimits* userLimits = new G4UserLimits(step);
@@ -333,9 +366,15 @@ void DetectorConstruction::ConstructSDandField() {
       allCharges.push_back(pCharge);
   }
 
+  G4double hCharge = +1.602e-19 * CLHEP::coulomb;
+  for (const auto& pos : fHolePositions) {
+      allPositions.push_back(pos);
+      allCharges.push_back(hCharge);
+  }
+  G4cout << "Starting Field Calculations" << G4endl;
   // Create the field with both electrons and protons
   auto sumField = new SumRadialField(allPositions, allCharges);
-
+  G4cout << "Ending Field Calculations" << G4endl;
   // Set up the field manager as before
   auto worldFM = new G4FieldManager();
   worldFM->SetDetectorField(sumField);
@@ -367,6 +406,18 @@ void DetectorConstruction::ConstructSDandField() {
 void DetectorConstruction::SetPBC(G4bool value)
 {
   PBC_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
+
+void DetectorConstruction::SetWorldXY(G4double value)
+{
+  worldXY_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
+
+void DetectorConstruction::SetWorldZ(G4double value)
+{
+  worldZ_ = value;
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 

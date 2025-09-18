@@ -47,7 +47,8 @@
 DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
 :G4UImessenger(), 
  detector_(Det), rootManager_(G4RootAnalysisManager::Instance()), 
- projectDir_(0), fileNameCmd_(0), PBCCmd_(0), EpsilonCmd_(0), RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0)
+ projectDir_(0), fileNameCmd_(0), PBCCmd_(0), EpsilonCmd_(0), WorldXYCmd_(0), WorldZCmd_(0), 
+ RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0)
  
 { 
   projectDir_ = new G4UIdirectory("/sphere/");
@@ -84,6 +85,16 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   ScaleCmd_->SetParameterName("choice",false);
   ScaleCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+  WorldXYCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/worldXY", this);
+  WorldXYCmd_->SetGuidance("Set XY Scale of the World.");
+  WorldXYCmd_->SetParameterName("choice",false);
+  WorldXYCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  WorldZCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/worldZ", this);
+  WorldZCmd_->SetGuidance("Set XY Scale of the World.");
+  WorldZCmd_->SetParameterName("choice",false);
+  WorldZCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
 
 }
 
@@ -97,6 +108,8 @@ DetectorMessenger::~DetectorMessenger()
   delete EpsilonCmd_;
   delete ScaleCmd_;
   delete RootInputCmd_;
+  delete WorldXYCmd_;
+  delete WorldZCmd_;
 
 }
 
@@ -106,25 +119,29 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 { 
 
   if( command == fileNameCmd_ )
-   {G4cout << "Opening ROOT file: " << newValue << G4endl;
+  {G4cout << "Opening ROOT file: " << newValue << G4endl;
     rootManager_->OpenFile(newValue);}
 
+  if( command == PBCCmd_ )
+  { detector_->SetPBC(PBCCmd_->GetNewBoolValue(newValue));}
 
- if( command == PBCCmd_ )
-   { detector_->SetPBC(PBCCmd_->GetNewBoolValue(newValue));}
+  if( command == RootInputCmd_ )
+  { detector_->SetRootInput(newValue);}
 
-if( command == RootInputCmd_ )
-   { detector_->SetRootInput(newValue);}
-
-if( command == CADFileCmd_ )
-   { detector_->SetCADFile(newValue);}
+  if( command == CADFileCmd_ )
+  { detector_->SetCADFile(newValue);}
 
   if( command == EpsilonCmd_ )
-   { detector_->SetEpsilon(EpsilonCmd_->GetNewDoubleValue(newValue));}
+  { detector_->SetEpsilon(EpsilonCmd_->GetNewDoubleValue(newValue));}
 
-   
   if( command == ScaleCmd_ )
   { detector_->SetCADScale(ScaleCmd_->GetNewDoubleValue(newValue));}
+  
+  if( command == WorldXYCmd_ )
+  { detector_->SetWorldXY(ScaleCmd_->GetNewDoubleValue(newValue));}
+
+  if( command == WorldZCmd_ )
+  { detector_->SetWorldZ(ScaleCmd_->GetNewDoubleValue(newValue));}
 
 }
 

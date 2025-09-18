@@ -58,16 +58,18 @@ class DetectorMessenger: public G4UImessenger
     
   private:
   
-    DetectorConstruction*      detector_;
-    G4RootAnalysisManager*     rootManager_; 
+    DetectorConstruction*       detector_;
+    G4RootAnalysisManager*      rootManager_; 
     
-    G4UIdirectory*             projectDir_;
-    G4UIcmdWithAString*        fileNameCmd_;
+    G4UIdirectory*              projectDir_;
+    G4UIcmdWithAString*         fileNameCmd_;
     G4UIcmdWithABool*           PBCCmd_;
-    G4UIcmdWithADouble*           EpsilonCmd_;
+    G4UIcmdWithADouble*         EpsilonCmd_;
     G4UIcmdWithAString*         RootInputCmd_;
     G4UIcmdWithAString*         CADFileCmd_;
     G4UIcmdWithADouble*         ScaleCmd_;
+    G4UIcmdWithADoubleAndUnit*  WorldXYCmd_;
+    G4UIcmdWithADoubleAndUnit*  WorldZCmd_;
 
 
 };

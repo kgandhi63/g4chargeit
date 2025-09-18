@@ -18,7 +18,6 @@ public:
     G4ThreeVector E(0., 0., 0.);
 
     const G4double epsilon0 = 1.0 / (mu0 * c_light * c_light);
-
     // Sum the field from all charges
     for (size_t i = 0; i < fPositions.size(); ++i) {
       G4ThreeVector dr = r - fPositions[i];

@@ -26,6 +26,8 @@
 /process/eLoss/UseICRU90 1
 /process/eLoss/UseAngularGenerator true
 #
+/sphere/worldXY 900 um
+/sphere/worldZ 800 um
 /sphere/filename root/24_stackediteration0_allparticles_num30000.root
 /sphere/cadinput/file stacked_spheres_frompython.stl
 /sphere/epsilon 4
@@ -40,7 +42,7 @@
 /gps/pos/shape Square
 /gps/pos/halfx 450.0 um
 /gps/pos/halfy 450.0 um
-/gps/pos/centre -141.42135623730948 -141.42135623730948 600 um
+/gps/pos/centre -176.77669529663686 -176.77669529663686 550 um
 /gps/direction 0.7071067811865475 0 -0.7071067811865475 
 #
 /gps/source/add 1
@@ -55,7 +57,7 @@
 /gps/pos/shape Square
 /gps/pos/halfx 450.0 um
 /gps/pos/halfy 450.0 um
-/gps/pos/centre 0 0 600 um
+/gps/pos/centre 0 0 550 um
 /gps/ang/type iso
 #
 /gps/source/add 2
@@ -65,7 +67,7 @@
 /gps/pos/shape Square
 /gps/pos/halfx 450.0 um
 /gps/pos/halfy 450.0 um
-/gps/pos/centre 0 0 600 um
+/gps/pos/centre 0 0 550 um
 /gps/ene/type Arb
 /gps/hist/type arb
 /gps/ene/diffspec true

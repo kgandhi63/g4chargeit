@@ -65,17 +65,20 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetRootInput (G4String);
     void SetCADScale (G4double);
 
-
-
+    void SetWorldXY (G4double);
+    void SetWorldZ (G4double);
                        
   private:
     G4VPhysicalVolume* ConstructVolumes();  
     G4bool PBC_;
+    G4double worldXY_;
+    G4double worldZ_;
     G4LogicalVolume* logicWorld_; 
     G4double Epsilon_;
     G4String CADFile_;
     G4String RootInput_;
     G4double Scale_;
+    std::vector<G4ThreeVector> fHolePositions;
     std::vector<G4ThreeVector> fElectronPositions;
     std::vector<G4ThreeVector> fProtonPositions;
     DetectorMessenger* detectorMessenger_;
