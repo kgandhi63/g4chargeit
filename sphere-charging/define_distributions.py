@@ -43,19 +43,19 @@ print(f"Exported {len(lines)} lines to {output_path}")
 ## write the photon distribution ## 
 
 # Maxwellian parameters
-# vth = 1  # Thermal velocity
-# phi = 13.5 #8.14  # Shift (e.g., bandgap energy in eV)
+vth = 1  # Thermal velocity
+phi = 13.5 #8.14  # Shift (e.g., bandgap energy in eV)
 
-# # Shifted Maxwellian distribution function
-# def f(v):
-#     return (1 / (vth * np.sqrt(np.pi))) * np.exp(-((v - phi)**2) / vth**2)
+# Shifted Maxwellian distribution function
+def f(v):
+    return (1 / (vth * np.sqrt(np.pi))) * np.exp(-((v - phi)**2) / vth**2)
 
 
 # black body 
-kb = 8.617333262e-5  # Boltzmann constant in eV/K
-T = 50000             # Temperature in Kelvin
-def f(e):
-    return (kb * T)**(-0.5) * e * np.exp(-e / (kb * T))
+# kb = 8.617333262e-5  # Boltzmann constant in eV/K
+# T = 50000             # Temperature in Kelvin
+# def f(e):
+#     return (kb * T)**(-0.5) * e * np.exp(-e / (kb * T))
 
 
 # Range and sampling

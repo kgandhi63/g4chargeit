@@ -22,7 +22,7 @@ worldZ = 800 # microns
 worldXY = 900 # microns
 
 # calculate offset for SW ions at 45 degrees
-particle_position = 200 # place all particles 200 microns above the geometry
+particle_position = 250 # place all particles 200 microns above the geometry
 ions_offset = np.sin(45*np.pi/180)*particle_position
 ion_rotation = np.sin(45*np.pi/180)
 
@@ -62,6 +62,8 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('/process/eLoss/UseICRU90 1\n')
     f.write('/process/eLoss/UseAngularGenerator true\n')
     f.write('#\n')
+    f.write(f'/sphere/worldXY {worldXY} um\n')
+    f.write(f'/sphere/worldZ {worldZ} um\n')
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
     f.write(f'/sphere/filename root/{increment_filename}.root\n')

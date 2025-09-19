@@ -468,4 +468,4 @@ def calculate_stats(df):
           f"({len(electrons_inside)} / {len(electrons_incident)})")
     print(f"Electrons ejected in material: {len(electrons_ejected)}\n")
 
-    return protons_inside, electrons_inside, photelec_holes, #all_electrons_inside, photelec_holes, electrons_ejected, 
+    return protons_inside, electrons_inside, photelec_holes #all_electrons_inside, photelec_holes, electrons_ejected, 
