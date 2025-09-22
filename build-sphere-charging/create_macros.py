@@ -20,12 +20,13 @@ selected_num = 30000 # adjusted this number to reflect the timestep in Zimmerman
 config_list = ["onlysolarwind", "onlyphotoemission", "allparticles"]
 
 # define the size of the world
+worldX = 900 # in units of microns
+worldY = 600 # in units of microns
 worldZ = 800 # in units of microns
-worldXY = 900 # in units of microns
 
 # calculate offset for SW ions at 45 degrees
-particle_position = 250 # place all particles 200 microns above the geometry
-ions_offset = np.sin(45*np.pi/180)*particle_position
+particle_position = 200 # place all particles 200 microns above the geometry
+ions_offset = np.tan(45*np.pi/180)*worldX/4
 ion_rotation = np.sin(45*np.pi/180)
 
 # Output files tracking
@@ -64,7 +65,8 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('/process/eLoss/UseICRU90 1\n')
     f.write('/process/eLoss/UseAngularGenerator true\n')
     f.write('#\n')
-    f.write(f'/sphere/worldXY {worldXY} um\n')
+    f.write(f'/sphere/worldX {worldX} um\n')
+    f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
@@ -83,9 +85,9 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/energy 1 keV\n') 
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
-        f.write(f'/gps/pos/halfx {worldXY/2} um\n')
-        f.write(f'/gps/pos/halfy {worldXY/2} um\n')
-        f.write(f'/gps/pos/centre -{ions_offset} -{ions_offset} {worldZ-particle_position} um\n')
+        f.write(f'/gps/pos/halfx {worldX/2} um\n')
+        f.write(f'/gps/pos/halfy {worldY/2} um\n')
+        f.write(f'/gps/pos/centre -{ions_offset} 0 {worldZ-particle_position} um\n')
         f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
         f.write('#\n')
         f.write('/gps/source/add 1\n')
@@ -98,8 +100,8 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write("/gps/hist/inter Lin\n")
         f.write("/gps/pos/type Plane\n")
         f.write("/gps/pos/shape Square\n")
-        f.write(f'/gps/pos/halfx {worldXY/2} um\n')
-        f.write(f'/gps/pos/halfy {worldXY/2} um\n')
+        f.write(f'/gps/pos/halfx {worldX/2} um\n')
+        f.write(f'/gps/pos/halfy {worldY/2} um\n')
         f.write(f"/gps/pos/centre 0 0 {worldZ-particle_position} um\n")
         f.write("/gps/ang/type iso\n")
         f.write('#\n') 
@@ -108,9 +110,9 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/particle gamma\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
-        f.write(f'/gps/pos/halfx {worldXY/2} um\n')
-        f.write(f'/gps/pos/halfy {worldXY/2} um\n')
-        f.write(f'/gps/pos/centre -{ions_offset} -{ions_offset} {worldZ-particle_position} um\n')
+        f.write(f'/gps/pos/halfx {worldX/2} um\n')
+        f.write(f'/gps/pos/halfy {worldY/2} um\n')
+        f.write(f'/gps/pos/centre -{ions_offset} 0 {worldZ-particle_position} um\n')
         f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
@@ -127,8 +129,8 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/energy 1 keV\n') 
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
-        f.write(f'/gps/pos/halfx {worldXY/2} um\n')
-        f.write(f'/gps/pos/halfy {worldXY/2} um\n')
+        f.write(f'/gps/pos/halfx {worldX/2} um\n')
+        f.write(f'/gps/pos/halfy {worldY/2} um\n')
         f.write(f'/gps/pos/centre -{ions_offset} 0 {worldZ-particle_position} um\n')
         f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
         f.write('#\n')
@@ -142,8 +144,8 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write("/gps/hist/inter Lin\n")
         f.write("/gps/pos/type Plane\n")
         f.write("/gps/pos/shape Square\n")
-        f.write(f'/gps/pos/halfx {worldXY/2} um\n')
-        f.write(f'/gps/pos/halfy {worldXY/2} um\n')
+        f.write(f'/gps/pos/halfx {worldX/2} um\n')
+        f.write(f'/gps/pos/halfy {worldY/2} um\n')
         f.write(f"/gps/pos/centre 0 0 {worldZ-particle_position} um\n")
         f.write("/gps/ang/type iso\n")
         f.write('#\n')
@@ -152,8 +154,8 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/particle gamma\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
-        f.write(f'/gps/pos/halfx {worldXY/2} um\n')
-        f.write(f'/gps/pos/halfy {worldXY/2} um\n')
+        f.write(f'/gps/pos/halfx {worldX/2} um\n')
+        f.write(f'/gps/pos/halfy {worldY/2} um\n')
         f.write(f'/gps/pos/centre -{ions_offset} 0 {worldZ-particle_position} um\n')
         f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
         f.write("/gps/ene/type Arb\n")

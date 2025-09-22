@@ -74,8 +74,17 @@ print(f"Exported {len(lines)} lines to {output_path}")
 
 # read in digitize solar spectrum from literature
 solardata = pd.read_csv("Fig2-FarrellSolarMinimum.csv")
-solar_xdata, solar_ydata = 1240/np.array(solardata["x"]), solardata[" y"]
+solar_xdata, solar_ydata = 1240/np.array(solardata["x"]), solardata[" y"]/np.sum(solardata[" y"])
 
+# Sort by solar_xdata
+sorted_indices = np.argsort(solar_xdata)
+solar_xdata = solar_xdata[sorted_indices]
+solar_ydata = solar_ydata[sorted_indices]
+
+# Filter data where energy <= 20 eV
+mask = solar_xdata <= 20 # cut off energy is needed, otherwise code takes forever to run
+solar_xdata = solar_xdata[mask]
+solar_ydata = solar_ydata[mask]
 
 # Combine into lines: "energy weight" in scientific notation
 lines = [

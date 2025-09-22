@@ -26,7 +26,8 @@
 /process/eLoss/UseICRU90 1
 /process/eLoss/UseAngularGenerator true
 #
-/sphere/worldXY 900 um
+/sphere/worldX 900 um
+/sphere/worldY 600 um
 /sphere/worldZ 800 um
 /sphere/rootinput/file 12_stackediteration0_onlyphotoemission_num30000.root 13_stackediteration1_onlyphotoemission_from_00_num30000.root 14_stackediteration2_onlyphotoemission_from_00_num30000.root 15_stackediteration3_onlyphotoemission_from_00_num30000.root 16_stackediteration4_onlyphotoemission_from_00_num30000.root 17_stackediteration5_onlyphotoemission_from_00_num30000.root 18_stackediteration6_onlyphotoemission_from_00_num30000.root
 /sphere/filename root/19_stackediteration7_onlyphotoemission_from_00_num30000.root
@@ -40,8 +41,8 @@
 /gps/pos/type Plane
 /gps/pos/shape Square
 /gps/pos/halfx 450.0 um
-/gps/pos/halfy 450.0 um
-/gps/pos/centre -176.77669529663686 -176.77669529663686 550 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre -224.99999999999997 0 600 um
 /gps/direction 0.7071067811865475 0 -0.7071067811865475 
 /gps/ene/type Arb
 /gps/hist/type arb

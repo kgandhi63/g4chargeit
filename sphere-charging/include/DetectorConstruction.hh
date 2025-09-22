@@ -65,13 +65,15 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetRootInput (G4String);
     void SetCADScale (G4double);
 
-    void SetWorldXY (G4double);
+    void SetWorldX (G4double);
+    void SetWorldY (G4double);
     void SetWorldZ (G4double);
                        
   private:
     G4VPhysicalVolume* ConstructVolumes();  
     G4bool PBC_;
-    G4double worldXY_;
+    G4double worldX_;
+    G4double worldY_;
     G4double worldZ_;
     G4LogicalVolume* logicWorld_; 
     G4double Epsilon_;

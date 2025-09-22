@@ -47,7 +47,7 @@
 DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
 :G4UImessenger(), 
  detector_(Det), rootManager_(G4RootAnalysisManager::Instance()), 
- projectDir_(0), fileNameCmd_(0), PBCCmd_(0), EpsilonCmd_(0), WorldXYCmd_(0), WorldZCmd_(0), 
+ projectDir_(0), fileNameCmd_(0), PBCCmd_(0), EpsilonCmd_(0), WorldXCmd_(0),WorldYCmd_(0), WorldZCmd_(0), 
  RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0)
  
 { 
@@ -85,10 +85,15 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   ScaleCmd_->SetParameterName("choice",false);
   ScaleCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  WorldXYCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/worldXY", this);
-  WorldXYCmd_->SetGuidance("Set XY Scale of the World.");
-  WorldXYCmd_->SetParameterName("choice",false);
-  WorldXYCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+  WorldXCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/worldX", this);
+  WorldXCmd_->SetGuidance("Set XY Scale of the World.");
+  WorldXCmd_->SetParameterName("choice",false);
+  WorldXCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  WorldYCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/worldY", this);
+  WorldYCmd_->SetGuidance("Set XY Scale of the World.");
+  WorldYCmd_->SetParameterName("choice",false);
+  WorldYCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
   WorldZCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/worldZ", this);
   WorldZCmd_->SetGuidance("Set XY Scale of the World.");
@@ -108,7 +113,8 @@ DetectorMessenger::~DetectorMessenger()
   delete EpsilonCmd_;
   delete ScaleCmd_;
   delete RootInputCmd_;
-  delete WorldXYCmd_;
+  delete WorldXCmd_;
+  delete WorldYCmd_;
   delete WorldZCmd_;
 
 }
@@ -137,8 +143,11 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   if( command == ScaleCmd_ )
   { detector_->SetCADScale(ScaleCmd_->GetNewDoubleValue(newValue));}
   
-  if( command == WorldXYCmd_ )
-  { detector_->SetWorldXY(ScaleCmd_->GetNewDoubleValue(newValue));}
+  if( command == WorldXCmd_ )
+  { detector_->SetWorldX(ScaleCmd_->GetNewDoubleValue(newValue));}
+
+  if( command == WorldYCmd_ )
+  { detector_->SetWorldY(ScaleCmd_->GetNewDoubleValue(newValue));}
 
   if( command == WorldZCmd_ )
   { detector_->SetWorldZ(ScaleCmd_->GetNewDoubleValue(newValue));}

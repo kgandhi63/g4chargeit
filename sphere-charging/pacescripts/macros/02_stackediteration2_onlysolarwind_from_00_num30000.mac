@@ -26,7 +26,8 @@
 /process/eLoss/UseICRU90 1
 /process/eLoss/UseAngularGenerator true
 #
-/sphere/worldXY 900 um
+/sphere/worldX 900 um
+/sphere/worldY 600 um
 /sphere/worldZ 800 um
 /sphere/rootinput/file 00_stackediteration0_onlysolarwind_num30000.root 01_stackediteration1_onlysolarwind_from_00_num30000.root
 /sphere/filename root/02_stackediteration2_onlysolarwind_from_00_num30000.root
@@ -42,8 +43,8 @@
 /gps/pos/type Plane
 /gps/pos/shape Square
 /gps/pos/halfx 450.0 um
-/gps/pos/halfy 450.0 um
-/gps/pos/centre -176.77669529663686 -176.77669529663686 550 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre -224.99999999999997 0 600 um
 /gps/direction 0.7071067811865475 0 -0.7071067811865475 
 #
 /gps/source/add 1
@@ -57,8 +58,8 @@
 /gps/pos/type Plane
 /gps/pos/shape Square
 /gps/pos/halfx 450.0 um
-/gps/pos/halfy 450.0 um
-/gps/pos/centre 0 0 550 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre 0 0 600 um
 /gps/ang/type iso
 #
 #

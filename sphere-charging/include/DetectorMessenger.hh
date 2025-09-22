@@ -68,7 +68,8 @@ class DetectorMessenger: public G4UImessenger
     G4UIcmdWithAString*         RootInputCmd_;
     G4UIcmdWithAString*         CADFileCmd_;
     G4UIcmdWithADouble*         ScaleCmd_;
-    G4UIcmdWithADoubleAndUnit*  WorldXYCmd_;
+    G4UIcmdWithADoubleAndUnit*  WorldXCmd_;
+    G4UIcmdWithADoubleAndUnit*  WorldYCmd_;
     G4UIcmdWithADoubleAndUnit*  WorldZCmd_;
 
 

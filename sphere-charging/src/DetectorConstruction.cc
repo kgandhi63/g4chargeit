@@ -94,7 +94,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
-, PBC_(false), worldXY_(0), worldZ_(0), Epsilon_(0), CADFile_(""), RootInput_(""), Scale_(1)
+, PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), CADFile_(""), RootInput_(""), Scale_(1)
 
 {
   // create commands for interactive definition of the detector 
@@ -164,7 +164,7 @@ G4SolidStore::GetInstance()->Clean();
   
   G4Box* solidWorld =    
     new G4Box("World",                       //its name
-       worldXY_/2*um, worldXY_/2*um, worldZ_/2*um);     //its size
+       worldX_/2*um, worldY_/2*um, worldZ_/2*um);     //its size
 
   logicWorld_ =                         
     new G4LogicalVolume(solidWorld,          //its solid
@@ -205,6 +205,7 @@ if (!CADFile_.empty()) {
   sphere_mesh->SetScale(Scale_);
   // Get the solid
   sphere_solid = sphere_mesh->GetSolid();
+
  }
  else {
   sphere_solid = new G4Sphere("Test", 0., 50*um, 0., 360.*deg, 0., 180.*deg);
@@ -409,9 +410,15 @@ void DetectorConstruction::SetPBC(G4bool value)
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 
-void DetectorConstruction::SetWorldXY(G4double value)
+void DetectorConstruction::SetWorldX(G4double value)
 {
-  worldXY_ = value;
+  worldX_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
+
+void DetectorConstruction::SetWorldY(G4double value)
+{
+  worldY_ = value;
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 
