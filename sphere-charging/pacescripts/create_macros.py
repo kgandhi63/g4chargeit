@@ -1,5 +1,6 @@
 import os
 import re
+import glob
 import shutil
 import numpy as np
 from collections import defaultdict
@@ -15,20 +16,21 @@ account = "pf17"
 username = "avira7"
 selected_num = 30000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 
-# Define a list of random seeds
-seedIN = [10008859, 10005380]
+# list of configurations
+config_list = ["onlysolarwind", "onlyphotoemission", "allparticles"]
 
-worldZ = 800 # microns
-worldXY = 900 # microns
+# define the size of the world
+worldZ = 800 # in units of microns
+worldXY = 900 # in units of microns
 
 # calculate offset for SW ions at 45 degrees
 particle_position = 250 # place all particles 200 microns above the geometry
-ions_offset = np.sin(45*np.pi/180)*particle_position
+ions_offset = np.tan(45*np.pi/180)*particle_position
 ion_rotation = np.sin(45*np.pi/180)
-
 
 # Output files tracking
 output_files = []
+seedIN = [10008859, 10005380]
 i = 0
 
 def write_macro(f, increment_filename, event_num, input_files=None):
@@ -83,7 +85,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/pos/shape Square\n')
         f.write(f'/gps/pos/halfx {worldXY/2} um\n')
         f.write(f'/gps/pos/halfy {worldXY/2} um\n')
-        f.write(f'/gps/pos/centre -{ions_offset} -{ions_offset} {worldZ-particle_position} um\n')
+        f.write(f'/gps/pos/centre -{ions_offset} 0 {worldZ-particle_position} um\n')
         f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
         f.write('#\n')
         f.write('/gps/source/add 1\n')
@@ -108,13 +110,13 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/pos/shape Square\n')
         f.write(f'/gps/pos/halfx {worldXY/2} um\n')
         f.write(f'/gps/pos/halfy {worldXY/2} um\n')
-        f.write(f"/gps/pos/centre 0 0 {worldZ-particle_position} um\n")
+        f.write(f'/gps/pos/centre -{ions_offset} 0 {worldZ-particle_position} um\n')
+        f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
         f.write("/gps/ene/diffspec true\n")
         f.write("/gps/hist/file photon_distribution.txt\n")
         f.write("/gps/hist/inter Lin\n")
-        f.write('/gps/ang/type iso\n')
         # f.write('/gps/ene/type Mono\n')
         # f.write('/gps/energy 10 eV\n')
         #f.write('/gps/direction 0 0 -1\n')
@@ -127,7 +129,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/pos/shape Square\n')
         f.write(f'/gps/pos/halfx {worldXY/2} um\n')
         f.write(f'/gps/pos/halfy {worldXY/2} um\n')
-        f.write(f'/gps/pos/centre -{ions_offset} -{ions_offset} {worldZ-particle_position} um\n')
+        f.write(f'/gps/pos/centre -{ions_offset} 0 {worldZ-particle_position} um\n')
         f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
         f.write('#\n')
         f.write('/gps/source/add 1\n')
@@ -152,13 +154,13 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/pos/shape Square\n')
         f.write(f'/gps/pos/halfx {worldXY/2} um\n')
         f.write(f'/gps/pos/halfy {worldXY/2} um\n')
-        f.write(f"/gps/pos/centre 0 0 {worldZ-particle_position} um\n")
+        f.write(f'/gps/pos/centre -{ions_offset} 0 {worldZ-particle_position} um\n')
+        f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
         f.write("/gps/ene/diffspec true\n")
         f.write("/gps/hist/file photon_distribution.txt\n")
         f.write("/gps/hist/inter Lin\n")
-        f.write('/gps/ang/type iso\n')
     else: 
         Warning("need to select from: onlysolarwind, onlyphotoemission, allparticles")
     f.write('#\n')
@@ -166,10 +168,11 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/run/beamOn {event_num}\n')
 
 #############################################################
+
 output_files = []
 i = 0
 
-for optionIN in ["onlysolarwind", "onlyphotoemission", "allparticles"]:
+for optionIN in config_list:
 
     for incrementIN in range(12):
 
@@ -187,7 +190,7 @@ for optionIN in ["onlysolarwind", "onlyphotoemission", "allparticles"]:
             filtered = [fname for fname, evnum, iterID, option in output_files if option == optionIN] # or (evnum == selected_num)
 
             input_list = ' '.join(filtered)
-            print(input_list)
+            #print(input_list)
     
             increment_filename = f"{i:02d}_stackediteration{incrementIN}_{optionIN}_from_00_num{selected_num}"
             with open(f"macros/{increment_filename}.mac", 'w') as f:
@@ -195,60 +198,32 @@ for optionIN in ["onlysolarwind", "onlyphotoemission", "allparticles"]:
             output_files.append((increment_filename + ".root", selected_num, incrementIN, optionIN))
             i += 1
 
-
-		
-#############################################################
-
-# Define paths
-macro_dir = "macros"
-run_dir = "runscripts"
-os.makedirs(run_dir, exist_ok=True)
-
-# Dictionary to hold commands per iteration
-iteration_commands = defaultdict(list)
-
-# Pattern to match iteration number
-pattern = re.compile(r'iteration(\d+)')
-
-# Collect and categorize macro files
-for fname in sorted(os.listdir(macro_dir)):
-    if fname.endswith(".mac"):
-        match = pattern.search(fname)
-        if match:
-            iteration_num = int(match.group(1))
-            cmd = f"./charging_sphere {os.path.join(macro_dir, fname)}"
-            iteration_commands[iteration_num].append(cmd)
-
-# Write out a script per iteration
-for iteration_num, commands in iteration_commands.items():
-    script_filename = os.path.join(run_dir, f"run_iteration{iteration_num}.sh")
-    with open(script_filename, "w") as f:
-        f.write("\n".join(commands))
-    print(f"Created: {script_filename}")
-
 #############################################################
 
 # Define directories
-run_dir = "runscripts"
 batch_dir = "batchscripts"
-os.makedirs(batch_dir, exist_ok=True)
+if os.path.exists(batch_dir):
+    shutil.rmtree(batch_dir)  # Delete the folder and all its contents
+
+os.makedirs(batch_dir, exist_ok=True)  # Recreate it cleanly
 
 # Template for SLURM batch file
-batch_template_serial = """#!/bin/bash
-#SBATCH --job-name=Iteration{iter}_Run
+batch_template = """#!/bin/bash
+#SBATCH --job-name=Iteration{iter}_Configuration{config}
 #SBATCH --account=gts-{account}
 #SBATCH --mail-user={username}@gatech.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=16
+#SBATCH --ntasks-per-node=1
 #SBATCH --mem=32gb
-#SBATCH --time=15:00:00
-#SBATCH --output=outputlogs/iteration{iter}_{option}_%A.out
+#SBATCH --time=18:00:00
+#SBATCH --output=outputlogs/iteration{iter}_{config}_%A
 
-echo "Starting iteration{iter} runs"
-bash {run_script}
+echo "Starting iteration{iter} for {config} configuration"
+srun {run_line}
 date
 """
+#bash {run_script}
 
 batch_template_array = """#!/bin/bash
 #SBATCH --job-name=Iteration{iter}_Array
@@ -273,40 +248,40 @@ eval "$cmd"
 date
 """
 
-# Loop over each run script and create corresponding SLURM script
-for fname in os.listdir(run_dir):
-    match = re.match(r'run_iteration(\d+)\.sh', fname)
-    if match:
-        iter_num = int(match.group(1))
-        run_script_path = os.path.join(run_dir, fname)
-        batch_filename = f"submit_iteration{iter_num}.sh"
-        batch_path = os.path.join(batch_dir, batch_filename)
+# Define paths
+macro_dir = "macros"
 
-        # Read number of lines in run script for --array
-        with open(run_script_path) as f:
-            num_lines = sum(1 for _ in f)
+# Pattern to match iteration number
+pattern = re.compile(r'iteration(\d+)')
 
-        # Use job array for iteration0 and iteration1
-        # if iter_num in [0, 1]:
-            batch_script = batch_template_array.format(
-                iter=iter_num,
-                run_script=run_script_path,
-                array_size=num_lines,                
-                account=account, 
-                username=username
-            )
-        # else:
-        # batch_script = batch_template_serial.format(
-        #     iter=iter_num,
-        #     run_script=run_script_path, 
-        #     account=account, 
-        #     username=username
-        # )
+# loop over all configurations
+i=0
+for configIN in config_list:
 
-        with open(batch_path, "w") as f:
-            f.write(batch_script)
+    # Collect and categorize macro files
+    for fname in sorted(os.listdir(macro_dir)):
+        if configIN in fname and fname.endswith(".mac"):
+            match = pattern.search(fname)
+            if match:
+                iteration_num = int(match.group(1))
+                cmd = f"./charging_sphere {os.path.join(macro_dir, fname)}"
+                batch_script = batch_template.format(
+                    iter=iteration_num,
+                    config=configIN,
+                    run_line=cmd,                
+                    account=account, 
+                    username=username
+                )
+                #iteration_commands[iteration_num].append(cmd)
 
-        print(f"Created: {batch_path}")
+                batch_filename = f"{i:02d}_submit_iteration{iteration_num}_for{configIN}.sh"
+                batch_path = os.path.join(batch_dir, batch_filename)
+                with open(batch_path, "w") as f:
+                    f.write(batch_script)
+
+                i+=1
+
+print(f"Created all batchscripts: 0 through {i-1}")
 
 #############################################################
 
@@ -314,31 +289,31 @@ for fname in os.listdir(run_dir):
 batch_dir = "batchscripts"
 output_script = "submit_all_iterations.sh"
 
-# Get and sort all batch submission scripts by iteration number
-batch_scripts = []
-for fname in os.listdir(batch_dir):
-    match = re.match(r"submit_iteration(\d+)\.sh", fname)
-    if match:
-        batch_scripts.append((int(match.group(1)), fname))
-
-batch_scripts.sort()  # Sort by iteration number
+# Get and sort all batch script files
+batch_scripts = glob.glob(os.path.join(batch_dir, "*.sh"))
+batch_scripts.sort()  # Sort alphabetically (can be adjusted if needed)
 
 # Start writing the master submission script
 with open(output_script, "w") as f:
     f.write("#!/bin/bash\n\n")
 
     previous_job_var = ""
-    for i, (_, script_name) in enumerate(batch_scripts):
-        script_path = os.path.join(batch_dir, script_name)
-        if i == 0:
-            f.write(f"# Submit the first job and capture its Job ID\n")
-            f.write(f"jid0=$(sbatch --parsable {script_path})\n")
-            f.write(f"echo \"Submitted iteration 0 job: $jid0\"\n\n")
-            previous_job_var = "$jid0"
+    for i, script_path in enumerate(batch_scripts):
+
+        # Use regex to find the iteration number
+        match = re.search(r"iteration(\d+)_for", script_path)
+        if match:
+            iteration = int(match.group(1))
+
+        if iteration == 0:
+            f.write("# Submit the first job and capture its Job ID\n")
+            f.write(f"jid{i}=$(sbatch --parsable {script_path})\n")
+            f.write(f"echo \"Submitted job for runscript: $jid{i}\"\n\n")
+            previous_job_var = f"$jid{i}"
         else:
             f.write(f"# Submit job {i} with dependency on previous job\n")
             f.write(f"jid{i}=$(sbatch --parsable --dependency=afterok:{previous_job_var} {script_path})\n")
-            f.write(f"echo \"Submitted iteration {i} job (afterok dependency): $jid{i}\"\n\n")
+            f.write(f"echo \"Submitted job for runscript (afterok dependency): $jid{i}\"\n\n")
             previous_job_var = f"$jid{i}"
 
 # Make the script executable

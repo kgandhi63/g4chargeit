@@ -40,13 +40,13 @@
 /gps/pos/shape Square
 /gps/pos/halfx 450.0 um
 /gps/pos/halfy 450.0 um
-/gps/pos/centre 0 0 550 um
+/gps/pos/centre -176.77669529663686 -176.77669529663686 550 um
+/gps/direction 0.7071067811865475 0 -0.7071067811865475 
 /gps/ene/type Arb
 /gps/hist/type arb
 /gps/ene/diffspec true
 /gps/hist/file photon_distribution.txt
 /gps/hist/inter Lin
-/gps/ang/type iso
 #
 /run/printProgress 100
 /run/beamOn 30000
