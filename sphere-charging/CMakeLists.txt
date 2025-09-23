@@ -70,8 +70,9 @@ endforeach()
 
 # Copy all contents of pacescripts/ into the build directory (not the folder itself)
 file(GLOB PACE_SCRIPTS ${CMAKE_SOURCE_DIR}/pacescripts/*)
-file(GLOB PACE_SCRIPTS ${CMAKE_SOURCE_DIR}/distributions/*.txt)
+file(GLOB DISTRIBUTIONS ${CMAKE_SOURCE_DIR}/distributions/*.txt)
 file(COPY ${PACE_SCRIPTS} DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${DISTRIBUTIONS} DESTINATION ${CMAKE_BINARY_DIR})
 
 # Copy all contents of pacescripts/ into the build directory (not the folder itself)
 file(GLOB GEOMETRY ${CMAKE_SOURCE_DIR}/geometry/*)

@@ -17,7 +17,7 @@ username = "avira7"
 selected_num = 30000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 
 # list of configurations
-config_list = ["onlysolarwind", "onlyphotoemission", "allparticles"]
+config_list = ["onlyphotoemission"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
 
 # define the size of the world
 worldX = 900 # in units of microns

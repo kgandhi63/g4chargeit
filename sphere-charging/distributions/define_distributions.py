@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy.interpolate import interp1d
 
 ## write the electron distribution ## 
 
@@ -53,7 +54,7 @@ print(f"Exported {len(lines)} lines to {output_path}")
 
 # # Range and sampling
 # vmin = 10 #0.0
-# vmax = 30.0
+# vmax = 50.0
 # nPoints = 80
 
 # # Discretize velocity range
@@ -81,15 +82,19 @@ sorted_indices = np.argsort(solar_xdata)
 solar_xdata = solar_xdata[sorted_indices]
 solar_ydata = solar_ydata[sorted_indices]
 
-# Filter data where energy <= 20 eV
-mask = solar_xdata <= 12 # cut off energy is needed, otherwise code takes forever to run
-solar_xdata = solar_xdata[mask]
-solar_ydata = solar_ydata[mask]
+# Define new evenly spaced energy values (e.g., 1 to 5 eV with 0.01 eV steps)
+vmin = 8
+vmax = 100.0
+x_interp = np.linspace(vmin, vmax, 1000)
+# Create interpolation function (linear or cubic)
+interp_func = interp1d(solar_xdata, solar_ydata, kind='linear', bounds_error=False, fill_value=0)
+# Get interpolated y-values
+y_interp = interp_func(x_interp)
 
 # Combine into lines: "energy weight" in scientific notation
 lines = [
     f"{energy:.6e} {weight:.6e}"
-    for energy, weight in zip(solar_xdata*1e-6, solar_ydata)
+    for energy, weight in zip(x_interp*1e-6, y_interp)
 ]
 
 # Export to file
