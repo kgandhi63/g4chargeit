@@ -1,0 +1,81 @@
+# Macro file for 427_stackediteration27_allparticles_from_00_num5000
+#
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+/process/verbose 0
+/process/had/verbose 0
+/process/em/verbose 0
+#
+/random/setSeeds 10008859 10005380
+/random/setSavingFlag 1
+#
+/process/em/fluo true
+/process/em/auger true
+/process/em/augerCascade true
+/process/em/deexcitationIgnoreCut true
+/process/em/Polarisation true
+/process/em/PhotoeffectBelowKShell true
+#
+/process/em/lowestElectronEnergy 0 eV
+/process/em/lowestMuHadEnergy 10 eV
+/process/em/enableSamplingTable 1
+#
+/process/eLoss/CSDARange 1
+/process/eLoss/UseICRU90 1
+/process/eLoss/UseAngularGenerator true
+#
+/sphere/worldX 900 um
+/sphere/worldY 600 um
+/sphere/worldZ 800 um
+/sphere/rootinput/file 400_stackediteration0_allparticles_num5000.root 401_stackediteration1_allparticles_from_00_num5000.root 402_stackediteration2_allparticles_from_00_num5000.root 403_stackediteration3_allparticles_from_00_num5000.root 404_stackediteration4_allparticles_from_00_num5000.root 405_stackediteration5_allparticles_from_00_num5000.root 406_stackediteration6_allparticles_from_00_num5000.root 407_stackediteration7_allparticles_from_00_num5000.root 408_stackediteration8_allparticles_from_00_num5000.root 409_stackediteration9_allparticles_from_00_num5000.root 410_stackediteration10_allparticles_from_00_num5000.root 411_stackediteration11_allparticles_from_00_num5000.root 412_stackediteration12_allparticles_from_00_num5000.root 413_stackediteration13_allparticles_from_00_num5000.root 414_stackediteration14_allparticles_from_00_num5000.root 415_stackediteration15_allparticles_from_00_num5000.root 416_stackediteration16_allparticles_from_00_num5000.root 417_stackediteration17_allparticles_from_00_num5000.root 418_stackediteration18_allparticles_from_00_num5000.root 419_stackediteration19_allparticles_from_00_num5000.root 420_stackediteration20_allparticles_from_00_num5000.root 421_stackediteration21_allparticles_from_00_num5000.root 422_stackediteration22_allparticles_from_00_num5000.root 423_stackediteration23_allparticles_from_00_num5000.root 424_stackediteration24_allparticles_from_00_num5000.root 425_stackediteration25_allparticles_from_00_num5000.root 426_stackediteration26_allparticles_from_00_num5000.root
+/sphere/filename root/427_stackediteration27_allparticles_from_00_num5000.root
+/sphere/cadinput/file stacked_spheres_frompython.stl
+/sphere/epsilon 4
+/sphere/PBC true
+#
+/run/initialize
+#
+/gps/particle proton
+/gps/ene/type Mono
+/gps/energy 1 keV
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 450.0 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre -224.99999999999997 0 600 um
+/gps/direction 0.7071067811865475 0 -0.7071067811865475 
+#
+/gps/source/add 1
+/gps/particle e-
+/gps/source/intensity 5
+/gps/ene/type Arb
+/gps/hist/type arb
+/gps/ene/diffspec true
+/gps/hist/file electron_distribution.txt
+/gps/hist/inter Lin
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 450.0 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre 0 0 600 um
+/gps/ang/type iso
+#
+/gps/source/add 2
+/gps/source/intensity 20 
+/gps/particle gamma
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 450.0 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre -224.99999999999997 0 600 um
+/gps/direction 0.7071067811865475 0 -0.7071067811865475 
+/gps/ene/type Arb
+/gps/hist/type arb
+/gps/ene/diffspec true
+/gps/hist/file photon_distribution.txt
+/gps/hist/inter Lin
+#
+/run/printProgress 100
+/run/beamOn 5000

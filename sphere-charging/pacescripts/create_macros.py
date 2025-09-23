@@ -14,10 +14,12 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-selected_num = 30000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+selected_num = 5000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+iterationNUM = 200 # number of iterations to perform
+# be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
-config_list = ["onlyphotoemission"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
+config_list = ["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
 
 # define the size of the world
 worldX = 900 # in units of microns
@@ -92,7 +94,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('#\n')
         f.write('/gps/source/add 1\n')
         f.write("/gps/particle e-\n")
-        f.write("/gps/source/intensity 3.55\n")
+        f.write("/gps/source/intensity 5\n")
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
         f.write("/gps/ene/diffspec true\n")
@@ -136,7 +138,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('#\n')
         f.write('/gps/source/add 1\n')
         f.write("/gps/particle e-\n")
-        f.write("/gps/source/intensity 3.55\n")
+        f.write("/gps/source/intensity 5\n")
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
         f.write("/gps/ene/diffspec true\n")
@@ -150,7 +152,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write("/gps/ang/type iso\n")
         f.write('#\n')
         f.write('/gps/source/add 2\n')
-        f.write('/gps/source/intensity 100 \n') # trial and error to determine this intensity based on desired bulk concentration
+        f.write('/gps/source/intensity 20 \n') # trial and error to determine this intensity based on desired bulk concentration
         f.write('/gps/particle gamma\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
@@ -176,7 +178,7 @@ i = 0
 
 for optionIN in config_list:
 
-    for incrementIN in range(12):
+    for incrementIN in range(iterationNUM):
 
         if incrementIN == 0:
             # Iteration 0 with selected_num

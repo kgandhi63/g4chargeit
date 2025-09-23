@@ -461,11 +461,12 @@ def calculate_stats(df):
     # --- Print outputs ---
     if len(incident_gamma) > 0:
 
-        print(f"Photoelectric yield (e⁻ stopped in volume/ γ): {photoelectric_yield:.4f} "
+        print(f"Photoelectric yield (holes/ γ): {photoelectric_yield:.4f} "
             f"({len(gamma_initial_leading_e_creation)} / {len(incident_gamma)})")
+        print(f"e- stopped in material, from photoelectric effect: {len(volume_e_event)}")
         print(f"Electrons ejected, from photoelectric effect: {len(gamma_initial_leading_to_e_ejection)}\n")
 
-        return gamma_initial_leading_e_creation, gamma_initial_leading_to_e_ejection
+        return gamma_initial_leading_e_creation, gamma_initial_leading_to_e_ejection, volume_e_event
     
     if len(protons_incident) > 0:
         print(f"Protons captured in material: {protons_capture_fraction:.2%} "

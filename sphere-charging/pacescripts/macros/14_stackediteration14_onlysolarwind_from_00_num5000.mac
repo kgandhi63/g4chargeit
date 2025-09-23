@@ -1,0 +1,67 @@
+# Macro file for 14_stackediteration14_onlysolarwind_from_00_num5000
+#
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+/process/verbose 0
+/process/had/verbose 0
+/process/em/verbose 0
+#
+/random/setSeeds 10008859 10005380
+/random/setSavingFlag 1
+#
+/process/em/fluo true
+/process/em/auger true
+/process/em/augerCascade true
+/process/em/deexcitationIgnoreCut true
+/process/em/Polarisation true
+/process/em/PhotoeffectBelowKShell true
+#
+/process/em/lowestElectronEnergy 0 eV
+/process/em/lowestMuHadEnergy 10 eV
+/process/em/enableSamplingTable 1
+#
+/process/eLoss/CSDARange 1
+/process/eLoss/UseICRU90 1
+/process/eLoss/UseAngularGenerator true
+#
+/sphere/worldX 900 um
+/sphere/worldY 600 um
+/sphere/worldZ 800 um
+/sphere/rootinput/file 00_stackediteration0_onlysolarwind_num5000.root 01_stackediteration1_onlysolarwind_from_00_num5000.root 02_stackediteration2_onlysolarwind_from_00_num5000.root 03_stackediteration3_onlysolarwind_from_00_num5000.root 04_stackediteration4_onlysolarwind_from_00_num5000.root 05_stackediteration5_onlysolarwind_from_00_num5000.root 06_stackediteration6_onlysolarwind_from_00_num5000.root 07_stackediteration7_onlysolarwind_from_00_num5000.root 08_stackediteration8_onlysolarwind_from_00_num5000.root 09_stackediteration9_onlysolarwind_from_00_num5000.root 10_stackediteration10_onlysolarwind_from_00_num5000.root 11_stackediteration11_onlysolarwind_from_00_num5000.root 12_stackediteration12_onlysolarwind_from_00_num5000.root 13_stackediteration13_onlysolarwind_from_00_num5000.root
+/sphere/filename root/14_stackediteration14_onlysolarwind_from_00_num5000.root
+/sphere/cadinput/file stacked_spheres_frompython.stl
+/sphere/epsilon 4
+/sphere/PBC true
+#
+/run/initialize
+#
+/gps/particle proton
+/gps/ene/type Mono
+/gps/energy 1 keV
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 450.0 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre -224.99999999999997 0 600 um
+/gps/direction 0.7071067811865475 0 -0.7071067811865475 
+#
+/gps/source/add 1
+/gps/particle e-
+/gps/source/intensity 5
+/gps/ene/type Arb
+/gps/hist/type arb
+/gps/ene/diffspec true
+/gps/hist/file electron_distribution.txt
+/gps/hist/inter Lin
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 450.0 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre 0 0 600 um
+/gps/ang/type iso
+#
+#
+/run/printProgress 100
+/run/beamOn 5000
