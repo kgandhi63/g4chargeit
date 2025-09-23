@@ -459,13 +459,14 @@ def calculate_stats(df):
     # ].drop_duplicates(subset="Event_Number", keep="last")
 
     # --- Print outputs ---
-    if len(gamma_initial_leading_e_creation) > 0:
+    if len(incident_gamma) > 0:
 
         print(f"Photoelectric yield (e⁻ stopped in volume/ γ): {photoelectric_yield:.4f} "
             f"({len(gamma_initial_leading_e_creation)} / {len(incident_gamma)})")
         print(f"Electrons ejected, from photoelectric effect: {len(gamma_initial_leading_to_e_ejection)}\n")
 
         return gamma_initial_leading_e_creation, gamma_initial_leading_to_e_ejection
+    
     if len(protons_incident) > 0:
         print(f"Protons captured in material: {protons_capture_fraction:.2%} "
             f"({len(protons_inside)} / {len(protons_incident)})")

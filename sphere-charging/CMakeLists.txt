@@ -58,10 +58,7 @@ target_link_libraries(charging_sphere ${ROOT_LIBRARIES})
 set(charging_scripts
     macro.mac
     vis.mac
-    electron_distribution.txt
-    photon_distribution.txt
   )
-
 
 foreach(_script ${charging_scripts})
   configure_file(
@@ -73,6 +70,7 @@ endforeach()
 
 # Copy all contents of pacescripts/ into the build directory (not the folder itself)
 file(GLOB PACE_SCRIPTS ${CMAKE_SOURCE_DIR}/pacescripts/*)
+file(GLOB PACE_SCRIPTS ${CMAKE_SOURCE_DIR}/distributions/*.txt)
 file(COPY ${PACE_SCRIPTS} DESTINATION ${CMAKE_BINARY_DIR})
 
 # Copy all contents of pacescripts/ into the build directory (not the folder itself)
