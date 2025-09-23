@@ -250,6 +250,7 @@ if (!RootInput_.empty()) {
         // Branch variables
         int event_number;
         std::vector<double>* post_step_position = nullptr;
+        std::vector<double>* pre_step_position = nullptr;
         Char_t volume_name_post[100];
         double kinetic_energy_post_mev;
         double parent_id;
@@ -258,6 +259,7 @@ if (!RootInput_.empty()) {
         // Set branch addresses
         tree->SetBranchAddress("Event_Number", &event_number);
         tree->SetBranchAddress("Post_Step_Position_mm", &post_step_position);
+        tree->SetBranchAddress("Pre_Step_Position_mm", &pre_step_position);
         tree->SetBranchAddress("Volume_Name_Post", &volume_name_post);
         tree->SetBranchAddress("Parent_ID", &parent_id);
         tree->SetBranchAddress("Kinetic_Energy_Post_MeV", &kinetic_energy_post_mev);
@@ -273,18 +275,19 @@ if (!RootInput_.empty()) {
         Long64_t nEntries = tree->GetEntries();
         for (Long64_t i = 0; i < nEntries; i++) {
             tree->GetEntry(i);
-            if (std::string(volume_name_post) != target_volume) continue;
             if (!post_step_position || post_step_position->size() < 3) continue;
+            if (!pre_step_position || pre_step_position->size() < 3) continue;
+
 
             std::string ptype = particle_type;
 
             // Track photon stops (photon reaches zero kinetic energy)
-            if (ptype == "gamma" && kinetic_energy_post_mev == 0.0) {
+            if (ptype == "gamma" && kinetic_energy_post_mev == 0.0 && std::string(volume_name_post) == target_volume) {
                 photonStops.insert(event_number);
             }
 
             // Stopped electrons
-            if (ptype == "e-" && kinetic_energy_post_mev == 0.0) {
+            if (ptype == "e-" && kinetic_energy_post_mev == 0.0 && std::string(volume_name_post) == target_volume) {
                 G4ThreeVector pos((*post_step_position)[0] * mm,
                                   (*post_step_position)[1] * mm,
                                   (*post_step_position)[2] * mm);
@@ -292,7 +295,7 @@ if (!RootInput_.empty()) {
             }
 
             // Stopped protons
-            if (ptype == "proton" && kinetic_energy_post_mev == 0.0) {
+            if (ptype == "proton" && kinetic_energy_post_mev == 0.0 && std::string(volume_name_post) == target_volume) {
                 G4ThreeVector pos((*post_step_position)[0] * mm,
                                   (*post_step_position)[1] * mm,
                                   (*post_step_position)[2] * mm);
@@ -302,9 +305,9 @@ if (!RootInput_.empty()) {
             // Hole = first secondary electron (parent_id == 1) in event where photon stopped
             if (ptype == "e-" && parent_id == 1 && photonStops.count(event_number)) {
                 if (holeRecordedEvents.insert(event_number).second) {
-                    G4ThreeVector pos((*post_step_position)[0] * mm,
-                                      (*post_step_position)[1] * mm,
-                                      (*post_step_position)[2] * mm);
+                    G4ThreeVector pos((*pre_step_position)[0] * mm,
+                                      (*pre_step_position)[1] * mm,
+                                      (*pre_step_position)[2] * mm);
                     fHolePositions.push_back(pos);
                 }
             }
