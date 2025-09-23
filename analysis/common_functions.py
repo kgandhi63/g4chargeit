@@ -411,26 +411,28 @@ def plot_potential_on_sphere(df, vmin=-0.07, vmax=0, iteration="iteration0"):
     return fig, ax 
 
 def calculate_stats(df):
-    # --- Photoelectric Yield ---
-    gamma_incident = df[
-        (df["Particle_Type"] == "gamma") & (df["Parent_ID"] == 0.0)
-    ].drop_duplicates(subset="Event_Number", keep="first")
 
-    photelec_generated = df[
-        (df["Particle_Type"] == "e-") & (df["Parent_ID"] == 1.0)
-    ].drop_duplicates(subset="Event_Number", keep="last")
+    # --- Photoemission Case ---
 
-    photelec_holes = df[
-        (df["Particle_Type"] == "e-") & (df["Parent_ID"] == 1.0)
-    ].drop_duplicates(subset="Event_Number", keep="first")
+    incident_gamma = df[df["Particle_Type"] == "gamma"].drop_duplicates(subset="Event_Number", keep="first")
 
-    photelec_generated = photelec_generated[
-        photelec_generated["Event_Number"].isin(gamma_incident["Event_Number"])
-    ]
+    # get dataframe of the last e- event within the sensitive detector
+    last_e_event = df[(df["Particle_Type"] == "e-")].drop_duplicates(subset="Event_Number", keep="last")
+    # get new dataframe of all e- that left the world
+    world_e_energy=last_e_event[(last_e_event["Volume_Name_Post"]=="World") | (last_e_event["Volume_Name_Pre"]=="World")]
+    volume_e_event=last_e_event[(last_e_event["Volume_Name_Post"]=="G4_SILICON_DIOXIDE")]
 
-    photoelectric_yield = len(photelec_generated) / len(gamma_incident) if len(gamma_incident) > 0 else 0
+    # get all the initial gamma energy that leads to an e- escaping
+    matching_event_numbers = np.intersect1d(df["Event_Number"], world_e_energy["Event_Number"])
+    gamma_initial_leading_to_e_ejection = df[df["Event_Number"].isin(matching_event_numbers)].drop_duplicates(subset="Event_Number", keep="first")
 
-    # --- Protons ---
+    #  get all the initial gamma energy that leds to the creation of e-
+    matching_event_numbers = np.intersect1d(df["Event_Number"], last_e_event["Event_Number"])
+    gamma_initial_leading_e_creation = df[df["Event_Number"].isin(matching_event_numbers)].drop_duplicates(subset="Event_Number", keep="first")
+
+    photoelectric_yield = len(gamma_initial_leading_e_creation) / len(incident_gamma) if len(incident_gamma) > 0 else 0
+
+    # --- Solar Wind Case ---
 
     protons_incident = df[(df["Particle_Type"] == "proton") & (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="first")
 
@@ -438,8 +440,6 @@ def calculate_stats(df):
     protons_inside = last_protons[(last_protons["Volume_Name_Post"] == "G4_SILICON_DIOXIDE")]
 
     protons_capture_fraction = len(protons_inside) / len(protons_incident) if len(protons_incident) > 0 else 0
-
-    # --- Electrons ---
 
     electrons_incident = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="first")
 
@@ -453,19 +453,23 @@ def calculate_stats(df):
     electrons_capture_fraction = len(electrons_inside) / len(electrons_incident) if len(electrons_incident) > 0 else 0
 
     # --- All electrons in SiO2, regardless of origin ---
-    all_electrons_inside = df[
-        (df["Volume_Name_Post"] == "G4_SILICON_DIOXIDE") &
-        (df["Particle_Type"] == "e-")
-    ].drop_duplicates(subset="Event_Number", keep="last")
+    # all_electrons_inside = df[
+    #     (df["Volume_Name_Post"] == "G4_SILICON_DIOXIDE") &
+    #     (df["Particle_Type"] == "e-")
+    # ].drop_duplicates(subset="Event_Number", keep="last")
 
     # --- Print outputs ---
-    print(f"Photoelectric yield (e⁻ / γ): {photoelectric_yield:.4f} "
-          f"({len(photelec_generated)} / {len(gamma_incident)})")
+    if len(gamma_initial_leading_e_creation) > 0:
+
+        print(f"Photoelectric yield (e⁻ stopped in volume/ γ): {photoelectric_yield:.4f} "
+            f"({len(gamma_initial_leading_e_creation)} / {len(incident_gamma)})")
+        print(f"Electrons ejected, from photoelectric effect: {len(gamma_initial_leading_to_e_ejection)}\n")
+
+        return gamma_initial_leading_e_creation, gamma_initial_leading_to_e_ejection
     if len(protons_incident) > 0:
         print(f"Protons captured in material: {protons_capture_fraction:.2%} "
             f"({len(protons_inside)} / {len(protons_incident)})")
-    print(f"Electrons captured in material: {electrons_capture_fraction:.2%} "
-          f"({len(electrons_inside)} / {len(electrons_incident)})")
-    print(f"Electrons ejected in material: {len(electrons_ejected)}\n")
+        print(f"Electrons captured in material: {electrons_capture_fraction:.2%} "
+            f"({len(electrons_inside)} / {len(electrons_incident)})")
 
-    return protons_inside, electrons_inside, photelec_holes #all_electrons_inside, photelec_holes, electrons_ejected, 
+        return protons_inside, electrons_inside 
