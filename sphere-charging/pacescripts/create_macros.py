@@ -14,22 +14,28 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-selected_num = 5000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-iterationNUM = 200 # number of iterations to perform
+eventnumbers_onlysolarwind = 500 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlyphotoemission = 3000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_allparticles = 5000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+iterationNUM = 101 # number of iterations to perform
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
 config_list = ["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
 
 # define the size of the world
-worldX = 900 # in units of microns
-worldY = 600 # in units of microns
-worldZ = 800 # in units of microns
+CAD_dimensions = (900,600,719.615) # in units of microns
+particle_position = 100 # place all particles 200 microns above the geometry
+bufferXY = 80 # in units of microns
+worldX = CAD_dimensions[0] + 2*bufferXY # in units of microns -- account for angle of beam
+worldY = CAD_dimensions[1] + 2*bufferXY # in units of microns
+worldZ = CAD_dimensions[2] + 2*particle_position # in units of microns
 
 # calculate offset for SW ions at 45 degrees
-particle_position = 200 # place all particles 200 microns above the geometry
-ions_offset = np.tan(45*np.pi/180)*worldX/4
-ion_rotation = np.sin(45*np.pi/180)
+Z_position = CAD_dimensions[2]/2 + particle_position
+XY_offset = Z_position - CAD_dimensions[2]/2 + bufferXY
+rotation = np.sin(45*np.pi/180)
+worldX += XY_offset # increase to account for offset in X direction
 
 # Output files tracking
 output_files = []
@@ -70,6 +76,8 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/sphere/worldX {worldX} um\n')
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
+    f.write('#\n')
+    f.write('/run/initialize\n')
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
     f.write(f'/sphere/filename root/{increment_filename}.root\n')
@@ -77,7 +85,6 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     #f.write('/sphere/cadinput/scale 0.001\n')
     f.write('/sphere/epsilon 4\n') 
     f.write('/sphere/PBC true\n')
-    f.write('#\n')
     f.write('/run/initialize\n')
     f.write('#\n')
     # only include the SW plasma (ions and electrons)
@@ -87,10 +94,10 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/energy 1 keV\n') 
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
-        f.write(f'/gps/pos/halfx {worldX/2} um\n')
-        f.write(f'/gps/pos/halfy {worldY/2} um\n')
-        f.write(f'/gps/pos/centre -{ions_offset} 0 {worldZ-particle_position} um\n')
-        f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
+        f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')
+        f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2} um\n')
+        f.write(f'/gps/pos/centre {XY_offset} 0 {Z_position} um\n')
+        f.write(f'/gps/direction -{rotation} 0 -{rotation} \n')
         f.write('#\n')
         f.write('/gps/source/add 1\n')
         f.write("/gps/particle e-\n")
@@ -102,9 +109,9 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write("/gps/hist/inter Lin\n")
         f.write("/gps/pos/type Plane\n")
         f.write("/gps/pos/shape Square\n")
-        f.write(f'/gps/pos/halfx {worldX/2} um\n')
-        f.write(f'/gps/pos/halfy {worldY/2} um\n')
-        f.write(f"/gps/pos/centre 0 0 {worldZ-particle_position} um\n")
+        f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')
+        f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2} um\n')
+        f.write(f"/gps/pos/centre 0 0 {Z_position} um\n")
         f.write("/gps/ang/type iso\n")
         f.write('#\n') 
     # include only the photons   
@@ -112,10 +119,10 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/particle gamma\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
-        f.write(f'/gps/pos/halfx {worldX/2} um\n')
-        f.write(f'/gps/pos/halfy {worldY/2} um\n')
-        f.write(f'/gps/pos/centre -{ions_offset} 0 {worldZ-particle_position} um\n')
-        f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
+        f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')
+        f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2} um\n')
+        f.write(f'/gps/pos/centre {XY_offset} 0 {Z_position} um\n')
+        f.write(f'/gps/direction -{rotation} 0 -{rotation} \n')
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
         f.write("/gps/ene/diffspec true\n")
@@ -131,10 +138,10 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/energy 1 keV\n') 
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
-        f.write(f'/gps/pos/halfx {worldX/2} um\n')
-        f.write(f'/gps/pos/halfy {worldY/2} um\n')
-        f.write(f'/gps/pos/centre -{ions_offset} 0 {worldZ-particle_position} um\n')
-        f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
+        f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')
+        f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2} um\n')
+        f.write(f'/gps/pos/centre {XY_offset} 0 {Z_position} um\n')
+        f.write(f'/gps/direction -{rotation} 0 -{rotation} \n')
         f.write('#\n')
         f.write('/gps/source/add 1\n')
         f.write("/gps/particle e-\n")
@@ -146,9 +153,9 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write("/gps/hist/inter Lin\n")
         f.write("/gps/pos/type Plane\n")
         f.write("/gps/pos/shape Square\n")
-        f.write(f'/gps/pos/halfx {worldX/2} um\n')
-        f.write(f'/gps/pos/halfy {worldY/2} um\n')
-        f.write(f"/gps/pos/centre 0 0 {worldZ-particle_position} um\n")
+        f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')
+        f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2} um\n')
+        f.write(f"/gps/pos/centre 0 0 {Z_position} um\n")
         f.write("/gps/ang/type iso\n")
         f.write('#\n')
         f.write('/gps/source/add 2\n')
@@ -156,10 +163,10 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('/gps/particle gamma\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
-        f.write(f'/gps/pos/halfx {worldX/2} um\n')
-        f.write(f'/gps/pos/halfy {worldY/2} um\n')
-        f.write(f'/gps/pos/centre -{ions_offset} 0 {worldZ-particle_position} um\n')
-        f.write(f'/gps/direction {ion_rotation} 0 -{ion_rotation} \n')
+        f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')
+        f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2} um\n')
+        f.write(f'/gps/pos/centre {XY_offset} 0 {Z_position} um\n')
+        f.write(f'/gps/direction -{rotation} 0 -{rotation} \n')
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
         f.write("/gps/ene/diffspec true\n")
@@ -178,14 +185,16 @@ i = 0
 
 for optionIN in config_list:
 
+    select_num = vars()['eventnumbers_' + optionIN] # selected_numSW, selected_numPE, selected_numall
+
     for incrementIN in range(iterationNUM):
 
         if incrementIN == 0:
             # Iteration 0 with selected_num
-            increment_filename = f"{i:02d}_stackediteration0_{optionIN}_num{selected_num}"
+            increment_filename = f"{i:03d}_stackediteration0_{optionIN}_num{select_num}"
             with open(f"macros/{increment_filename}.mac", 'w') as f:
-                write_macro(f, increment_filename, selected_num)
-            output_files.append((increment_filename + ".root", selected_num, incrementIN, optionIN))
+                write_macro(f, increment_filename, select_num)
+            output_files.append((increment_filename + ".root", select_num, incrementIN, optionIN))
             i += 1
 
         elif incrementIN > 0:
@@ -196,11 +205,21 @@ for optionIN in config_list:
             input_list = ' '.join(filtered)
             #print(input_list)
     
-            increment_filename = f"{i:02d}_stackediteration{incrementIN}_{optionIN}_from_00_num{selected_num}"
+            increment_filename = f"{i:03d}_stackediteration{incrementIN}_{optionIN}_from_00_num{select_num}"
             with open(f"macros/{increment_filename}.mac", 'w') as f:
-                write_macro(f, increment_filename, selected_num, input_files=[input_list])
-            output_files.append((increment_filename + ".root", selected_num, incrementIN, optionIN))
+                write_macro(f, increment_filename, select_num, input_files=[input_list])
+            output_files.append((increment_filename + ".root", select_num, incrementIN, optionIN))
             i += 1
+
+
+for optionIN in config_list:
+
+    select_num, i = 1000000, 0
+
+    increment_filename = f"{i:03d}_stackediteration0_{optionIN}_num{select_num}"
+    with open(f"macros/{increment_filename}.mac", 'w') as f:
+        write_macro(f, increment_filename, select_num)
+    output_files.append((increment_filename + ".root", select_num, 0, optionIN))
 
 #############################################################
 
@@ -278,7 +297,7 @@ for configIN in config_list:
                 )
                 #iteration_commands[iteration_num].append(cmd)
 
-                batch_filename = f"{i:02d}_submit_iteration{iteration_num}_for{configIN}.sh"
+                batch_filename = f"{i:03d}_submit_iteration{iteration_num}_for{configIN}.sh"
                 batch_path = os.path.join(batch_dir, batch_filename)
                 with open(batch_path, "w") as f:
                     f.write(batch_script)

@@ -29,6 +29,8 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/g4pbc/lib/cmake/g4pbc/g4pbcTargets.cmake"
   "/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/CMakeLists.txt"
   "/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/macro.mac"
+  "/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/testphotons.mac"
+  "/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/testsolarwind.mac"
   "/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/sphere-charging/vis.mac"
   "/storage/pace-apps/manual/packages/root/6.30.04/gcc-12.3.0/cmake/modules/FindVdt.cmake"
   "/storage/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-12.3.0/cmake-3.30.2-yzfwrncmyizuujyat2tsx3j7gkcfheib/share/cmake-3.30/Modules/CMakeCInformation.cmake"
@@ -132,6 +134,8 @@ set(CMAKE_MAKEFILE_OUTPUTS
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
   "macro.mac"
+  "testsolarwind.mac"
+  "testphotons.mac"
   "vis.mac"
   "CMakeFiles/CMakeDirectoryInformation.cmake"
   )

@@ -127,7 +127,7 @@ def plot_face_illumination(incident_particles, convex_combined, vmin=0, vmax=1):
 
     return convex_combined, face_illum
 
-def plot_surface_potential_electrons_protons(electrons, protons, convex_combined, vmin=-0.01,vmax=0.01):
+def plot_surface_potential_fornegativepositive_charge(electrons, protons, convex_combined, vmin=-0.01,vmax=0.01):
 
     point = np.array(electrons["Pre_Step_Position_mm"].tolist())  # Your point coordinate
     _, distance_e, face_id_e = convex_combined.nearest.on_surface(point)
@@ -194,7 +194,53 @@ def plot_surface_potential_electrons_protons(electrons, protons, convex_combined
 
     return convex_combined, face_potentials
 
-def plot_surface_potential_electrons_or_protons(electrons, convex_combined, vmin=-0.01,vmax=0.01, q = -1.602e-19 ):
+def plot_surface_potential_allparticle_case(gammas, photoelectrons, protons, electrons, convex_combined, vmin=-0.01, vmax=0.01):
+    # --- Combine negative charges: electrons + photoelectrons ---
+    neg_particles = pd.concat([electrons, photoelectrons], ignore_index=True)
+    neg_points = np.array(neg_particles["Pre_Step_Position_mm"].tolist())
+    _, distance_neg, face_id_neg = convex_combined.nearest.on_surface(neg_points)
+
+    # Compute potential for negative charges
+    q_neg = -1.602e-19  # Coulombs
+    potentials_neg = 1 / (4 * np.pi * epsilon_0) * q_neg / (np.abs(distance_neg - 0.1) * 0.001 + 1e-12) * 1000  # mV
+
+    # --- Combine positive charges: protons + gammas ---
+    pos_particles = pd.concat([protons, gammas], ignore_index=True)
+    pos_points = np.array(pos_particles["Pre_Step_Position_mm"].tolist())
+    _, distance_pos, face_id_pos = convex_combined.nearest.on_surface(pos_points)
+
+    # Compute potential for positive charges
+    q_pos = +1.602e-19  # Coulombs
+    potentials_pos = 1 / (4 * np.pi * epsilon_0) * q_pos / (np.abs(distance_pos - 0.1) * 0.001 + 1e-12) * 1000  # mV
+
+    # --- Aggregate potentials per face (negative) ---
+    unique_faces_neg, inverse_indices_neg = np.unique(face_id_neg, return_inverse=True)
+    potentials_sum_neg = np.zeros(len(unique_faces_neg))
+    np.add.at(potentials_sum_neg, inverse_indices_neg, potentials_neg)
+
+    # --- Aggregate potentials per face (positive) ---
+    unique_faces_pos, inverse_indices_pos = np.unique(face_id_pos, return_inverse=True)
+    potentials_sum_pos = np.zeros(len(unique_faces_pos))
+    np.add.at(potentials_sum_pos, inverse_indices_pos, potentials_pos)
+
+    # --- Combine into face potentials array ---
+    face_potentials = np.zeros(len(convex_combined.faces))
+    face_potentials[unique_faces_neg] += potentials_sum_neg
+    face_potentials[unique_faces_pos] += potentials_sum_pos
+
+    # --- Visualization ---
+    colors_rgba = np.zeros((len(face_potentials), 4), dtype=np.uint8)
+    cmap = plt.cm.seismic
+    norm_func = Normalize(vmin=vmin, vmax=vmax)
+    colors_rgb = cmap(norm_func(face_potentials))[:, :3]
+    colors_rgba[:, :3] = (colors_rgb * 255).astype(np.uint8)
+
+    convex_combined.visual.face_colors = colors_rgba
+
+    return convex_combined, face_potentials
+
+
+def plot_surface_potential_one_particle_type(electrons, convex_combined, vmin=-0.01,vmax=0.01, q = -1.602e-19 ):
 
     point = np.array(electrons["Pre_Step_Position_mm"].tolist())  # Your point coordinate
     _, distance_e, face_id_e = convex_combined.nearest.on_surface(point)
@@ -410,7 +456,7 @@ def plot_potential_on_sphere(df, vmin=-0.07, vmax=0, iteration="iteration0"):
 
     return fig, ax 
 
-def calculate_stats(df):
+def calculate_stats(df, config="photoemission"):
 
     # --- Photoemission Case ---
 
@@ -446,20 +492,10 @@ def calculate_stats(df):
     last_electrons = df[(df["Particle_Type"] == "e-")].drop_duplicates(subset="Event_Number", keep="last")
     electrons_inside = last_electrons[(last_electrons["Volume_Name_Post"] == "G4_SILICON_DIOXIDE")]
 
-    electrons_ejected = df[(df["Particle_Type"] == "e-") & \
-                           (df["Volume_Name_Post"] == "World")].\
-                            drop_duplicates(subset="Event_Number", keep="last")
-
     electrons_capture_fraction = len(electrons_inside) / len(electrons_incident) if len(electrons_incident) > 0 else 0
 
-    # --- All electrons in SiO2, regardless of origin ---
-    # all_electrons_inside = df[
-    #     (df["Volume_Name_Post"] == "G4_SILICON_DIOXIDE") &
-    #     (df["Particle_Type"] == "e-")
-    # ].drop_duplicates(subset="Event_Number", keep="last")
-
     # --- Print outputs ---
-    if len(incident_gamma) > 0:
+    if "photoemission" in config:
 
         print(f"Photoelectric yield (holes/ γ): {photoelectric_yield:.4f} "
             f"({len(gamma_initial_leading_e_creation)} / {len(incident_gamma)})")
@@ -468,10 +504,23 @@ def calculate_stats(df):
 
         return gamma_initial_leading_e_creation, gamma_initial_leading_to_e_ejection, volume_e_event
     
-    if len(protons_incident) > 0:
-        print(f"Protons captured in material: {protons_capture_fraction:.2%} "
+    elif "solarwind" in config:
+        print(f"Incident H+ stopped in material: {protons_capture_fraction:.2%} "
             f"({len(protons_inside)} / {len(protons_incident)})")
-        print(f"Electrons captured in material: {electrons_capture_fraction:.2%} "
-            f"({len(electrons_inside)} / {len(electrons_incident)})")
+        print(f"Incident e- stopped in material: {electrons_capture_fraction:.2%} "
+            f"({len(electrons_inside)} / {len(electrons_incident)})\n")
 
         return protons_inside, electrons_inside 
+
+    elif "allparticles" in config:
+
+        print(f"Photoelectric yield (holes/ γ): {photoelectric_yield:.4f} "
+            f"({len(gamma_initial_leading_e_creation)} / {len(incident_gamma)})")
+        print(f"e- stopped in material, from photoelectric effect: {len(volume_e_event)}")
+        print(f"Electrons ejected, from photoelectric effect: {len(gamma_initial_leading_to_e_ejection)}")
+        print(f"Incident H+ stopped in material: {protons_capture_fraction:.2%} "
+            f"({len(protons_inside)} / {len(protons_incident)})")
+        print(f"Incident e- stopped in material: {electrons_capture_fraction:.2%} "
+            f"({len(electrons_inside)} / {len(electrons_incident)})\n")
+
+        return gamma_initial_leading_e_creation, volume_e_event, protons_inside, electrons_inside 

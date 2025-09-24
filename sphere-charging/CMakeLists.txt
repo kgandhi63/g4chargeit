@@ -57,6 +57,8 @@ target_link_libraries(charging_sphere ${ROOT_LIBRARIES})
 
 set(charging_scripts
     macro.mac
+    testsolarwind.mac
+    testphotons.mac
     vis.mac
   )
 
