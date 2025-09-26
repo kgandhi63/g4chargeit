@@ -65,7 +65,7 @@
 #include "G4Sphere.hh"
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
-#include "SumRadialField.hh"
+#include "SumRadialFieldMap.hh"
 
 #include "G4GeometryManager.hh"
 #include "G4PhysicalVolumeStore.hh"
@@ -346,7 +346,6 @@ new G4PVPlacement(0,                          	//no rotation
 return physWorld;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 void DetectorConstruction::ConstructSDandField() {
   static auto sdManager = SDManager::GetInstance();
   sdManager->CreateSD();
@@ -360,25 +359,36 @@ void DetectorConstruction::ConstructSDandField() {
   // Electrons (negative charge)
   G4double eCharge = -1.602e-19 * CLHEP::coulomb;
   for (const auto& pos : fElectronPositions) {
-      allPositions.push_back(pos);
-      allCharges.push_back(eCharge);
+    allPositions.push_back(pos);
+    allCharges.push_back(eCharge);
   }
   // Protons (positive charge)
   G4double pCharge = +1.602e-19 * CLHEP::coulomb;
   for (const auto& pos : fProtonPositions) {
-      allPositions.push_back(pos);
-      allCharges.push_back(pCharge);
+    allPositions.push_back(pos);
+    allCharges.push_back(pCharge);
   }
-
+  // Holes (positive charge)
   G4double hCharge = +1.602e-19 * CLHEP::coulomb;
   for (const auto& pos : fHolePositions) {
-      allPositions.push_back(pos);
-      allCharges.push_back(hCharge);
+    allPositions.push_back(pos);
+    allCharges.push_back(hCharge);
   }
-  G4cout << "Starting Field Calculations" << G4endl;
-  // Create the field with both electrons and protons
-  auto sumField = new SumRadialField(allPositions, allCharges);
-  G4cout << "Ending Field Calculations" << G4endl;
+
+  G4cout << "Starting Field Map Precomputation" << G4endl;
+
+  // Define grid: 800 µm cube centered at origin, 2 µm step
+  G4ThreeVector min(-400*um, -400*um, -400*um);
+  G4ThreeVector max( 400*um,  400*um,  400*um);
+  G4ThreeVector step(2*um, 2*um, 2*um);
+
+  // Create the precomputed field map
+  auto sumField = new SumRadialFieldMap(allPositions, allCharges,
+                                        min, max, step,
+                                        SumRadialFieldMap::StorageType::Double);
+
+  G4cout << "Ending Field Map Precomputation" << G4endl;
+
   // Set up the field manager as before
   auto worldFM = new G4FieldManager();
   worldFM->SetDetectorField(sumField);
@@ -395,6 +405,7 @@ void DetectorConstruction::ConstructSDandField() {
 
   logicWorld_->SetFieldManager(worldFM, true);
 
+  // Attach sensitive detector to daughters
   G4int nD = logicWorld_->GetNoDaughters();
   for (G4int i = 0; i < nD; ++i) {
     auto lv = logicWorld_->GetDaughter(i)->GetLogicalVolume();

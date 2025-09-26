@@ -54,10 +54,10 @@ RM = /storage/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-12.3.0/cmake-3.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/g4pbc
+CMAKE_SOURCE_DIR = /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/g4pbc
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc
+CMAKE_BINARY_DIR = /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-g4pbc
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -81,14 +81,14 @@ clean: CMakeFiles/g4pbc.dir/clean
 CMakeFiles/g4pbc.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/g4pbc.dir/build.make CMakeFiles/g4pbc.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/g4pbc.dir/build.make CMakeFiles/g4pbc.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/CMakeFiles --progress-num=1,2,3,4,5 "Built target g4pbc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles --progress-num=1,2,3,4,5 "Built target g4pbc"
 .PHONY : CMakeFiles/g4pbc.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/g4pbc.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/g4pbc.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles 0
 .PHONY : CMakeFiles/g4pbc.dir/rule
 
 # Convenience name for target.

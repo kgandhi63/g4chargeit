@@ -57,10 +57,10 @@ RM = /storage/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-12.3.0/cmake-3.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/g4pbc
+CMAKE_SOURCE_DIR = /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/g4pbc
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc
+CMAKE_BINARY_DIR = /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-g4pbc
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -78,7 +78,7 @@ package/fast: package
 # Special rule for the target package_source
 package_source:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Run CPack packaging tool for source..."
-	/storage/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-12.3.0/cmake-3.30.2-yzfwrncmyizuujyat2tsx3j7gkcfheib/bin/cpack --config ./CPackSourceConfig.cmake /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/CPackSourceConfig.cmake
+	/storage/pace-apps/spack/packages/linux-rhel9-x86_64_v3/gcc-12.3.0/cmake-3.30.2-yzfwrncmyizuujyat2tsx3j7gkcfheib/bin/cpack --config ./CPackSourceConfig.cmake /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CPackSourceConfig.cmake
 .PHONY : package_source
 
 # Special rule for the target package_source
@@ -152,9 +152,9 @@ install/strip/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/CMakeFiles /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-g4pbc//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /storage/home/hcoda1/5/avira7/r-zjiang33-0/geant4_workdir/Grain-Charging-Simulations/build-g4pbc/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /storage/home/hcoda1/1/kgandhi63/r-zjiang33-0/Grain-Charging-Simulations/build-g4pbc/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
