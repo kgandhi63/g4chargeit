@@ -125,13 +125,13 @@ G4LogicalVolumeStore::GetInstance()->Clean();
 G4SolidStore::GetInstance()->Clean();
 
 // Add dielectric Constant
- G4MaterialPropertiesTable* dielectric = new G4MaterialPropertiesTable();
- dielectric->AddConstProperty("Epsilon",  Epsilon_, true);
+G4MaterialPropertiesTable* dielectric = new G4MaterialPropertiesTable();
+dielectric->AddConstProperty("Epsilon",  Epsilon_, true);
 
 
-   // Set Property to SiO2
-  G4Material* SiO2 = G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
-  SiO2->SetMaterialPropertiesTable(dielectric);
+// Set Property to SiO2
+G4Material* SiO2 = G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
+SiO2->SetMaterialPropertiesTable(dielectric);
 
 // Set Property to SiO2
 //G4int ncomponents,natoms; //, abundance;
@@ -172,14 +172,6 @@ G4SolidStore::GetInstance()->Clean();
                         world_mat,           //its material
                         "World");            //its name
 
-  if (PBC_)
-   {
-    G4PeriodicBoundaryBuilder* pbb = new G4PeriodicBoundaryBuilder();
-    logicWorld_ = pbb->Construct(logicWorld_);
-    std::cout << "PBC set to logicWorld" << std::endl;
-   }
-
-
   G4VPhysicalVolume* physWorld = 
     new G4PVPlacement(0,                     //no rotation
                       G4ThreeVector(),       //at (0,0,0)
@@ -190,7 +182,12 @@ G4SolidStore::GetInstance()->Clean();
                       0,                     //copy number
                       checkOverlaps);        //overlaps checking
 
-
+  if (PBC_)
+  {
+    G4PeriodicBoundaryBuilder* pbb = new G4PeriodicBoundaryBuilder();
+    logicWorld_ = pbb->Construct(logicWorld_);
+    std::cout << "PBC set to logicWorld" << std::endl;
+  }
 
 G4VSolid* sphere_solid;
  // Load In CAD Files (Check repo for other input files -KG) // Create Input from global variable
@@ -207,12 +204,11 @@ if (!CADFile_.empty()) {
   // Get the solid
   sphere_solid = sphere_mesh->GetSolid();
 
- }
+}
  else {
   sphere_solid = new G4Sphere("Test", 0., 50*um, 0., 360.*deg, 0., 180.*deg);
   std::cout << "Auto Defaulted To 50 um Sphere." << std::endl;
-  
- }
+}
 
 // Create Electrons
 if (!RootInput_.empty()) {
@@ -329,12 +325,13 @@ G4LogicalVolume*logicSphere= new G4LogicalVolume(sphere_solid, SiO2 , SiO2->GetN
 
 
 new G4PVPlacement(0,                          	//no rotation
-              G4ThreeVector(),     //at (0,0,0)
+              G4ThreeVector(0.03,0,0),     //at (0,0,0)
               logicSphere,                               //its logical volume
               SiO2->GetName(),               //its name
               logicWorld_,                        //its mother volume
               false,                              //no boolean operation
               0);                                 //copy number
+              
 
 //logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
 

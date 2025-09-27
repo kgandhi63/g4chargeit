@@ -14,19 +14,19 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-eventnumbers_onlysolarwind = 5000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-eventnumbers_onlyphotoemission = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlysolarwind = 2000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlyphotoemission = 5000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-iterationNUM = 101 # number of iterations to perform
+iterationNUM = 50 # number of iterations to perform
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
 config_list = ["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
 
 # define the size of the world
-CAD_dimensions = (900,600,719.615) # in units of microns
-particle_position = 50 # place all particles 200 microns above the geometry
-bufferXY = 5 # in units of microns
+CAD_dimensions = (200,600,546.410) # in units of microns
+particle_position = 30 # place all particles 200 microns above the geometry
+bufferXY = 0 # in units of microns
 worldX = CAD_dimensions[0] + 2*bufferXY # in units of microns -- account for angle of beam
 worldY = CAD_dimensions[1] + 2*bufferXY # in units of microns
 worldZ = CAD_dimensions[2] + 2*particle_position # in units of microns
@@ -35,7 +35,7 @@ worldZ = CAD_dimensions[2] + 2*particle_position # in units of microns
 Z_position = CAD_dimensions[2]/2 + particle_position
 XY_offset = Z_position - CAD_dimensions[2]/2 + bufferXY
 rotation = np.sin(45*np.pi/180)
-worldX += XY_offset # increase to account for offset in X direction
+#worldX += XY_offset # increase to account for offset in X direction
 
 # Output files tracking
 output_files = []
@@ -76,7 +76,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/sphere/worldX {worldX} um\n')
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
-    f.write(f'/sphere/fieldMapStep 5 um\n') # step size for field map solver
+    f.write(f'/sphere/fieldMapStep 2 um\n') # step size for field map solver
     f.write('#\n')
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')

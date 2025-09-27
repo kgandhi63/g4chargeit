@@ -1,0 +1,82 @@
+# Macro file for 112_stackediteration12_allparticles_from_00_num10000
+#
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+/process/verbose 0
+/process/had/verbose 0
+/process/em/verbose 0
+#
+/random/setSeeds 10008859 10005380
+/random/setSavingFlag 1
+#
+/process/em/fluo true
+/process/em/auger true
+/process/em/augerCascade true
+/process/em/deexcitationIgnoreCut true
+/process/em/Polarisation true
+/process/em/PhotoeffectBelowKShell true
+#
+/process/em/lowestElectronEnergy 0 eV
+/process/em/lowestMuHadEnergy 10 eV
+/process/em/enableSamplingTable 1
+#
+/process/eLoss/CSDARange 1
+/process/eLoss/UseICRU90 1
+/process/eLoss/UseAngularGenerator true
+#
+/sphere/worldX 200 um
+/sphere/worldY 600 um
+/sphere/worldZ 606.41 um
+/sphere/fieldMapStep 2 um
+#
+/sphere/rootinput/file 100_stackediteration0_allparticles_num10000.root 101_stackediteration1_allparticles_from_00_num10000.root 102_stackediteration2_allparticles_from_00_num10000.root 103_stackediteration3_allparticles_from_00_num10000.root 104_stackediteration4_allparticles_from_00_num10000.root 105_stackediteration5_allparticles_from_00_num10000.root 106_stackediteration6_allparticles_from_00_num10000.root 107_stackediteration7_allparticles_from_00_num10000.root 108_stackediteration8_allparticles_from_00_num10000.root 109_stackediteration9_allparticles_from_00_num10000.root 110_stackediteration10_allparticles_from_00_num10000.root 111_stackediteration11_allparticles_from_00_num10000.root
+/sphere/filename root/112_stackediteration12_allparticles_from_00_num10000.root
+/sphere/cadinput/file stacked_spheres_frompython.stl
+/sphere/epsilon 4
+/sphere/PBC true
+/run/initialize
+#
+/gps/particle proton
+/gps/ene/type Mono
+/gps/energy 1 keV
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 100.0 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre 30.0 0 303.205 um
+/gps/direction -0.7071067811865475 0 -0.7071067811865475 
+#
+/gps/source/add 1
+/gps/particle e-
+/gps/source/intensity 5
+/gps/ene/type Arb
+/gps/hist/type arb
+/gps/ene/diffspec true
+/gps/hist/file electron_distribution.txt
+/gps/hist/inter Lin
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 100.0 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre 0 0 303.205 um
+/gps/ang/type iso
+#
+/gps/source/add 2
+/gps/source/intensity 20 
+/gps/particle gamma
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 100.0 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre 30.0 0 303.205 um
+/gps/direction -0.7071067811865475 0 -0.7071067811865475 
+/gps/ene/type Arb
+/gps/hist/type arb
+/gps/ene/diffspec true
+/gps/hist/file photon_distribution.txt
+/gps/hist/inter Lin
+#
+/run/printProgress 100
+/run/beamOn 10000
