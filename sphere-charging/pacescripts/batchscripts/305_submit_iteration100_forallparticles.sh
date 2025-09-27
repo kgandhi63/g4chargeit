@@ -10,5 +10,5 @@
 #SBATCH --output=outputlogs/iteration100_allparticles_%A
 
 echo "Starting iteration100 for allparticles configuration"
-srun ./charging_sphere macros/302_stackediteration100_allparticles_from_00_num5000.mac
+srun ./charging_sphere macros/302_stackediteration100_allparticles_from_00_num10000.mac
 date

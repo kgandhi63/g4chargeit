@@ -10,5 +10,5 @@
 #SBATCH --output=outputlogs/iteration32_allparticles_%A
 
 echo "Starting iteration32 for allparticles configuration"
-srun ./charging_sphere macros/234_stackediteration32_allparticles_from_00_num5000.mac
+srun ./charging_sphere macros/234_stackediteration32_allparticles_from_00_num10000.mac
 date

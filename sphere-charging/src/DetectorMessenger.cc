@@ -48,7 +48,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
 :G4UImessenger(), 
  detector_(Det), rootManager_(G4RootAnalysisManager::Instance()), 
  projectDir_(0), fileNameCmd_(0), PBCCmd_(0), EpsilonCmd_(0), WorldXCmd_(0),WorldYCmd_(0), WorldZCmd_(0), 
- RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0)
+ FieldMapStepCmd_(0), RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0)
  
 { 
   projectDir_ = new G4UIdirectory("/sphere/");
@@ -100,6 +100,11 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   WorldZCmd_->SetParameterName("choice",false);
   WorldZCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+  FieldMapStepCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/fieldMapStep", this);
+  FieldMapStepCmd_->SetGuidance("Set step size for field map solver.");
+  FieldMapStepCmd_->SetParameterName("choice",false);
+  FieldMapStepCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
 
 }
 
@@ -116,6 +121,7 @@ DetectorMessenger::~DetectorMessenger()
   delete WorldXCmd_;
   delete WorldYCmd_;
   delete WorldZCmd_;
+  delete FieldMapStepCmd_;
 
 }
 
@@ -151,6 +157,9 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 
   if( command == WorldZCmd_ )
   { detector_->SetWorldZ(ScaleCmd_->GetNewDoubleValue(newValue));}
+
+  if( command == FieldMapStepCmd_ )
+  { detector_->SetFieldMapStep(ScaleCmd_->GetNewDoubleValue(newValue));}
 
 }
 

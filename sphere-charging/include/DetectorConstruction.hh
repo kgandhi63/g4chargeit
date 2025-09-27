@@ -68,6 +68,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetWorldX (G4double);
     void SetWorldY (G4double);
     void SetWorldZ (G4double);
+    void SetFieldMapStep (G4double);
                        
   private:
     G4VPhysicalVolume* ConstructVolumes();  
@@ -75,6 +76,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4double worldX_;
     G4double worldY_;
     G4double worldZ_;
+    G4double fieldMapStep_;
     G4LogicalVolume* logicWorld_; 
     G4double Epsilon_;
     G4String CADFile_;

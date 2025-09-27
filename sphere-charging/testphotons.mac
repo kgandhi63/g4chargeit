@@ -30,12 +30,13 @@
 /sphere/worldX 1240.0 um
 /sphere/worldY 760 um
 /sphere/worldZ 919.615 um
-/run/initialize
+/sphere/fieldMapStep 2 um
 /sphere/filename test.root
 /sphere/cadinput/file stacked_spheres_frompython.stl
 /sphere/epsilon 4
 /sphere/PBC true
 /run/initialize
+#/run/initialize
 #
 /gps/particle gamma
 /gps/pos/type Plane
@@ -50,6 +51,6 @@
 /gps/hist/file photon_distribution.txt
 /gps/hist/inter Lin
 #
-/control/execute vis.mac
+#/control/execute vis.mac
 /run/printProgress 100
 /run/beamOn 100

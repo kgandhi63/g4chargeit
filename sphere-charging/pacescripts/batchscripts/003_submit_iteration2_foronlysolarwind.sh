@@ -10,5 +10,5 @@
 #SBATCH --output=outputlogs/iteration2_onlysolarwind_%A
 
 echo "Starting iteration2 for onlysolarwind configuration"
-srun ./charging_sphere macros/002_stackediteration2_onlysolarwind_from_00_num500.mac
+srun ./charging_sphere macros/002_stackediteration2_onlysolarwind_from_00_num5000.mac
 date

@@ -10,5 +10,5 @@
 #SBATCH --output=outputlogs/iteration60_onlyphotoemission_%A
 
 echo "Starting iteration60 for onlyphotoemission configuration"
-srun ./charging_sphere macros/161_stackediteration60_onlyphotoemission_from_00_num3000.mac
+srun ./charging_sphere macros/161_stackediteration60_onlyphotoemission_from_00_num10000.mac
 date

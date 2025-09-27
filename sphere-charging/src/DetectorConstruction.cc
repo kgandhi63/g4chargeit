@@ -41,7 +41,7 @@
 #include "G4VisAttributes.hh"
 #include "G4Colour.hh"
 
-
+#include <chrono>  // Make sure this is included
 
 #include "G4MaterialPropertiesTable.hh"
 #include "G4FieldManager.hh"
@@ -94,7 +94,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
-, PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), CADFile_(""), RootInput_(""), Scale_(1)
+, PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMapStep_(0),
+CADFile_(""), RootInput_(""), Scale_(1)
 
 {
   // create commands for interactive definition of the detector 
@@ -335,8 +336,6 @@ new G4PVPlacement(0,                          	//no rotation
               false,                              //no boolean operation
               0);                                 //copy number
 
-
-
 //logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
 
 //G4double step = 1 * nm;
@@ -377,17 +376,25 @@ void DetectorConstruction::ConstructSDandField() {
 
   G4cout << "Starting Field Map Precomputation" << G4endl;
 
+  // Start timer
+  auto start = std::chrono::high_resolution_clock::now();
+
   // Define grid: 800 µm cube centered at origin, 2 µm step
-  G4ThreeVector min(-400*um, -400*um, -400*um);
-  G4ThreeVector max( 400*um,  400*um,  400*um);
-  G4ThreeVector step(2*um, 2*um, 2*um);
+  G4ThreeVector min(-worldX_/2*um, -worldY_/2*um, -worldZ_/2*um); //-400*um, -400*um, -400*um);
+  G4ThreeVector max(worldX_/2*um, worldY_/2*um, worldZ_/2*um); // 400*um,  400*um,  400*um);
+  G4ThreeVector step(fieldMapStep_*um, fieldMapStep_*um, fieldMapStep_*um);
 
   // Create the precomputed field map
   auto sumField = new SumRadialFieldMap(allPositions, allCharges,
                                         min, max, step,
                                         SumRadialFieldMap::StorageType::Double);
 
+  // End timer
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> duration = end - start;
+
   G4cout << "Ending Field Map Precomputation" << G4endl;
+  G4cout << "Precomputation took " << duration.count() << " seconds." << G4endl;
 
   // Set up the field manager as before
   auto worldFM = new G4FieldManager();
@@ -439,6 +446,12 @@ void DetectorConstruction::SetWorldY(G4double value)
 void DetectorConstruction::SetWorldZ(G4double value)
 {
   worldZ_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
+
+void DetectorConstruction::SetFieldMapStep(G4double value)
+{
+  fieldMapStep_ = value;
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 

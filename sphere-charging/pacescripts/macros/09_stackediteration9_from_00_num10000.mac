@@ -1,0 +1,78 @@
+# Macro file for 09_stackediteration9_from_00_num10000
+#
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+/process/verbose 0
+/process/had/verbose 0
+/process/em/verbose 0
+/cuts/setLowEdge 5 eV
+#
+/random/setSeeds 10008859 10005380
+/random/setSavingFlag 1
+#
+/process/em/fluo true
+/process/em/auger true
+/process/em/augerCascade true
+/process/em/deexcitationIgnoreCut true
+/process/em/Polarisation true
+/process/em/PhotoeffectBelowKShell true
+#
+/process/em/lowestElectronEnergy 10 eV
+/process/em/lowestMuHadEnergy 10 eV
+/process/em/enableSamplingTable 1
+#
+/process/eLoss/CSDARange 1
+/process/eLoss/UseICRU90 1
+/process/eLoss/UseAngularGenerator true
+#
+/sphere/rootinput/file 00_stackediteration0_num10000.root 01_stackediteration1_from_00_num10000.root 02_stackediteration2_from_00_num10000.root 03_stackediteration3_from_00_num10000.root 04_stackediteration4_from_00_num10000.root 05_stackediteration5_from_00_num10000.root 06_stackediteration6_from_00_num10000.root 07_stackediteration7_from_00_num10000.root 08_stackediteration8_from_00_num10000.root
+/sphere/filename root/09_stackediteration9_from_00_num10000.root
+/sphere/cadinput/file stacked_spheres.stl
+/sphere/cadinput/scale 0.001
+/sphere/epsilon 3.9
+/sphere/PBC false
+#
+/run/initialize
+#
+/gps/particle proton
+/gps/ene/type Mono
+/gps/energy 1 keV
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 50 um
+/gps/pos/halfy 50 um
+/gps/pos/centre 0 0 60 um
+/gps/pos/rot1 1 0 0  # This aligns the X-axis with the world X-axis
+/gps/pos/rot2 0 0 1  # This aligns the Z-axis with the world Z-axis
+/gps/direction 0.707 -0.707 0
+#
+/gps/source/add 1
+/gps/particle e-
+/gps/source/intensity 1 # Relative intensity of the gamma source
+/gps/ene/type Mono
+/gps/energy 120 eV
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 50 um
+/gps/pos/halfy 50 um
+/gps/pos/centre 0 0 60 um
+/gps/direction 0 0 -1
+/gps/ang/type planar
+#
+/gps/source/add 2
+/gps/source/intensity 100 # Relative intensity of the gamma source
+/gps/particle gamma
+/gps/ene/type Mono
+/gps/energy 9 eV
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 50 um
+/gps/pos/halfy 50 um
+/gps/pos/centre 0 0 60 um
+/gps/direction 0 0 -1
+/gps/ang/type planar
+#
+/run/printProgress 100
+/run/beamOn 10000
