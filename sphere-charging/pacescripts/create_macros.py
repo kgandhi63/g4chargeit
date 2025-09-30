@@ -101,7 +101,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('#\n')
         f.write('/gps/source/add 1\n')
         f.write("/gps/particle e-\n")
-        f.write("/gps/source/intensity 5\n")
+        f.write("/gps/source/intensity 2\n")
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
         f.write("/gps/ene/diffspec true\n")
@@ -145,7 +145,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write('#\n')
         f.write('/gps/source/add 1\n')
         f.write("/gps/particle e-\n")
-        f.write("/gps/source/intensity 5\n")
+        f.write("/gps/source/intensity 2\n")
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
         f.write("/gps/ene/diffspec true\n")
@@ -159,7 +159,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
         f.write("/gps/ang/type iso\n")
         f.write('#\n')
         f.write('/gps/source/add 2\n')
-        f.write('/gps/source/intensity 20 \n') # trial and error to determine this intensity based on desired bulk concentration
+        f.write('/gps/source/intensity 15 \n') # trial and error to determine this intensity based on desired bulk concentration
         f.write('/gps/particle gamma\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')

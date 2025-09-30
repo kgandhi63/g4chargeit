@@ -8,6 +8,7 @@
 #include "G4PhysicalConstants.hh"
 #include <vector>
 #include <algorithm>
+#include <string>  // Required for std::string
 
 class SumRadialFieldMap : public G4ElectricField {
 public:
@@ -25,6 +26,8 @@ public:
   ~SumRadialFieldMap() override = default;
 
   void GetFieldValue(const G4double point[4], G4double Field[6]) const override;
+
+  void ExportFieldMapToFile(const std::string& filename) const;
 
 private:
   // Input charges

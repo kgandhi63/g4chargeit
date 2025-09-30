@@ -3,6 +3,10 @@
 #include <cmath>
 #include <stdexcept>
 
+#include <fstream>    
+#include <iomanip>    // (optional, for precision)
+#include <omp.h>  // Add at the top
+
 SumRadialFieldMap::SumRadialFieldMap(const std::vector<G4ThreeVector>& pos,
                                      const std::vector<G4double>& charges,
                                      const G4ThreeVector& min,
@@ -47,12 +51,15 @@ SumRadialFieldMap::SumRadialFieldMap(const std::vector<G4ThreeVector>& pos,
 
   // Build the map
   BuildFieldMap();
+
+  ExportFieldMapToFile("FieldMap.txt");
 }
 
 void SumRadialFieldMap::BuildFieldMap() {
   const G4double epsilon0 = 1.0 / (mu0 * c_light * c_light);
 
   // Triple loop over grid points
+  #pragma omp parallel for schedule(dynamic)
   for (int ix = 0; ix < fNx; ++ix) {
     const G4double x = fMin.x() + ix * fStep.x();
     for (int iy = 0; iy < fNy; ++iy) {
@@ -146,4 +153,42 @@ void SumRadialFieldMap::GetFieldValue(const G4double point[4], G4double Field[6]
   Field[3] = E.x();
   Field[4] = E.y();
   Field[5] = E.z();
+}
+
+void SumRadialFieldMap::ExportFieldMapToFile(const std::string& filename) const {
+    std::ofstream outfile(filename);
+    if (!outfile.is_open()) {
+        G4Exception("SumRadialFieldMap::ExportFieldMapToFile",
+                    "FileOpenError", FatalException,
+                    ("Failed to open file: " + filename).c_str());
+        return;
+    }
+
+    outfile << "# x y z Ex Ey Ez\n";
+    outfile << std::scientific << std::setprecision(6);
+
+    for (int ix = 0; ix < fNx; ++ix) {
+        const G4double x = fMin.x() + ix * fStep.x();
+        for (int iy = 0; iy < fNy; ++iy) {
+            const G4double y = fMin.y() + iy * fStep.y();
+            for (int iz = 0; iz < fNz; ++iz) {
+                const G4double z = fMin.z() + iz * fStep.z();
+
+                const int id = Index(ix, iy, iz);
+                G4ThreeVector E;
+                if (fStorage == StorageType::Double) {
+                    E = fGridD[id];
+                } else {
+                    const Vec3f& Ef = fGridF[id];
+                    E = G4ThreeVector(Ef.x, Ef.y, Ef.z);
+                }
+
+                outfile << x << " " << y << " " << z << " "
+                        << E.x() << " " << E.y() << " " << E.z() << "\n";
+            }
+        }
+    }
+
+    outfile.close();
+    G4cout << "Field map exported to: " << filename << G4endl;
 }

@@ -460,12 +460,12 @@ def calculate_stats(df, config="photoemission"):
 
     # --- Photoemission Case ---
 
-    incident_gamma = df[df["Particle_Type"] == "gamma"].drop_duplicates(subset="Event_Number", keep="first")
+    incident_gamma = df[(df["Particle_Type"] == "gamma")  & (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="first")
 
     # get dataframe of the last e- event within the sensitive detector
-    last_e_event = df[(df["Particle_Type"] == "e-")].drop_duplicates(subset="Event_Number", keep="last")
+    last_e_event = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] > 0.0)].drop_duplicates(subset="Event_Number", keep="last")
     # get new dataframe of all e- that left the world
-    world_e_energy=last_e_event[(last_e_event["Volume_Name_Post"]=="World") | (last_e_event["Volume_Name_Pre"]=="World")]
+    world_e_energy=last_e_event[(last_e_event["Volume_Name_Post"]=="physical_cyclic") | (last_e_event["Volume_Name_Pre"]=="physical_cyclic")]
     volume_e_event=last_e_event[(last_e_event["Volume_Name_Post"]=="G4_SILICON_DIOXIDE")]
 
     # get all the initial gamma energy that leads to an e- escaping
@@ -489,7 +489,7 @@ def calculate_stats(df, config="photoemission"):
 
     electrons_incident = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="first")
 
-    last_electrons = df[(df["Particle_Type"] == "e-")].drop_duplicates(subset="Event_Number", keep="last")
+    last_electrons = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="last")
     electrons_inside = last_electrons[(last_electrons["Volume_Name_Post"] == "G4_SILICON_DIOXIDE")]
 
     electrons_capture_fraction = len(electrons_inside) / len(electrons_incident) if len(electrons_incident) > 0 else 0

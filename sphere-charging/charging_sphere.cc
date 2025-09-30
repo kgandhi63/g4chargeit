@@ -32,13 +32,14 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 #include "G4Types.hh"
 
+#include "G4MPImanager.hh"
+#include "G4MPIsession.hh"
+
 #ifdef G4MULTITHREADED
 #include "G4MTRunManager.hh"
 #else
 #include "G4RunManager.hh"
 #endif
-
-
 
 #include "G4UImanager.hh"
 #include "Randomize.hh"
@@ -97,6 +98,26 @@ int main(int argc,char** argv) {
   /// choose the Random engine
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
 
+  // --------------------------------------------------------------------
+  // MPI session
+  // --------------------------------------------------------------------
+  // At first, G4MPImanager/G4MPIsession should be created.
+  // G4MPImanager* g4MPI = new G4MPImanager(argc, argv);
+
+  // // MPI session (G4MPIsession) instead of G4UIterminal
+  // // Terminal availability depends on your MPI implementation.
+  // G4MPIsession* session = g4MPI->GetMPIsession();
+
+  // // LAM/MPI users can use G4tcsh.
+  // G4String prompt = "[40;01;33m";
+  // prompt += "G4MPI";
+  // prompt += "[40;31m(%s)[40;36m[%/][00;30m:";
+  // session->SetPrompt(prompt);
+
+  // --------------------------------------------------------------------
+  // user application setting
+  // --------------------------------------------------------------------
+
   /// construct the default run manager
   G4RunManager* runManager = new G4RunManager;
 
@@ -118,6 +139,12 @@ int main(int argc,char** argv) {
    //physList->ReplacePhysics(new G4EmStandardPhysicsWVI);
    //physList->ReplacePhysics(new G4EmLowEPPhysics);
    physList->ReplacePhysics(new G4EmStandardPhysics_option4);
+
+   G4EmParameters* emParams = G4EmParameters::Instance();
+   emParams->SetFluo(true);   // Enable fluorescence
+   emParams->SetAuger(true);  // Enable Auger electrons
+   emParams->SetPixe(true);   // Enable PIXE
+   emParams->SetMinEnergy(1*eV); // Minimum kinetic energy for EM tables
 
   // G4ProcessManager* pmanager = G4Proton::Proton()->GetProcessManager();
   // G4PhysicsListHelper* ph = G4PhysicsListHelper::GetPhysicsListHelper();
@@ -185,6 +212,7 @@ int main(int argc,char** argv) {
   /// job termination
   delete visManager;
   delete runManager;
+  delete g4MPI;
 
 
 }

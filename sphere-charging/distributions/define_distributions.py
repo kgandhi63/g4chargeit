@@ -81,13 +81,14 @@ solar_xdata, solar_ydata = 1240/np.array(solardata["x"]), solardata[" y"]/np.sum
 sorted_indices = np.argsort(solar_xdata)
 solar_xdata = solar_xdata[sorted_indices]
 solar_ydata = solar_ydata[sorted_indices]
+print(min(solar_xdata), max(solar_xdata))
 
 # Define new evenly spaced energy values (e.g., 1 to 5 eV with 0.01 eV steps)
-vmin = 8
-vmax = 100.0
+vmin = 8.1
+vmax = 330.0
 x_interp = np.linspace(vmin, vmax, 1000)
 # Create interpolation function (linear or cubic)
-interp_func = interp1d(solar_xdata, solar_ydata, kind='linear', bounds_error=False, fill_value=0)
+interp_func = interp1d(solar_xdata, solar_ydata, kind='linear', bounds_error=False, fill_value="extrapolate")
 # Get interpolated y-values
 y_interp = interp_func(x_interp)
 

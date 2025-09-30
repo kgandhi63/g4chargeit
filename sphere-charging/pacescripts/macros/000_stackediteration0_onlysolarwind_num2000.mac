@@ -49,7 +49,7 @@
 #
 /gps/source/add 1
 /gps/particle e-
-/gps/source/intensity 5
+/gps/source/intensity 2
 /gps/ene/type Arb
 /gps/hist/type arb
 /gps/ene/diffspec true

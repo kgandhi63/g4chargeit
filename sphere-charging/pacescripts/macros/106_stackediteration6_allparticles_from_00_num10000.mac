@@ -50,7 +50,7 @@
 #
 /gps/source/add 1
 /gps/particle e-
-/gps/source/intensity 5
+/gps/source/intensity 2
 /gps/ene/type Arb
 /gps/hist/type arb
 /gps/ene/diffspec true
@@ -64,7 +64,7 @@
 /gps/ang/type iso
 #
 /gps/source/add 2
-/gps/source/intensity 20 
+/gps/source/intensity 15 
 /gps/particle gamma
 /gps/pos/type Plane
 /gps/pos/shape Square
