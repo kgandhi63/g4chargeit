@@ -5,7 +5,6 @@
 
 #include <fstream>    
 #include <iomanip>    // (optional, for precision)
-#include <chrono>
 #include <omp.h>  // Add at the top
 
 SumRadialFieldMap::SumRadialFieldMap(const std::vector<G4ThreeVector>& pos,
@@ -59,46 +58,7 @@ SumRadialFieldMap::SumRadialFieldMap(const std::vector<G4ThreeVector>& pos,
 void SumRadialFieldMap::BuildFieldMap() {
   const G4double epsilon0 = 1.0 / (mu0 * c_light * c_light);
 
-  auto start_seq = std::chrono::high_resolution_clock::now();
-  for (int ix = 0; ix < fNx; ++ix) {
-      const G4double x = fMin.x() + ix * fStep.x();
-      for (int iy = 0; iy < fNy; ++iy) {
-        const G4double y = fMin.y() + iy * fStep.y();
-        for (int iz = 0; iz < fNz; ++iz) {
-          const G4double z = fMin.z() + iz * fStep.z();
-
-          G4ThreeVector r(x, y, z);
-          G4ThreeVector E(0., 0., 0.);
-
-          // Coulomb sum over all charges
-          for (size_t i = 0; i < fPositions.size(); ++i) {
-            G4ThreeVector dr = r - fPositions[i];
-            G4double d = dr.mag();
-            if (d > 0.) {
-              const G4double invr3 = 1.0 / (d * d * d);
-              E += (fCharges[i] / (4.0 * pi * epsilon0)) * (dr * invr3);
-            }
-          }
-
-          const int id = Index(ix, iy, iz);
-          if (fStorage == StorageType::Double) {
-            fGridD[id] = E;
-          } else {
-            fGridF[id] = Vec3f{ static_cast<float>(E.x()),
-                                static_cast<float>(E.y()),
-                                static_cast<float>(E.z()) };
-          }
-        }
-      }
-    }
-
-  auto end_seq = std::chrono::high_resolution_clock::now();
-  auto seq_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_seq - start_seq);
-  G4cout << "Sequential: " << seq_time.count() << " ms" << G4endl;
-
-
   // Triple loop over grid points
-  auto start_par = std::chrono::high_resolution_clock::now();
   #pragma omp parallel for schedule(dynamic)
   for (int ix = 0; ix < fNx; ++ix) {
     const G4double x = fMin.x() + ix * fStep.x();
@@ -131,11 +91,6 @@ void SumRadialFieldMap::BuildFieldMap() {
       }
     }
   }
-  auto end_par = std::chrono::high_resolution_clock::now();
-  auto par_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_par - start_par);
-
-  G4cout << "Parallel: " << par_time.count() << " ms" << G4endl;
-  G4cout << "Speedup: " << (double)seq_time.count() / par_time.count() << "x" << G4endl;
 }
 
 G4ThreeVector SumRadialFieldMap::Interpolate(int ix, int iy, int iz,
@@ -212,7 +167,6 @@ void SumRadialFieldMap::ExportFieldMapToFile(const std::string& filename) const 
     outfile << "# x y z Ex Ey Ez\n";
     outfile << std::scientific << std::setprecision(6);
 
-    #pragma omp parallel for schedule(dynamic)
     for (int ix = 0; ix < fNx; ++ix) {
         const G4double x = fMin.x() + ix * fStep.x();
         for (int iy = 0; iy < fNy; ++iy) {
