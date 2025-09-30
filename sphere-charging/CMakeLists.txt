@@ -84,4 +84,3 @@ file(COPY ${GEOMETRY} DESTINATION ${CMAKE_BINARY_DIR}/geometry/)
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
 install(TARGETS charging_sphere DESTINATION bin)
-

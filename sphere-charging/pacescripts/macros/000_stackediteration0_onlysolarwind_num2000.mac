@@ -29,7 +29,7 @@
 /sphere/worldX 200 um
 /sphere/worldY 600 um
 /sphere/worldZ 606.41 um
-/sphere/fieldMapStep 2 um
+/sphere/fieldMapStep 10 um
 #
 /sphere/filename root/000_stackediteration0_onlysolarwind_num2000.root
 /sphere/cadinput/file stacked_spheres_frompython.stl

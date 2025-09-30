@@ -76,7 +76,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/sphere/worldX {worldX} um\n')
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
-    f.write(f'/sphere/fieldMapStep 2 um\n') # step size for field map solver
+    f.write(f'/sphere/fieldMapStep 10 um\n') # step size for field map solver
     f.write('#\n')
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
@@ -237,10 +237,12 @@ batch_template = """#!/bin/bash
 #SBATCH --mail-user={username}@gatech.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=16
 #SBATCH --mem=32gb
 #SBATCH --time=18:00:00
 #SBATCH --output=outputlogs/iteration{iter}_{config}_%A
+
+module load openmpi/4.1.5
 
 echo "Starting iteration{iter} for {config} configuration"
 srun {run_line}

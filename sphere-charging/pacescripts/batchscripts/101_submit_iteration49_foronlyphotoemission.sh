@@ -4,10 +4,12 @@
 #SBATCH --mail-user=avira7@gatech.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=16
 #SBATCH --mem=32gb
 #SBATCH --time=18:00:00
 #SBATCH --output=outputlogs/iteration49_onlyphotoemission_%A
+
+module load openmpi/4.1.5
 
 echo "Starting iteration49 for onlyphotoemission configuration"
 srun ./charging_sphere macros/099_stackediteration49_onlyphotoemission_from_00_num5000.mac

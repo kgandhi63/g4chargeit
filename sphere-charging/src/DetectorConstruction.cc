@@ -90,7 +90,6 @@
 
 #include "CADMesh.hh"
 
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
@@ -133,11 +132,11 @@ dielectric->AddConstProperty("Epsilon",  Epsilon_, true);
 G4Material* SiO2 = G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
 SiO2->SetMaterialPropertiesTable(dielectric);
 
-G4cout << "SiO2 Material: " << SiO2->GetName() << G4endl;
-G4cout << "SiO2 Temperature: " << SiO2->GetTemperature() / kelvin << " K" << G4endl;
-G4cout << "SiO2 Pressure: " << SiO2->GetPressure() / pascal << " Pa" << G4endl;
-G4cout << "SiO2 Density: " << SiO2->GetDensity() / (g/cm3) << " g/cm3" << G4endl;
-G4cout << "SiO2 Ionization Potential: " << SiO2->GetIonisation()->GetMeanExcitationEnergy() / eV << " eV" << G4endl;
+// G4cout << "SiO2 Material: " << SiO2->GetName() << G4endl;
+// G4cout << "SiO2 Temperature: " << SiO2->GetTemperature() / kelvin << " K" << G4endl;
+// G4cout << "SiO2 Pressure: " << SiO2->GetPressure() / pascal << " Pa" << G4endl;
+// G4cout << "SiO2 Density: " << SiO2->GetDensity() / (g/cm3) << " g/cm3" << G4endl;
+// G4cout << "SiO2 Ionization Potential: " << SiO2->GetIonisation()->GetMeanExcitationEnergy() / eV << " eV" << G4endl;
 
 // Set Property to SiO2
 //G4int ncomponents,natoms; //, abundance;
@@ -171,10 +170,10 @@ G4cout << "SiO2 Ionization Potential: " << SiO2->GetIonisation()->GetMeanExcitat
   // G4Material* world_mat = new G4Material("Galactic", 1, 1.01*g/mole, universe_mean_density,
   //                 kStateGas, 400*kelvin, 1.e-7*pascal);
 
-  G4cout << "World Material: " << world_mat->GetName() << G4endl;
-  G4cout << "World Temperature: " << world_mat->GetTemperature() / kelvin << " K" << G4endl;
-  G4cout << "World Pressure: " << world_mat->GetPressure() / pascal << " Pa" << G4endl;
-  G4cout << "World Density: " << world_mat->GetDensity() / (g/cm3) << " g/cm3" << G4endl;
+  // G4cout << "World Material: " << world_mat->GetName() << G4endl;
+  // G4cout << "World Temperature: " << world_mat->GetTemperature() / kelvin << " K" << G4endl;
+  // G4cout << "World Pressure: " << world_mat->GetPressure() / pascal << " Pa" << G4endl;
+  // G4cout << "World Density: " << world_mat->GetDensity() / (g/cm3) << " g/cm3" << G4endl;
   
   G4Box* solidWorld =    
     new G4Box("World",                       //its name

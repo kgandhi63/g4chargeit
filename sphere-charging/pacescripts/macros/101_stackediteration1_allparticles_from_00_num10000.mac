@@ -29,7 +29,7 @@
 /sphere/worldX 200 um
 /sphere/worldY 600 um
 /sphere/worldZ 606.41 um
-/sphere/fieldMapStep 2 um
+/sphere/fieldMapStep 10 um
 #
 /sphere/rootinput/file 100_stackediteration0_allparticles_num10000.root
 /sphere/filename root/101_stackediteration1_allparticles_from_00_num10000.root

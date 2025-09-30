@@ -84,6 +84,8 @@
 #include "G4hIonisation.hh"
 #include "G4PhysicsListHelper.hh"
 
+#include <omp.h>
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 int main(int argc,char** argv) {
@@ -111,21 +113,32 @@ int main(int argc,char** argv) {
   // prompt += "[40;31m(%s)[40;36m[%/][00;30m:";
   // session->SetPrompt(prompt);
 
+  // Add at the very beginning of main
+  #ifdef _OPENMP
+      G4cout << "=== OpenMP Configuration ===" << G4endl;
+      G4cout << "OpenMP is enabled. Version: " << _OPENMP << G4endl;
+      G4cout << "Max threads available: " << omp_get_max_threads() << G4endl;
+  #else
+      G4cout << "OpenMP is NOT enabled" << G4endl;
+  #endif
+
   // --------------------------------------------------------------------
   // user application setting
   // --------------------------------------------------------------------
 
   /// construct the default run manager
-  //G4RunManager* runManager = new G4RunManager;
+  G4RunManager* runManager = new G4RunManager;
 
-  #ifdef G4MULTITHREADED
-    G4MTRunManager* runManager = new G4MTRunManager;
-    runManager->SetNumberOfThreads(2*(G4Threading::G4GetNumberOfCores()));
-    G4cout << "Multithreaded" << G4endl;
-  #else
-    G4RunManager* runManager = new G4RunManager;
-    G4cout << "Single threaded" << G4endl;
-  #endif
+  // #ifdef G4MULTITHREADED
+  //   G4MTRunManager* runManager = new G4MTRunManager;
+  //   G4int numThreads = 2*(G4Threading::G4GetNumberOfCores());
+  //   runManager->SetNumberOfThreads(numThreads);
+  //   G4cout << "Multithreaded - Number of threads: " << numThreads << G4endl;
+  //   G4cout << "Number of cores: " << G4Threading::G4GetNumberOfCores() << G4endl;
+  // #else
+  //   G4RunManager* runManager = new G4RunManager;
+  //   G4cout << "Single threaded" << G4endl;
+  // #endif
 
   /// set mandatory initialization classes
   DetectorConstruction* det= new DetectorConstruction;
@@ -145,11 +158,11 @@ int main(int argc,char** argv) {
    //physList->ReplacePhysics(new G4EmLowEPPhysics);
    physList->ReplacePhysics(new G4EmStandardPhysics_option4);
 
-   G4EmParameters* emParams = G4EmParameters::Instance();
-   emParams->SetFluo(true);   // Enable fluorescence
-   emParams->SetAuger(true);  // Enable Auger electrons
-   emParams->SetPixe(true);   // Enable PIXE
-   emParams->SetMinEnergy(1*eV); // Minimum kinetic energy for EM tables
+   //G4EmParameters* emParams = G4EmParameters::Instance();
+   //emParams->SetFluo(true);   // Enable fluorescence
+   //emParams->SetAuger(true);  // Enable Auger electrons
+   //emParams->SetPixe(true);   // Enable PIXE
+   //emParams->SetMinEnergy(1*eV); // Minimum kinetic energy for EM tables
 
   // G4ProcessManager* pmanager = G4Proton::Proton()->GetProcessManager();
   // G4PhysicsListHelper* ph = G4PhysicsListHelper::GetPhysicsListHelper();
