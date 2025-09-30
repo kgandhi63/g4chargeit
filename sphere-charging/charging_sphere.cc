@@ -32,14 +32,11 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 #include "G4Types.hh"
 
-#include "G4MPImanager.hh"
-#include "G4MPIsession.hh"
+// #include "G4MPImanager.hh"
+// #include "G4MPIsession.hh"
 
-#ifdef G4MULTITHREADED
 #include "G4MTRunManager.hh"
-#else
 #include "G4RunManager.hh"
-#endif
 
 #include "G4UImanager.hh"
 #include "Randomize.hh"
@@ -119,12 +116,20 @@ int main(int argc,char** argv) {
   // --------------------------------------------------------------------
 
   /// construct the default run manager
-  G4RunManager* runManager = new G4RunManager;
+  //G4RunManager* runManager = new G4RunManager;
+
+  #ifdef G4MULTITHREADED
+    G4MTRunManager* runManager = new G4MTRunManager;
+    runManager->SetNumberOfThreads(2*(G4Threading::G4GetNumberOfCores()));
+    G4cout << "Multithreaded" << G4endl;
+  #else
+    G4RunManager* runManager = new G4RunManager;
+    G4cout << "Single threaded" << G4endl;
+  #endif
 
   /// set mandatory initialization classes
   DetectorConstruction* det= new DetectorConstruction;
   runManager->SetUserInitialization(det);
-
 
   // load all physics that we defined
   //PhysicsList* physList = new PhysicsList;
@@ -212,7 +217,7 @@ int main(int argc,char** argv) {
   /// job termination
   delete visManager;
   delete runManager;
-  delete g4MPI;
+  //delete g4MPI;
 
 
 }

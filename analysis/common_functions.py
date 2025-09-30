@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import glob
 
+import trimesh 
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 def read_rootfile(file,directory_path=None):
@@ -94,6 +95,36 @@ def plot_electron_positions(df,world_dimensions = (-0.05, 0.05), n_bins=100, ite
     plt.show()
 
     return fig, ax 
+
+def plot_trimesh_edges_only(mesh, edge_color=[0, 0, 0, 128]):  # Black with 50% transparency
+    """Plot only the edges with specified color and transparency"""
+    
+    # Create edge visualizations
+    edges = mesh.edges_unique
+    vertices = mesh.vertices
+    
+    # Create a collection of lines for each edge
+    lines = []
+    for edge in edges:
+        lines.append(trimesh.path.entities.Line(edge))
+    
+    # Create colors for each entity (each line) with RGBA
+    # Ensure we have 4 values (RGBA) for each color
+    if len(edge_color) == 3:
+        edge_color = list(edge_color) + [128]  # Add alpha if only RGB provided
+    
+    colors = np.tile(edge_color, (len(lines), 1))
+    
+    # Create a Path3D object
+    path = trimesh.path.Path3D(
+        entities=lines,
+        vertices=vertices,
+        colors=colors
+    )
+    
+    scene = trimesh.Scene()
+    scene.add_geometry(path)
+    return scene
 
 def plot_face_illumination(incident_particles, convex_combined, vmin=0, vmax=1):
     """
