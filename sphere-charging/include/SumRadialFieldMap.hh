@@ -21,6 +21,7 @@ public:
                     const G4ThreeVector& min,
                     const G4ThreeVector& max,
                     const G4ThreeVector& step,
+                    const std::string& filename,
                     StorageType storage = StorageType::Double);
 
   ~SumRadialFieldMap() override = default;

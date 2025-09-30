@@ -12,6 +12,7 @@ SumRadialFieldMap::SumRadialFieldMap(const std::vector<G4ThreeVector>& pos,
                                      const G4ThreeVector& min,
                                      const G4ThreeVector& max,
                                      const G4ThreeVector& step,
+                                     const std::string& filename,
                                      StorageType storage)
 : fPositions(pos),
   fCharges(charges),
@@ -52,7 +53,7 @@ SumRadialFieldMap::SumRadialFieldMap(const std::vector<G4ThreeVector>& pos,
   // Build the map
   BuildFieldMap();
 
-  ExportFieldMapToFile("FieldMap.txt");
+  ExportFieldMapToFile(filename);
 }
 
 void SumRadialFieldMap::BuildFieldMap() {

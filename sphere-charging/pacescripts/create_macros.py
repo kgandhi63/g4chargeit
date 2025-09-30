@@ -12,8 +12,8 @@ if os.path.exists("macros"):
 os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 
 # define the number of particles for the each iteration
-account = "pf17"
-username = "avira7"
+account = "zjiang33"
+username = "kgandhi63"
 eventnumbers_onlysolarwind = 2000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_onlyphotoemission = 5000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
@@ -255,8 +255,8 @@ batch_template_array = """#!/bin/bash
 #SBATCH --account=gts-{account}
 #SBATCH --mail-user={username}@gatech.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --nodes=4
-#SBATCH --ntasks-per-node=16
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=16
 #SBATCH --mem=32gb
 #SBATCH --time=15:00:00
 #SBATCH --output=outputlogs/iteration{iter}_%A_%a.out

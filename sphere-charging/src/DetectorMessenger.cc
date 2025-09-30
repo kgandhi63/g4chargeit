@@ -48,7 +48,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
 :G4UImessenger(), 
  detector_(Det), rootManager_(G4RootAnalysisManager::Instance()), 
  projectDir_(0), fileNameCmd_(0), PBCCmd_(0), EpsilonCmd_(0), WorldXCmd_(0),WorldYCmd_(0), WorldZCmd_(0), 
- FieldMapStepCmd_(0), RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0)
+ FieldMapStepCmd_(0), RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0), FieldFile_(nullptr)
  
 { 
   projectDir_ = new G4UIdirectory("/sphere/");
@@ -106,6 +106,12 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   FieldMapStepCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
 
+  FieldFile_ = new G4UIcmdWithAString("/field/file",this);
+  FieldFile_->SetGuidance("Field Map Save File");
+  FieldFile_->SetParameterName("choice",false);
+  FieldFile_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -122,6 +128,7 @@ DetectorMessenger::~DetectorMessenger()
   delete WorldYCmd_;
   delete WorldZCmd_;
   delete FieldMapStepCmd_;
+  delete FieldFile_;
 
 }
 
@@ -150,16 +157,19 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   { detector_->SetCADScale(ScaleCmd_->GetNewDoubleValue(newValue));}
   
   if( command == WorldXCmd_ )
-  { detector_->SetWorldX(ScaleCmd_->GetNewDoubleValue(newValue));}
+  { detector_->SetWorldX(WorldXCmd_->GetNewDoubleValue(newValue));}
 
   if( command == WorldYCmd_ )
-  { detector_->SetWorldY(ScaleCmd_->GetNewDoubleValue(newValue));}
+  { detector_->SetWorldY(WorldYCmd_->GetNewDoubleValue(newValue));}
 
   if( command == WorldZCmd_ )
-  { detector_->SetWorldZ(ScaleCmd_->GetNewDoubleValue(newValue));}
+  { detector_->SetWorldZ(WorldZCmd_->GetNewDoubleValue(newValue));}
 
   if( command == FieldMapStepCmd_ )
-  { detector_->SetFieldMapStep(ScaleCmd_->GetNewDoubleValue(newValue));}
+  { detector_->SetFieldMapStep(FieldMapStepCmd_->GetNewDoubleValue(newValue));}
+
+  if( command == FieldFile_ )
+  { detector_->SetFieldFile(newValue);}
 
 }
 

@@ -64,7 +64,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetCADFile (G4String);
     void SetRootInput (G4String);
     void SetCADScale (G4double);
-
+    void SetFieldFile (G4String);
     void SetWorldX (G4double);
     void SetWorldY (G4double);
     void SetWorldZ (G4double);
@@ -81,6 +81,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4double Epsilon_;
     G4String CADFile_;
     G4String RootInput_;
+    G4String filename_;
     G4double Scale_;
     std::vector<G4ThreeVector> fHolePositions;
     std::vector<G4ThreeVector> fElectronPositions;

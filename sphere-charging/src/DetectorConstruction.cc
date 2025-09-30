@@ -94,7 +94,7 @@
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
 , PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMapStep_(0),
-CADFile_(""), RootInput_(""), Scale_(1)
+CADFile_(""), RootInput_(""), Scale_(1), filename_("")
 
 {
   // create commands for interactive definition of the detector 
@@ -395,7 +395,7 @@ void DetectorConstruction::ConstructSDandField() {
 
   // Create the precomputed field map
   auto sumField = new SumRadialFieldMap(allPositions, allCharges,
-                                        min, max, step,
+                                        min, max, step, filename_,
                                         SumRadialFieldMap::StorageType::Double);
 
   // End timer
@@ -490,5 +490,10 @@ void DetectorConstruction::SetCADScale(G4double value)
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 
+void DetectorConstruction::SetFieldFile(G4String value)
+{
+  filename_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
 
 

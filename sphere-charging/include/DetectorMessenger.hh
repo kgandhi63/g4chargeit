@@ -72,6 +72,7 @@ class DetectorMessenger: public G4UImessenger
     G4UIcmdWithADoubleAndUnit*  WorldYCmd_;
     G4UIcmdWithADoubleAndUnit*  WorldZCmd_;
     G4UIcmdWithADoubleAndUnit*  FieldMapStepCmd_;
+    G4UIcmdWithAString*         FieldFile_;
 
 
 };
