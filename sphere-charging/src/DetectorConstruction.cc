@@ -177,7 +177,13 @@ SiO2->SetMaterialPropertiesTable(dielectric);
   
   G4Box* solidWorld =    
     new G4Box("World",                       //its name
-       worldX_/2*um, worldY_/2*um, worldZ_/2*um);     //its size
+       worldX_/2, worldY_/2, worldZ_/2);     //its size
+
+  G4cout << "World size: "
+       << "X: " << G4BestUnit(worldX_, "Length") << ", "
+       << "Y: " << G4BestUnit(worldY_, "Length") << ", "
+       << "Z: " << G4BestUnit(worldZ_, "Length") << G4endl;
+
 
   logicWorld_ =                         
     new G4LogicalVolume(solidWorld,          //its solid
@@ -389,9 +395,9 @@ void DetectorConstruction::ConstructSDandField() {
   auto start = std::chrono::high_resolution_clock::now();
 
   // Define grid: 800 µm cube centered at origin, 2 µm step
-  G4ThreeVector min(-worldX_/2*um, -worldY_/2*um, -worldZ_/2*um); //-400*um, -400*um, -400*um);
-  G4ThreeVector max(worldX_/2*um, worldY_/2*um, worldZ_/2*um); // 400*um,  400*um,  400*um);
-  G4ThreeVector step(fieldMapStep_*um, fieldMapStep_*um, fieldMapStep_*um);
+  G4ThreeVector min(-worldX_/2, -worldY_/2, -worldZ_/2); //-400*um, -400*um, -400*um);
+  G4ThreeVector max(worldX_/2, worldY_/2, worldZ_/2); // 400*um,  400*um,  400*um);
+  G4ThreeVector step(fieldMapStep_, fieldMapStep_, fieldMapStep_);
 
   // Create the precomputed field map
   auto sumField = new SumRadialFieldMap(allPositions, allCharges,

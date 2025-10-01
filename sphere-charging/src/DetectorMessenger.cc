@@ -55,7 +55,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   projectDir_->SetGuidance("commands specific to this project");
   
 
-  fileNameCmd_ = new G4UIcmdWithAString("/sphere/filename",this);
+  fileNameCmd_ = new G4UIcmdWithAString("/sphere/rootoutput/file",this);
   fileNameCmd_->SetGuidance("Define the filename.");
   fileNameCmd_->SetParameterName("choice",false);
   fileNameCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
@@ -106,7 +106,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   FieldMapStepCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
 
-  FieldFile_ = new G4UIcmdWithAString("/field/file",this);
+  FieldFile_ = new G4UIcmdWithAString("/sphere/field/file",this);
   FieldFile_->SetGuidance("Field Map Save File");
   FieldFile_->SetParameterName("choice",false);
   FieldFile_->AvailableForStates(G4State_PreInit,G4State_Idle);

@@ -30,13 +30,14 @@
 /sphere/worldX 200 um
 /sphere/worldY 600 um
 /sphere/worldZ 606.41 um
-/sphere/fieldMapStep 2 um
-/sphere/filename test.root
+/sphere/fieldMapStep 10 um
+/sphere/field/file test-FieldMap.txt
 /sphere/cadinput/file stacked_spheres_frompython.stl
+#/sphere/cadinput/scale 0.001
+/sphere/rootoutput/file test-rootOutput.root
 /sphere/epsilon 4
 /sphere/PBC true
 /run/initialize
-#/run/initialize
 #
 /gps/particle gamma
 /gps/pos/type Plane

@@ -15,13 +15,13 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 account = "pf17"
 username = "avira7"
 eventnumbers_onlysolarwind = 2000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-eventnumbers_onlyphotoemission = 5000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlyphotoemission = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 iterationNUM = 50 # number of iterations to perform
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
-config_list = ["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
+config_list = ["onlyphotoemission"] #["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
 
 # define the size of the world
 CAD_dimensions = (200,600,546.410) # in units of microns
@@ -77,10 +77,11 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
     f.write(f'/sphere/fieldMapStep 10 um\n') # step size for field map solver
+    f.write(f'/sphere/field/file fieldmaps/field-{increment_filename.split("_")[0]}.txt \n')
     f.write('#\n')
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
-    f.write(f'/sphere/filename root/{increment_filename}.root\n')
+    f.write(f'/sphere/rootoutput/file root/{increment_filename}.root\n')
     f.write('/sphere/cadinput/file stacked_spheres_frompython.stl\n')
     #f.write('/sphere/cadinput/scale 0.001\n')
     f.write('/sphere/epsilon 4\n') 
@@ -175,7 +176,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     else: 
         Warning("need to select from: onlysolarwind, onlyphotoemission, allparticles")
     f.write('#\n')
-    f.write('/run/printProgress 100\n')
+    f.write('/run/printProgress 5000\n')
     f.write(f'/run/beamOn {event_num}\n')
 
 #############################################################
@@ -205,21 +206,20 @@ for optionIN in config_list:
             input_list = ' '.join(filtered)
             #print(input_list)
     
-            increment_filename = f"{i:03d}_stackediteration{incrementIN}_{optionIN}_from_00_num{select_num}"
+            increment_filename = f"{i:03d}_stackediteration{incrementIN}_{optionIN}_num{select_num}"
             with open(f"macros/{increment_filename}.mac", 'w') as f:
                 write_macro(f, increment_filename, select_num, input_files=[input_list])
             output_files.append((increment_filename + ".root", select_num, incrementIN, optionIN))
             i += 1
 
+# for optionIN in config_list:
 
-for optionIN in config_list:
+#     select_num, i = 1000000, 0
 
-    select_num, i = 1000000, 0
-
-    increment_filename = f"{i:03d}_stackediteration0_{optionIN}_num{select_num}"
-    with open(f"macros/{increment_filename}.mac", 'w') as f:
-        write_macro(f, increment_filename, select_num)
-    output_files.append((increment_filename + ".root", select_num, 0, optionIN))
+#     increment_filename = f"{i:03d}_stackediteration0_{optionIN}_num{select_num}"
+#     with open(f"macros/{increment_filename}.mac", 'w') as f:
+#         write_macro(f, increment_filename, select_num)
+#     output_files.append((increment_filename + ".root", select_num, 0, optionIN))
 
 #############################################################
 
@@ -237,8 +237,9 @@ batch_template = """#!/bin/bash
 #SBATCH --mail-user={username}@gatech.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=32gb
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=24
+#SBATCH --mem=1gb
 #SBATCH --time=18:00:00
 #SBATCH --output=outputlogs/iteration{iter}_{config}_%A
 
@@ -255,8 +256,8 @@ batch_template_array = """#!/bin/bash
 #SBATCH --account=gts-{account}
 #SBATCH --mail-user={username}@gatech.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --nodes=4
-#SBATCH --ntasks-per-node=16
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=16
 #SBATCH --mem=32gb
 #SBATCH --time=15:00:00
 #SBATCH --output=outputlogs/iteration{iter}_%A_%a.out

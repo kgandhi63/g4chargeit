@@ -36,6 +36,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/outputlogs)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/geometry)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/root)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/fieldmaps)
 
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
