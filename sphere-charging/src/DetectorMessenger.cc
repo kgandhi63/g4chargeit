@@ -105,12 +105,10 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   FieldMapStepCmd_->SetParameterName("choice",false);
   FieldMapStepCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-
   FieldFile_ = new G4UIcmdWithAString("/sphere/field/file",this);
   FieldFile_->SetGuidance("Field Map Save File");
   FieldFile_->SetParameterName("choice",false);
   FieldFile_->AvailableForStates(G4State_PreInit,G4State_Idle);
-
 
 }
 

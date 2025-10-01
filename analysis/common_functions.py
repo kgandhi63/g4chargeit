@@ -315,7 +315,7 @@ def plot_surface_potential_one_particle_type(electrons, convex_combined, vmin=-0
     # Apply colors to mesh
     convex_combined.visual.face_colors = colors_rgba
 
-    return convex_combined
+    return convex_combined, face_potentials
 
 
 def plot_electron_positions_slice(

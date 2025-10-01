@@ -13,5 +13,5 @@
 module load openmpi/4.1.5
 
 echo "Starting iteration23 for onlyphotoemission configuration"
-srun ./charging_sphere macros/023_stackediteration23_onlyphotoemission_num100000.mac
+srun ./charging_sphere macros/023_stackediteration23_onlyphotoemission_num500000.mac
 date

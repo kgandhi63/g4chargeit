@@ -407,9 +407,11 @@ void DetectorConstruction::ConstructSDandField() {
   // End timer
   auto end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> duration = end - start;
-
   G4cout << "Ending Field Map Precomputation" << G4endl;
-  G4cout << "Precomputation took " << duration.count() << " seconds." << G4endl;
+
+  // Convert seconds to minutes (1 minute = 60 seconds)
+  double duration_in_minutes = duration.count() / 60.0;
+  G4cout << "Precomputation took " << duration_in_minutes << " minutes." << G4endl;
 
   // Set up the field manager as before
   auto worldFM = new G4FieldManager();

@@ -14,14 +14,14 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-eventnumbers_onlysolarwind = 2000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-eventnumbers_onlyphotoemission = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlysolarwind = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlyphotoemission = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 iterationNUM = 50 # number of iterations to perform
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
-config_list = ["onlyphotoemission"] #["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
+config_list = ["onlyphotoemission", "onlysolarwind"] #["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
 
 # define the size of the world
 CAD_dimensions = (200,600,546.410) # in units of microns
@@ -77,7 +77,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
     f.write(f'/sphere/fieldMapStep 10 um\n') # step size for field map solver
-    f.write(f'/sphere/field/file fieldmaps/field-{increment_filename.split("_")[0]}.txt \n')
+    f.write(f'/sphere/field/file fieldmaps/field-{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}.txt \n')
     f.write('#\n')
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
