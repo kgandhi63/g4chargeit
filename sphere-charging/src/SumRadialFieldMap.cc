@@ -3,6 +3,7 @@
 #include <cmath>
 #include <stdexcept>
 
+#include <immintrin.h> // For AVX intrinsics
 #include <fstream>    
 #include <iomanip>    // (optional, for precision)
 #include <omp.h>  // Add at the top
@@ -55,50 +56,118 @@ SumRadialFieldMap::SumRadialFieldMap(const std::vector<G4ThreeVector>& pos,
 
   ExportFieldMapToFile(filename);
 }
+
 void SumRadialFieldMap::BuildFieldMap() {
   const G4double coulombsConstant = 1.0 / (4.0 * pi * (1.0 / (mu0 * c_light * c_light)));
- 
-  // --- Pre-calculate scaled charges to avoid redundant calculations inside the loop ---
+
+  // --- Enhanced precomputation ---
   std::vector<G4double> scaledCharges(fCharges.size());
+  #pragma omp parallel for schedule(static)
   for (size_t i = 0; i < fCharges.size(); ++i) {
     scaledCharges[i] = fCharges[i] * coulombsConstant;
   }
- 
-  // --- OPTIMIZED PARALLEL LOOP ---
-  // 1. Use ONLY ONE pragma for all three loops.
-  // 2. Use collapse(3) to merge the three loops into one large parallel task.
-  // 3. Use schedule(static) for this uniform workload, as it has less overhead.
-  #pragma omp parallel for schedule(static) collapse(3)
+
+  // Convert to Structure of Arrays (SoA) for better vectorization
+  struct ChargeData {
+    std::vector<G4double> x, y, z, charge;
+  };
+  
+  ChargeData chargeData;
+  chargeData.x.resize(fPositions.size());
+  chargeData.y.resize(fPositions.size());
+  chargeData.z.resize(fPositions.size());
+  chargeData.charge.resize(fPositions.size());
+  
+  #pragma omp parallel for schedule(static)
+  for (size_t i = 0; i < fPositions.size(); ++i) {
+    chargeData.x[i] = fPositions[i].x();
+    chargeData.y[i] = fPositions[i].y();
+    chargeData.z[i] = fPositions[i].z();
+    chargeData.charge[i] = scaledCharges[i];
+  }
+
+  // Precompute constants
+  const G4double min_x = fMin.x();
+  const G4double min_y = fMin.y();
+  const G4double min_z = fMin.z();
+  const G4double step_x = fStep.x();
+  const G4double step_y = fStep.y();
+  const G4double step_z = fStep.z();
+  const size_t num_charges = fPositions.size();
+  const G4double epsilon = 1e-16; // Small value to avoid division by zero
+
+  // --- OPTIMIZED PARALLEL LOOP WITH VECTORIZATION ---
+  #pragma omp parallel for schedule(static) collapse(2)
   for (int ix = 0; ix < fNx; ++ix) {
     for (int iy = 0; iy < fNy; ++iy) {
+      
+      // Precompute x,y for this 2D slice
+      const G4double x = min_x + ix * step_x;
+      const G4double y = min_y + iy * step_y;
+      
+      // Precompute differences in x,y for all charges
+      std::vector<G4double> dx(num_charges), dy(num_charges);
+      for (size_t i = 0; i < num_charges; ++i) {
+        dx[i] = x - chargeData.x[i];
+        dy[i] = y - chargeData.y[i];
+      }
+      
       for (int iz = 0; iz < fNz; ++iz) {
-        // These calculations are now distributed efficiently across all threads
-        const G4double x = fMin.x() + ix * fStep.x();
-        const G4double y = fMin.y() + iy * fStep.y();
-        const G4double z = fMin.z() + iz * fStep.z();
- 
-        G4ThreeVector r(x, y, z);
-        G4ThreeVector E(0., 0., 0.);
- 
-        // Coulomb sum over all 1,000,000 charges
-        for (size_t i = 0; i < fPositions.size(); ++i) {
-          G4ThreeVector dr = r - fPositions[i];
-          G4double d2 = dr.mag2(); // Use squared magnitude (faster, no sqrt)
-          if (d2 > 0.) {
-            G4double invd = 1.0 / std::sqrt(d2); // Only one sqrt now
-            G4double invr3 = invd * invd * invd;
-            E += scaledCharges[i] * (dr * invr3); // Use pre-calculated value
+        const G4double z = min_z + iz * step_z;
+        
+        G4double Ex = 0.0, Ey = 0.0, Ez = 0.0;
+
+        // Vectorized inner loop (manual unrolling + SIMD-friendly)
+        size_t i = 0;
+        
+        // Use manual unrolling for better pipelining
+        for (; i + 3 < num_charges; i += 4) {
+          for (int j = 0; j < 4; ++j) {
+            const size_t idx = i + j;
+            const G4double dz = z - chargeData.z[idx];
+            const G4double dx_val = dx[idx];
+            const G4double dy_val = dy[idx];
+            
+            const G4double d2 = dx_val*dx_val + dy_val*dy_val + dz*dz;
+            
+            if (d2 > epsilon) {
+              const G4double invd = 1.0 / std::sqrt(d2);
+              const G4double invr3 = invd * invd * invd;
+              const G4double scaled = chargeData.charge[idx] * invr3;
+              
+              Ex += dx_val * scaled;
+              Ey += dy_val * scaled;
+              Ez += dz * scaled;
+            }
           }
         }
- 
+        
+        // Remainder loop
+        for (; i < num_charges; ++i) {
+          const G4double dz = z - chargeData.z[i];
+          const G4double dx_val = dx[i];
+          const G4double dy_val = dy[i];
+          
+          const G4double d2 = dx_val*dx_val + dy_val*dy_val + dz*dz;
+          
+          if (d2 > epsilon) {
+            const G4double invd = 1.0 / std::sqrt(d2);
+            const G4double invr3 = invd * invd * invd;
+            const G4double scaled = chargeData.charge[i] * invr3;
+            
+            Ex += dx_val * scaled;
+            Ey += dy_val * scaled;
+            Ez += dz * scaled;
+          }
+        }
+
         const int id = Index(ix, iy, iz);
         if (fStorage == StorageType::Double) {
-          fGridD[id] = E;
-        }
-        else {
-          fGridF[id] = Vec3f{ static_cast<float>(E.x()),
-                                static_cast<float>(E.y()),
-                                static_cast<float>(E.z()) };
+          fGridD[id] = G4ThreeVector(Ex, Ey, Ez);
+        } else {
+          fGridF[id] = Vec3f{ static_cast<float>(Ex),
+                              static_cast<float>(Ey),
+                              static_cast<float>(Ez) };
         }
       }
     }
