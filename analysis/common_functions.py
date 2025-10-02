@@ -6,10 +6,13 @@ import matplotlib.colors as mcolors
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import struct
+from typing import Dict, Any
 import glob
 
 import trimesh 
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
 
 def read_rootfile(file,directory_path=None):
     #file = '00_iteration0_num5000.root' #'13_iteration5_from_num1000000.root'
@@ -28,6 +31,57 @@ def read_rootfile(file,directory_path=None):
     df['Kinetic_Energy_Diff_eV'] = (df['Kinetic_Energy_Pre_MeV'] - df['Kinetic_Energy_Post_MeV'])*1e6 # convert to eV
 
     return df 
+
+def read_field_map_binary_pandas(filename: str) -> pd.DataFrame:
+    """
+    Read C++ binary field map into pandas DataFrame
+    """
+    with open(filename, 'rb') as f:
+        # Read header
+        dimensions = np.frombuffer(f.read(3 * 4), dtype=np.int32)  # 3 ints
+        min_coords = np.frombuffer(f.read(3 * 8), dtype=np.float64)  # 3 doubles
+        step_size = np.frombuffer(f.read(3 * 8), dtype=np.float64)  # 3 doubles
+        storage_type = np.frombuffer(f.read(4), dtype=np.int32)[0]  # 1 int
+        
+        nx, ny, nz = dimensions
+        total_points = nx * ny * nz
+        
+        # print(f"Reading field map: {nx} x {ny} x {nz} = {total_points:,} points")
+        # print(f"Min coordinates: {min_coords}")
+        # print(f"Step size: {step_size}")
+        # print(f"Storage type: {'Double' if storage_type == 0 else 'Float'}")
+        
+        # Read field data
+        if storage_type == 0:  # Double precision
+            field_data = np.frombuffer(f.read(total_points * 3 * 8), dtype=np.float64)
+        else:  # Float precision  
+            field_data = np.frombuffer(f.read(total_points * 3 * 4), dtype=np.float32)
+        
+        # Reshape to 4D: [x, y, z, components]
+        field_data = field_data.reshape(nx, ny, nz, 3)
+        
+        # Create coordinate arrays
+        x_coords = min_coords[0] + np.arange(nx) * step_size[0]
+        y_coords = min_coords[1] + np.arange(ny) * step_size[1]
+        z_coords = min_coords[2] + np.arange(nz) * step_size[2]
+        
+        # Create meshgrid and flatten for DataFrame
+        X, Y, Z = np.meshgrid(x_coords, y_coords, z_coords, indexing='ij')
+        
+        # Create DataFrame
+        df = pd.DataFrame({
+            'x': X.flatten(),
+            'y': Y.flatten(), 
+            'z': Z.flatten(),
+            'Ex': field_data[:, :, :, 0].flatten(),
+            'Ey': field_data[:, :, :, 1].flatten(),
+            'Ez': field_data[:, :, :, 2].flatten()
+        })
+        
+        # Add magnitude column
+        df['E_magnitude'] = np.sqrt(df['Ex']**2 + df['Ey']**2 + df['Ez']**2)
+        
+        return df
 
 def plot_electron_positions(df,world_dimensions = (-0.05, 0.05), n_bins=100, iteration="iteration0", stacked_spheres=None):
 
