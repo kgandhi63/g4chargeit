@@ -6,8 +6,8 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=24
-#SBATCH --mem=1gb
-#SBATCH --time=18:00:00
+#SBATCH --mem=32gb
+#SBATCH --time=20:00:00
 #SBATCH --output=outputlogs/iteration39_onlyphotoemission_%A
 
 module load openmpi/4.1.5

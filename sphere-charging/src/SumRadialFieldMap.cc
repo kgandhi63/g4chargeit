@@ -237,39 +237,34 @@ void SumRadialFieldMap::GetFieldValue(const G4double point[4], G4double Field[6]
 }
 
 void SumRadialFieldMap::ExportFieldMapToFile(const std::string& filename) const {
-    std::ofstream outfile(filename);
+    std::ofstream outfile(filename, std::ios::binary);
     if (!outfile.is_open()) {
-        G4Exception("SumRadialFieldMap::ExportFieldMapToFile",
+        G4Exception("SumRadialFieldMap::ExportFieldMapToFileBinary",
                     "FileOpenError", FatalException,
                     ("Failed to open file: " + filename).c_str());
         return;
     }
-
-    outfile << "# x y z Ex Ey Ez\n";
-    outfile << std::scientific << std::setprecision(6);
-
-    for (int ix = 0; ix < fNx; ++ix) {
-        const G4double x = fMin.x() + ix * fStep.x();
-        for (int iy = 0; iy < fNy; ++iy) {
-            const G4double y = fMin.y() + iy * fStep.y();
-            for (int iz = 0; iz < fNz; ++iz) {
-                const G4double z = fMin.z() + iz * fStep.z();
-
-                const int id = Index(ix, iy, iz);
-                G4ThreeVector E;
-                if (fStorage == StorageType::Double) {
-                    E = fGridD[id];
-                } else {
-                    const Vec3f& Ef = fGridF[id];
-                    E = G4ThreeVector(Ef.x, Ef.y, Ef.z);
-                }
-
-                outfile << x << " " << y << " " << z << " "
-                        << E.x() << " " << E.y() << " " << E.z() << "\n";
-            }
-        }
+    
+    // Write header with metadata
+    int dimensions[3] = {fNx, fNy, fNz};
+    double min[3] = {fMin.x(), fMin.y(), fMin.z()};
+    double step[3] = {fStep.x(), fStep.y(), fStep.z()};
+    int storage_type = static_cast<int>(fStorage);
+    
+    outfile.write(reinterpret_cast<const char*>(dimensions), sizeof(dimensions));
+    outfile.write(reinterpret_cast<const char*>(min), sizeof(min));
+    outfile.write(reinterpret_cast<const char*>(step), sizeof(step));
+    outfile.write(reinterpret_cast<const char*>(&storage_type), sizeof(storage_type));
+    
+    // Write field data
+    if (fStorage == StorageType::Double) {
+        outfile.write(reinterpret_cast<const char*>(fGridD.data()), 
+                     fGridD.size() * sizeof(G4ThreeVector));
+    } else {
+        outfile.write(reinterpret_cast<const char*>(fGridF.data()), 
+                     fGridF.size() * sizeof(Vec3f));
     }
-
+    
     outfile.close();
-    G4cout << "Field map exported to: " << filename << G4endl;
+    G4cout << "Binary field map exported to: " << filename << G4endl;
 }

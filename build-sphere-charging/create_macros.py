@@ -17,11 +17,11 @@ username = "avira7"
 eventnumbers_onlysolarwind = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_onlyphotoemission = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-iterationNUM = 50 # number of iterations to perform
+iterationNUM = 100 # number of iterations to perform
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
-config_list = ["onlyphotoemission", "onlysolarwind"] #["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
+config_list = ["onlyphotoemission"] #, "onlysolarwind"] #["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
 
 # define the size of the world
 CAD_dimensions = (200,600,546.410) # in units of microns
@@ -76,7 +76,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/sphere/worldX {worldX} um\n')
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
-    f.write(f'/sphere/fieldMapStep 10 um\n') # step size for field map solver
+    f.write(f'/sphere/fieldMapStep 5 um\n') # step size for field map solver
     f.write(f'/sphere/field/file fieldmaps/field-{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}.txt \n')
     f.write('#\n')
     if input_files:
@@ -239,8 +239,8 @@ batch_template = """#!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=24
-#SBATCH --mem=1gb
-#SBATCH --time=18:00:00
+#SBATCH --mem=32gb
+#SBATCH --time=20:00:00
 #SBATCH --output=outputlogs/iteration{iter}_{config}_%A
 
 module load openmpi/4.1.5
