@@ -37,12 +37,14 @@
 #include "G4UniformElectricField.hh"
 #include "G4FieldManager.hh"
 #include "SumRadialFieldMap.hh"
+#include "AdaptiveSumRadialFieldMap.hh"
 
 #include <memory>
 
 class G4LogicalVolume;
 class DetectorMessenger;
 class G4VPhysicalVolume;
+class G4VSolid;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -56,7 +58,6 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     // construct function
     virtual G4VPhysicalVolume* Construct();
     // function to set the sensitive detector volume
-    void SetFieldValue(G4ThreeVector value);
     void ConstructSDandField() override;
     void SetPBC (G4bool);
     void SetRoot (G4bool);
@@ -68,7 +69,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetWorldX (G4double);
     void SetWorldY (G4double);
     void SetWorldZ (G4double);
-    void SetFieldMapStep (G4double);
+    void SetFieldMinimumStep (G4double);
+    void SetFieldGradThreshold (G4double);
                        
   private:
     G4VPhysicalVolume* ConstructVolumes();  
@@ -76,7 +78,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4double worldX_;
     G4double worldY_;
     G4double worldZ_;
-    G4double fieldMapStep_;
+    G4double fieldMinimumStep_;
+    G4double fieldGradThreshold_;
     G4LogicalVolume* logicWorld_; 
     G4double Epsilon_;
     G4String CADFile_;
@@ -87,6 +90,9 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     std::vector<G4ThreeVector> fElectronPositions;
     std::vector<G4ThreeVector> fProtonPositions;
     DetectorMessenger* detectorMessenger_;
+
+    // CAD geometry
+    G4VSolid* sphereSolid_;  // ← Make sure this exists
 
 };
 

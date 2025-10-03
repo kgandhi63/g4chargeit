@@ -48,12 +48,12 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
 :G4UImessenger(), 
  detector_(Det), rootManager_(G4RootAnalysisManager::Instance()), 
  projectDir_(0), fileNameCmd_(0), PBCCmd_(0), EpsilonCmd_(0), WorldXCmd_(0),WorldYCmd_(0), WorldZCmd_(0), 
- FieldMapStepCmd_(0), RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0), FieldFile_(nullptr)
+ FieldMinimumStepCmd_(0), FieldGradThresholdCmd_(0), RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0), 
+ FieldFile_(nullptr)
  
 { 
   projectDir_ = new G4UIdirectory("/sphere/");
   projectDir_->SetGuidance("commands specific to this project");
-  
 
   fileNameCmd_ = new G4UIcmdWithAString("/sphere/rootoutput/file",this);
   fileNameCmd_->SetGuidance("Define the filename.");
@@ -100,10 +100,15 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   WorldZCmd_->SetParameterName("choice",false);
   WorldZCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  FieldMapStepCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/fieldMapStep", this);
-  FieldMapStepCmd_->SetGuidance("Set step size for field map solver.");
-  FieldMapStepCmd_->SetParameterName("choice",false);
-  FieldMapStepCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+  FieldMinimumStepCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/field/MinimumStep", this);
+  FieldMinimumStepCmd_->SetGuidance("Set minimum step size for adapative field map.");
+  FieldMinimumStepCmd_->SetParameterName("choice",false);
+  FieldMinimumStepCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  FieldGradThresholdCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/field/GradThreshold", this);
+  FieldGradThresholdCmd_->SetGuidance("Set minimum step size for adapative field map.");
+  FieldGradThresholdCmd_->SetParameterName("choice",false);
+  FieldGradThresholdCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
   FieldFile_ = new G4UIcmdWithAString("/sphere/field/file",this);
   FieldFile_->SetGuidance("Field Map Save File");
@@ -125,7 +130,8 @@ DetectorMessenger::~DetectorMessenger()
   delete WorldXCmd_;
   delete WorldYCmd_;
   delete WorldZCmd_;
-  delete FieldMapStepCmd_;
+  delete FieldMinimumStepCmd_;
+  delete FieldGradThresholdCmd_;
   delete FieldFile_;
 
 }
@@ -163,8 +169,11 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   if( command == WorldZCmd_ )
   { detector_->SetWorldZ(WorldZCmd_->GetNewDoubleValue(newValue));}
 
-  if( command == FieldMapStepCmd_ )
-  { detector_->SetFieldMapStep(FieldMapStepCmd_->GetNewDoubleValue(newValue));}
+  if( command == FieldMinimumStepCmd_ )
+  { detector_->SetFieldMinimumStep(FieldMinimumStepCmd_->GetNewDoubleValue(newValue));}
+
+  if( command == FieldGradThresholdCmd_ )
+  { detector_->SetFieldGradThreshold(FieldGradThresholdCmd_->GetNewDoubleValue(newValue));}
 
   if( command == FieldFile_ )
   { detector_->SetFieldFile(newValue);}

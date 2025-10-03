@@ -93,8 +93,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
-, PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMapStep_(0),
-CADFile_(""), RootInput_(""), Scale_(1), filename_("")
+, PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMinimumStep_(0),sphereSolid_(0),
+fieldGradThreshold_(0), CADFile_(""), RootInput_(""), Scale_(1), filename_("")
 
 {
   // create commands for interactive definition of the detector 
@@ -207,7 +207,7 @@ SiO2->SetMaterialPropertiesTable(dielectric);
     std::cout << "PBC set to logicWorld" << std::endl;
   }
 
-G4VSolid* sphere_solid;
+//G4VSolid* sphereSolid_;
  // Load In CAD Files (Check repo for other input files -KG) // Create Input from global variable
 if (!CADFile_.empty()) {
 
@@ -220,11 +220,11 @@ if (!CADFile_.empty()) {
   auto sphere_mesh = CADMesh::TessellatedMesh::FromSTL(full_path);
   sphere_mesh->SetScale(Scale_);
   // Get the solid
-  sphere_solid = sphere_mesh->GetSolid();
+  sphereSolid_ = sphere_mesh->GetSolid();
 
 }
  else {
-  sphere_solid = new G4Sphere("Test", 0., 50*um, 0., 360.*deg, 0., 180.*deg);
+  sphereSolid_ = new G4Sphere("Test", 0., 50*um, 0., 360.*deg, 0., 180.*deg);
   std::cout << "Auto Defaulted To 50 um Sphere." << std::endl;
 }
 
@@ -339,7 +339,7 @@ if (!RootInput_.empty()) {
 }
 
 
-G4LogicalVolume*logicSphere= new G4LogicalVolume(sphere_solid, SiO2 , SiO2->GetName());  
+G4LogicalVolume*logicSphere= new G4LogicalVolume(sphereSolid_, SiO2 , SiO2->GetName());  
 
 
 new G4PVPlacement(0,                          	//no rotation
@@ -389,7 +389,7 @@ void DetectorConstruction::ConstructSDandField() {
     allCharges.push_back(hCharge);
   }
 
-  G4cout << "Starting Field Map Precomputation" << G4endl;
+  G4cout << "Starting Adaptive Field Map Precomputation" << G4endl;
 
   // Start timer
   auto start = std::chrono::high_resolution_clock::now();
@@ -397,30 +397,38 @@ void DetectorConstruction::ConstructSDandField() {
   // Define grid: 800 µm cube centered at origin, 2 µm step
   G4ThreeVector min(-worldX_/2, -worldY_/2, -worldZ_/2); //-400*um, -400*um, -400*um);
   G4ThreeVector max(worldX_/2, worldY_/2, worldZ_/2); // 400*um,  400*um,  400*um);
-  G4ThreeVector step(fieldMapStep_, fieldMapStep_, fieldMapStep_);
 
-  // Create the precomputed field map
-  auto sumField = new SumRadialFieldMap(allPositions, allCharges,
-                                        min, max, step, filename_,
-                                        SumRadialFieldMap::StorageType::Double);
+  // Create the adaptive field map - SIMPLIFIED! No grid parameters needed
+  auto adaptiveSumField = new AdaptiveSumRadialFieldMap(
+      std::unique_ptr<G4VSolid>(sphereSolid_), // Transfer ownership
+      allPositions, 
+      allCharges,
+      min, max, 
+      fieldMinimumStep_,
+      fieldGradThreshold_,
+      filename_,
+      6,
+      AdaptiveSumRadialFieldMap::StorageType::Double
+  );
 
   // End timer
   auto end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> duration = end - start;
-  G4cout << "Ending Field Map Precomputation" << G4endl;
+  G4cout << "Ending Adaptive Field Map Precomputation" << G4endl;
 
   // Convert seconds to minutes (1 minute = 60 seconds)
   double duration_in_minutes = duration.count() / 60.0;
   G4cout << "Precomputation took " << duration_in_minutes << " minutes." << G4endl;
 
-  // Set up the field manager as before
+  // Set up the field manager - NOW IT WILL WORK!
   auto worldFM = new G4FieldManager();
-  worldFM->SetDetectorField(sumField);
+  worldFM->SetDetectorField(adaptiveSumField);  // No error now!
   worldFM->SetMinimumEpsilonStep(1.0e-7);
   worldFM->SetMaximumEpsilonStep(1.0e-4);
   worldFM->SetDeltaOneStep(0.1*um);
 
-  auto equation = new G4EqMagElectricField(sumField);
+  // This will also work now!
+  auto equation = new G4EqMagElectricField(adaptiveSumField);
   const G4int nvar = 8;
   auto stepper = new G4DormandPrince745(equation, nvar);
   auto driver  = new G4IntegrationDriver<G4DormandPrince745>(0.1*um, stepper, nvar);
@@ -428,6 +436,47 @@ void DetectorConstruction::ConstructSDandField() {
   worldFM->SetChordFinder(chord);
 
   logicWorld_->SetFieldManager(worldFM, true);
+
+  // G4cout << "Starting Field Map Precomputation" << G4endl;
+
+  // // Start timer
+  // auto start = std::chrono::high_resolution_clock::now();
+
+  // // Define grid: 800 µm cube centered at origin, 2 µm step
+  // G4ThreeVector min(-worldX_/2, -worldY_/2, -worldZ_/2); //-400*um, -400*um, -400*um);
+  // G4ThreeVector max(worldX_/2, worldY_/2, worldZ_/2); // 400*um,  400*um,  400*um);
+
+  // // // Create the precomputed field map
+  // // auto sumField = new SumRadialFieldMap(allPositions, allCharges,
+  // //                                       min, max, step, filename_,
+  // //                                       SumRadialFieldMap::StorageType::Double);
+
+
+
+  // // End timer
+  // auto end = std::chrono::high_resolution_clock::now();
+  // std::chrono::duration<double> duration = end - start;
+  // G4cout << "Ending Field Map Precomputation" << G4endl;
+
+  // // Convert seconds to minutes (1 minute = 60 seconds)
+  // double duration_in_minutes = duration.count() / 60.0;
+  // G4cout << "Precomputation took " << duration_in_minutes << " minutes." << G4endl;
+
+  // // Set up the field manager as before
+  // auto worldFM = new G4FieldManager();
+  // worldFM->SetDetectorField(adaptiveSumField);
+  // worldFM->SetMinimumEpsilonStep(1.0e-7);
+  // worldFM->SetMaximumEpsilonStep(1.0e-4);
+  // worldFM->SetDeltaOneStep(0.1*um);
+
+  // auto equation = new G4EqMagElectricField(adaptiveSumField);
+  // const G4int nvar = 8;
+  // auto stepper = new G4DormandPrince745(equation, nvar);
+  // auto driver  = new G4IntegrationDriver<G4DormandPrince745>(0.1*um, stepper, nvar);
+  // auto chord   = new G4ChordFinder(driver);
+  // worldFM->SetChordFinder(chord);
+
+  // logicWorld_->SetFieldManager(worldFM, true);
 
   // Attach sensitive detector to daughters
   G4int nD = logicWorld_->GetNoDaughters();
@@ -466,12 +515,6 @@ void DetectorConstruction::SetWorldZ(G4double value)
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 
-void DetectorConstruction::SetFieldMapStep(G4double value)
-{
-  fieldMapStep_ = value;
-  G4RunManager::GetRunManager()->ReinitializeGeometry();
-}
-
  void DetectorConstruction::SetEpsilon(G4double value)
 {
   Epsilon_ = value;
@@ -504,4 +547,14 @@ void DetectorConstruction::SetFieldFile(G4String value)
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 
+void DetectorConstruction::SetFieldMinimumStep(G4double value)
+{
+  fieldMinimumStep_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
 
+void DetectorConstruction::SetFieldGradThreshold(G4double value)
+{
+  fieldGradThreshold_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
