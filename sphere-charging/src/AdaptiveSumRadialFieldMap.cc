@@ -262,6 +262,11 @@ void AdaptiveSumRadialFieldMap::GetFieldValue(const G4double point[4], G4double 
     field[5] = E.z();  // E-field z
 }
 
+void AdaptiveSumRadialFieldMap::calculateBoundingBox(G4ThreeVector& min, G4ThreeVector& max) {
+    min = worldMin_;
+    max = worldMax_;
+}
+
 G4ThreeVector AdaptiveSumRadialFieldMap::evaluateField(const G4ThreeVector& point, const Node* node) const {
     if (!node) return G4ThreeVector(0,0,0);
     
@@ -279,11 +284,6 @@ G4ThreeVector AdaptiveSumRadialFieldMap::evaluateField(const G4ThreeVector& poin
     }
     
     // Fallback: compute field directly
-    return computeFieldFromCharges(point);
-}
-
-G4ThreeVector AdaptiveSumRadialFieldMap::computeLeafField(const G4ThreeVector& point, const Node* node) const {
-    // Delegate to the main field computation function
     return computeFieldFromCharges(point);
 }
 
