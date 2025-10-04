@@ -54,7 +54,7 @@ SumRadialFieldMap::SumRadialFieldMap(const std::vector<G4ThreeVector>& pos,
   // Build the map
   BuildFieldMap();
 
-  ExportFieldMapToFile(filename);
+  //ExportFieldMapToFile(filename);
 }
 
 void SumRadialFieldMap::BuildFieldMap() {

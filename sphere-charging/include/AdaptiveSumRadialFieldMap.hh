@@ -6,6 +6,7 @@
 #include "G4VSolid.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4ElectricField.hh"
+#include "SumRadialFieldMap.hh"  // Include the uniform field map
 #include <array>
 #include <memory>
 #include <vector>
@@ -18,24 +19,23 @@ public:
 
     struct Node {
         G4ThreeVector min, max;
-        G4ThreeVector center;  // Added for gradient computation
-        double charge;
+        G4ThreeVector center;
+        G4ThreeVector precomputed_field;  // Field value at center
         bool is_leaf;
         std::array<std::unique_ptr<Node>, 8> children;
         
-        Node() : charge(0.0), is_leaf(false) {}
+        Node() : is_leaf(false) {}
     };
 
-    // Constructor
+    // Constructor that takes a uniform mesh from SumRadialFieldMap
     AdaptiveSumRadialFieldMap(std::unique_ptr<G4VSolid> solid, 
-                             const std::vector<G4ThreeVector>& positions,
-                             const std::vector<double>& charges,
+                             const SumRadialFieldMap& uniformFieldMap,
+                             const G4double& gradThreshold,
+                             const G4double& minStep,
+                             const std::string& filename,
                              const G4ThreeVector& min,
                              const G4ThreeVector& max,
-                             const G4double& step,
-                             const G4double& gradThreshold,
-                             const std::string& filename,
-                             int max_depth, 
+                             int max_depth,
                              StorageType storage = StorageType::Double);
 
     ~AdaptiveSumRadialFieldMap() override = default;
@@ -53,48 +53,43 @@ private:
     std::unique_ptr<Node> root_;
     std::unique_ptr<G4VSolid> sphereSolid_;
     int max_depth_;
-    G4double worldX_, worldY_, worldZ_;
     
-    // Field map parameters
+    // Field data from uniform mesh
     std::vector<G4ThreeVector> fPositions;
     std::vector<G4double> fCharges;
+    G4double worldX_, worldY_,worldZ_; 
     G4ThreeVector worldMin_, worldMax_; 
     G4double minStepSize_;
-    G4double fieldGradThreshold_;
     StorageType fStorage;
-    int fNx, fNy, fNz;
+
+    // Gradient-based refinement parameters
+    double fieldGradThreshold_;  // V/m per micron
 
     // Mesh statistics
     mutable size_t total_nodes_;
     mutable size_t leaf_nodes_;
-    mutable size_t surface_refinements_;
     mutable size_t gradient_refinements_;
     mutable int max_depth_reached_;
 
     // Mesh construction methods
-    std::unique_ptr<Node> buildAdaptiveMesh();
+    std::unique_ptr<Node> buildFromUniformMesh(const SumRadialFieldMap& uniformFieldMap);
+    std::unique_ptr<Node> createOctreeFromUniformGrid(const SumRadialFieldMap& uniformFieldMap, 
+                                                     const G4ThreeVector& min, 
+                                                     const G4ThreeVector& max,
+                                                     int depth);
+    void refineMeshByGradient(Node* node);
     
     void calculateBoundingBox(G4ThreeVector& min, G4ThreeVector& max);
-    
-    std::unique_ptr<Node> buildOctree(const G4ThreeVector& min, 
-                                     const G4ThreeVector& max,
-                                     int depth);
-
-    // Enhanced refinement criteria with gradient support
-    bool shouldRefineNode(const G4ThreeVector& min, const G4ThreeVector& max, 
-                         const G4ThreeVector& center, int depth);
-    
-    bool isNearSurface(const G4ThreeVector& point, double tolerance) const;
     
     // Gradient-based refinement methods
     bool hasHighFieldGradient(const G4ThreeVector& center, double sample_distance) const;
     double estimateFieldGradient(const G4ThreeVector& center, double distance) const;
     G4ThreeVector computeFieldFromCharges(const G4ThreeVector& point) const;
+    G4ThreeVector getFieldFromUniformMap(const G4ThreeVector& point, const SumRadialFieldMap& uniformMap) const;
 
     // Field computation
     G4ThreeVector evaluateField(const G4ThreeVector& point, const Node* node) const;
-    G4ThreeVector computeLeafField(const G4ThreeVector& point, const Node* node) const;
-
+    
     // Utility functions
     void calculateChildBounds(const G4ThreeVector& min, const G4ThreeVector& max,
                              const G4ThreeVector& center, int child_index,

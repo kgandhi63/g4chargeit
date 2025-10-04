@@ -14,43 +14,31 @@
 
 AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     std::unique_ptr<G4VSolid> solid, 
-    const std::vector<G4ThreeVector>& positions,
-    const std::vector<double>& charges,
+    const SumRadialFieldMap& uniformFieldMap,
+    const G4double& gradThreshold,
+    const G4double& minStep,
+    const std::string& filename,
     const G4ThreeVector& min,
     const G4ThreeVector& max,
-    const G4double& minStepSize,
-    const G4double& gradThreshold,
-    const std::string& filename,
     int max_depth,
     StorageType storage)
-    : sphereSolid_(std::move(solid)), max_depth_(max_depth),
-      fPositions(positions), fCharges(charges), fieldGradThreshold_(gradThreshold),
-      worldMin_(min), worldMax_(max), minStepSize_(minStepSize), fStorage(storage)
+    : sphereSolid_(std::move(solid)), max_depth_(max_depth),minStepSize_(minStep),
+      worldMin_(min), worldMax_(max), fieldGradThreshold_(gradThreshold), fStorage(storage)
 {
-    // Basic validation
-
-    if (positions.size() != charges.size()) {
-        throw std::runtime_error("AdaptiveSumRadialFieldMap: positions and charges size mismatch.");
-    }
-    
-    if (worldMax_.x() <= worldMin_.x() || worldMax_.y() <= worldMin_.y() || worldMax_.z() <= worldMin_.z()) {
-        throw std::runtime_error("AdaptiveSumRadialFieldMap: max must exceed min in all axes.");
-    }
+                 
+    // Set world dimensions
+    setWorldDimensions(worldMax_.x() - worldMin_.x(), worldMax_.y() - worldMin_.y(), worldMax_.z() - worldMin_.z());
 
     // Initialize statistics
     total_nodes_ = 0;
     leaf_nodes_ = 0;
-    surface_refinements_ = 0;
     gradient_refinements_ = 0;
     max_depth_reached_ = 0;
 
-    // Set world dimensions from input bounds
-    setWorldDimensions(worldMax_.x() - worldMin_.x(), worldMax_.y() - worldMin_.y(), worldMax_.z() - worldMin_.z());
-    
-    // Build the adaptive mesh with OpenMP parallelization
-    root_ = buildAdaptiveMesh();
+    // Build adaptive mesh from uniform mesh
+    root_ = buildFromUniformMesh(uniformFieldMap);
 
-    G4cout << "after build mesh" << G4endl;
+    G4cout << "Adaptive mesh built from uniform mesh" << G4endl;
 
     // Collect final statistics
     collectStatistics(root_.get(), 0);
@@ -64,28 +52,31 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
 }
 
 std::unique_ptr<AdaptiveSumRadialFieldMap::Node> 
-AdaptiveSumRadialFieldMap::buildAdaptiveMesh() {
+AdaptiveSumRadialFieldMap::buildFromUniformMesh(const SumRadialFieldMap& uniformFieldMap) {
     G4ThreeVector min, max;
     calculateBoundingBox(min, max);
     
-    return buildOctree(min, max, 0);
-}
-
-void AdaptiveSumRadialFieldMap::calculateBoundingBox(G4ThreeVector& min, G4ThreeVector& max) {
-    min = worldMin_;
-    max = worldMax_;
+    // Create initial octree matching the uniform grid resolution
+    G4cout << "Creating initial octree from uniform grid..." << G4endl;
+    auto root = createOctreeFromUniformGrid(uniformFieldMap, min, max, 0);
+    
+    // Refine based on field gradients using the uniform map for field queries
+    G4cout << "Refining mesh based on field gradients..." << G4endl;
+    refineMeshByGradient(root.get());
+    
+    return root;
 }
 
 std::unique_ptr<AdaptiveSumRadialFieldMap::Node> 
-AdaptiveSumRadialFieldMap::buildOctree(const G4ThreeVector& min, 
-                                      const G4ThreeVector& max,
-                                      int depth) {
+AdaptiveSumRadialFieldMap::createOctreeFromUniformGrid(const SumRadialFieldMap& uniformFieldMap,
+                                                      const G4ThreeVector& min, 
+                                                      const G4ThreeVector& max,
+                                                      int depth) {
     auto node = std::make_unique<Node>();
     node->min = min;
     node->max = max;
     node->center = (min + max) * 0.5;
-    node->is_leaf = false;
-
+    
     #pragma omp atomic
     total_nodes_++;
 
@@ -93,112 +84,106 @@ AdaptiveSumRadialFieldMap::buildOctree(const G4ThreeVector& min,
     max_depth_reached_ = std::max(max_depth_reached_, depth);
 
     double size = (max.x() - min.x());
-    G4cout << "Depth: " << depth << ", Size: " << size/um << " um, "
-           << "Bounds: [" << min.x()/um << "," << min.y()/um << "," << min.z()/um << "] to ["
-           << max.x()/um << "," << max.y()/um << "," << max.z()/um << "]" << G4endl;
-
-    // Check if we should refine this node based on multiple criteria
-    bool should_refine = shouldRefineNode(min, max, node->center, depth);
-    G4cout << "Should refine: " << should_refine << G4endl;
     
-    if (should_refine && depth < max_depth_) {
-        G4cout << "REFINING - Creating children at depth " << depth << G4endl;
+    // Determine if we should create children based on uniform grid resolution
+    // Stop when we reach approximately the uniform grid cell size
+    bool should_create_children = (size > 2.0 * minStepSize_) && (depth < max_depth_);
+    
+    if (should_create_children) {
         G4ThreeVector center = node->center;
         
-        // Add a safety check to prevent infinite recursion
-        if (size < 0.1 * um) {
-            G4cout << "WARNING: Node size too small, forcing leaf node" << G4endl;
-            node->is_leaf = true;
-            #pragma omp atomic
-            leaf_nodes_++;
-            return node;
+        // Create children
+        for (int i = 0; i < 8; ++i) {
+            G4ThreeVector child_min, child_max;
+            calculateChildBounds(min, max, center, i, child_min, child_max);
+            node->children[i] = createOctreeFromUniformGrid(uniformFieldMap, child_min, child_max, depth + 1);
         }
-        
-        // Parallelize child creation for deeper levels
-        if (depth >= 2) {
-            #pragma omp parallel for schedule(dynamic)
-            for (int i = 0; i < 8; ++i) {
-                G4ThreeVector child_min, child_max;
-                calculateChildBounds(min, max, center, i, child_min, child_max);
-                G4cout << "Child " << i << " bounds calculated" << G4endl;
-                
-                #pragma omp critical
-                {
-                    node->children[i] = buildOctree(child_min, child_max, depth + 1);
-                }
-                G4cout << "Child " << i << " completed" << G4endl;
-            }
-        } else {
-            // Sequential for top levels (better cache locality)
-            for (int i = 0; i < 8; ++i) {
-                G4ThreeVector child_min, child_max;
-                calculateChildBounds(min, max, center, i, child_min, child_max);
-                G4cout << "Child " << i << " bounds calculated" << G4endl;
-                node->children[i] = buildOctree(child_min, child_max, depth + 1);
-                G4cout << "Child " << i << " completed" << G4endl;
-            }
-        }
-        G4cout << "All children created at depth " << depth << G4endl;
+        node->is_leaf = false;
     } else {
-        // Leaf node
-        G4cout << "MAKING LEAF NODE at depth " << depth << G4endl;
+        // This is a leaf node - use uniform field map to get field value
         node->is_leaf = true;
+        node->precomputed_field = getFieldFromUniformMap(node->center, uniformFieldMap);
+        
         #pragma omp atomic
         leaf_nodes_++;
     }
     
-    G4cout << "Returning node from depth " << depth << G4endl;
     return node;
 }
 
-bool AdaptiveSumRadialFieldMap::shouldRefineNode(const G4ThreeVector& min, 
-                                                const G4ThreeVector& max,
-                                                const G4ThreeVector& center,
-                                                int depth) {
-    double size = (max.x() - min.x());
+void AdaptiveSumRadialFieldMap::refineMeshByGradient(Node* node) {
+    if (!node) return;
     
-    // Always refine first few levels to establish base structure
-    if (depth < 2) return true;
-    
-    // Check minimum size constraint
-    if (size < minStepSize_) {
-        return false;
+    // If this is a leaf node, check if it needs refinement
+    if (node->is_leaf) {
+        double size = (node->max.x() - node->min.x());
+        
+        // Check if we should refine based on gradient and size constraints
+        if (size > minStepSize_ && hasHighFieldGradient(node->center, size * 0.2)) {
+            #pragma omp atomic
+            gradient_refinements_++;
+            
+            G4cout << "Refining node at [" << node->center.x()/um << ", " 
+                   << node->center.y()/um << ", " << node->center.z()/um 
+                   << "] um, size: " << size/um << " um" << G4endl;
+            
+            // Convert this leaf to an internal node and create children
+            node->is_leaf = false;
+            #pragma omp atomic
+            leaf_nodes_--;
+            
+            G4ThreeVector center = node->center;
+            
+            // Create children as leaf nodes initially
+            for (int i = 0; i < 8; ++i) {
+                G4ThreeVector child_min, child_max;
+                calculateChildBounds(node->min, node->max, center, i, child_min, child_max);
+                
+                auto child = std::make_unique<Node>();
+                child->min = child_min;
+                child->max = child_max;
+                child->center = (child_min + child_max) * 0.5;
+                child->is_leaf = true;
+                child->precomputed_field = computeFieldFromCharges(child->center);
+                
+                #pragma omp atomic
+                total_nodes_++;
+                #pragma omp atomic
+                leaf_nodes_++;
+                
+                node->children[i] = std::move(child);
+            }
+            
+            // Recursively check new children for refinement
+            for (auto& child : node->children) {
+                refineMeshByGradient(child.get());
+            }
+        }
+    } else {
+        // Recursively check all children
+        for (auto& child : node->children) {
+            refineMeshByGradient(child.get());
+        }
     }
-
-
-    
-    // Check if node is near CAD surface - refine these regions
-    // if (isNearSurface(center, size * 0.3)) {
-    //     #pragma omp atomic
-    //     surface_refinements_++;
-    //     return true;
-    // }
-    
-    // Check field gradient - refine regions with high field variation
-    if (hasHighFieldGradient(center, size * 0.2)) {
-        #pragma omp atomic
-        gradient_refinements_++;
-        return true;
-    }
-    
-    return false;
 }
 
-bool AdaptiveSumRadialFieldMap::isNearSurface(const G4ThreeVector& point, double tolerance) const {
-    if (!sphereSolid_) return false;
+G4ThreeVector AdaptiveSumRadialFieldMap::getFieldFromUniformMap(const G4ThreeVector& point, 
+                                                               const SumRadialFieldMap& uniformMap) const {
+    // Use the uniform field map to get the field value
+    G4double field[6] = {0};
+    G4double point4[4] = {point.x(), point.y(), point.z(), 0.0};
+    uniformMap.GetFieldValue(point4, field);
     
-    EInside inside_status = sphereSolid_->Inside(point);
-    
-    // Refine if inside or on surface
-    if (inside_status == kInside || inside_status == kSurface) {
-        return true;
-    }
-    
-    return false;
+    return G4ThreeVector(field[3], field[4], field[5]);  // Electric field components
 }
 
 bool AdaptiveSumRadialFieldMap::hasHighFieldGradient(const G4ThreeVector& center, double sample_distance) const {
-    // Estimate field gradient by sampling around the center point
+    // Quick check for very large nodes
+    if (sample_distance > 50 * um) {
+        return false;
+    }
+    
+    // Estimate field gradient
     double gradient_magnitude = estimateFieldGradient(center, sample_distance);
     
     // Convert to V/m per micron for threshold comparison
@@ -208,31 +193,33 @@ bool AdaptiveSumRadialFieldMap::hasHighFieldGradient(const G4ThreeVector& center
 }
 
 double AdaptiveSumRadialFieldMap::estimateFieldGradient(const G4ThreeVector& center, double distance) const {
-    // Sample field at 6 points around center to estimate gradient components
+    double actual_distance = std::min(distance, 5.0 * um);
+    
+    // Sample field at 6 points around center
     std::vector<G4ThreeVector> sample_points = {
-        center + G4ThreeVector(distance, 0, 0),
-        center - G4ThreeVector(distance, 0, 0),
-        center + G4ThreeVector(0, distance, 0),
-        center - G4ThreeVector(0, distance, 0),
-        center + G4ThreeVector(0, 0, distance),
-        center - G4ThreeVector(0, 0, distance)
+        center + G4ThreeVector(actual_distance, 0, 0),
+        center - G4ThreeVector(actual_distance, 0, 0),
+        center + G4ThreeVector(0, actual_distance, 0),
+        center - G4ThreeVector(0, actual_distance, 0),
+        center + G4ThreeVector(0, 0, actual_distance),
+        center - G4ThreeVector(0, 0, actual_distance)
     };
     
-    // Compute fields at sample points
-    std::vector<G4ThreeVector> sample_fields;
-    sample_fields.reserve(6);
+    // Compute field magnitudes at sample points
+    std::vector<double> field_magnitudes;
+    field_magnitudes.reserve(6);
     
     for (const auto& point : sample_points) {
-        sample_fields.push_back(computeFieldFromCharges(point));
+        G4ThreeVector field = computeFieldFromCharges(point);
+        field_magnitudes.push_back(field.mag());
     }
     
-    // Calculate gradient components using finite differences
-    G4ThreeVector gradient;
-    gradient.setX((sample_fields[0].mag() - sample_fields[1].mag()) / (2 * distance)); // dE/dx
-    gradient.setY((sample_fields[2].mag() - sample_fields[3].mag()) / (2 * distance)); // dE/dy
-    gradient.setZ((sample_fields[4].mag() - sample_fields[5].mag()) / (2 * distance)); // dE/dz
+    // Calculate gradient components
+    double grad_x = (field_magnitudes[0] - field_magnitudes[1]) / (2 * actual_distance);
+    double grad_y = (field_magnitudes[2] - field_magnitudes[3]) / (2 * actual_distance);
+    double grad_z = (field_magnitudes[4] - field_magnitudes[5]) / (2 * actual_distance);
     
-    return gradient.mag();
+    return std::sqrt(grad_x * grad_x + grad_y * grad_y + grad_z * grad_z);
 }
 
 G4ThreeVector AdaptiveSumRadialFieldMap::computeFieldFromCharges(const G4ThreeVector& point) const {
@@ -305,10 +292,8 @@ void AdaptiveSumRadialFieldMap::PrintMeshStatistics() const {
     G4cout << "Total nodes: " << total_nodes_ << G4endl;
     G4cout << "Leaf nodes: " << leaf_nodes_ << G4endl;
     G4cout << "Max depth reached: " << max_depth_reached_ << G4endl;
-    G4cout << "Surface-based refinements: " << surface_refinements_ << G4endl;
     G4cout << "Gradient-based refinements: " << gradient_refinements_ << G4endl;
     G4cout << "Field gradient threshold: " << fieldGradThreshold_ << " V/m per µm" << G4endl;
-    G4cout << "World size: " << worldX_/um << " µm cube" << G4endl;
     G4cout << "Min node size: " << minStepSize_/um << " µm" << G4endl;
     G4cout << "=================================" << G4endl;
 }
@@ -383,9 +368,9 @@ void AdaptiveSumRadialFieldMap::ExportFieldMapToFile(const std::string& filename
     
     // Write header with adaptive mesh metadata
     double world_bounds[6] = {
-        worldMin_.x(), worldMin_.y(), worldMin_.z(),
-        worldMax_.x(), worldMax_.y(), worldMax_.z()
-    };
+            worldMin_.x(), worldMin_.y(), worldMin_.z(),
+            worldMax_.x(), worldMax_.y(), worldMax_.z()
+        };
     int mesh_parameters[4] = {
         max_depth_,
         static_cast<int>(minStepSize_ / um), // Convert to microns for storage
@@ -426,13 +411,13 @@ void AdaptiveSumRadialFieldMap::writeOctreeToFile(std::ofstream& outfile, const 
     outfile.write(reinterpret_cast<const char*>(node_bounds), sizeof(node_bounds));
     outfile.write(&node_type, sizeof(node_type));
     
-    if (node->is_leaf) {
-        // For leaf nodes, write charge density
-        outfile.write(reinterpret_cast<const char*>(&node->charge), sizeof(node->charge));
-    } else {
-        // For non-leaf nodes, recursively write children
-        for (const auto& child : node->children) {
-            writeOctreeToFile(outfile, child.get());
-        }
-    }
+    // if (node->is_leaf) {
+    //     // For leaf nodes, write charge density
+    //     outfile.write(reinterpret_cast<const char*>(&node->charge), sizeof(node->charge));
+    // } else {
+    //     // For non-leaf nodes, recursively write children
+    //     for (const auto& child : node->children) {
+    //         writeOctreeToFile(outfile, child.get());
+    //     }
+    //}
 }

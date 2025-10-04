@@ -397,17 +397,22 @@ void DetectorConstruction::ConstructSDandField() {
   // Define grid: 800 µm cube centered at origin, 2 µm step
   G4ThreeVector min(-worldX_/2, -worldY_/2, -worldZ_/2); //-400*um, -400*um, -400*um);
   G4ThreeVector max(worldX_/2, worldY_/2, worldZ_/2); // 400*um,  400*um,  400*um);
+  G4ThreeVector step(10*um, 10*um, 10*um);
 
-  // Create the adaptive field map - SIMPLIFIED! No grid parameters needed
-  auto adaptiveSumField = new AdaptiveSumRadialFieldMap(
-      std::unique_ptr<G4VSolid>(sphereSolid_), // Transfer ownership
-      allPositions, 
-      allCharges,
-      min, max, 
+  // First create the uniform field map
+  auto uniformFieldMap = new SumRadialFieldMap(allPositions, allCharges,
+                                              min, max, step, "uniform_field_map.bin",
+                                              SumRadialFieldMap::StorageType::Double);
+
+  // Then create adaptive field map using the uniform one
+  auto adaptiveFieldMap = new AdaptiveSumRadialFieldMap(
+      std::unique_ptr<G4VSolid>(sphereSolid_),
+      *uniformFieldMap,  // Pass the uniform field map
+      fieldGradThreshold_,               // Gradient threshold (V/m per micron)
       fieldMinimumStep_,
-      fieldGradThreshold_,
       filename_,
-      6,
+      min, max,
+      6,                 // max depth
       AdaptiveSumRadialFieldMap::StorageType::Double
   );
 
@@ -422,13 +427,13 @@ void DetectorConstruction::ConstructSDandField() {
 
   // Set up the field manager - NOW IT WILL WORK!
   auto worldFM = new G4FieldManager();
-  worldFM->SetDetectorField(adaptiveSumField);  // No error now!
+  worldFM->SetDetectorField(adaptiveFieldMap);  // No error now!
   worldFM->SetMinimumEpsilonStep(1.0e-7);
   worldFM->SetMaximumEpsilonStep(1.0e-4);
   worldFM->SetDeltaOneStep(0.1*um);
 
   // This will also work now!
-  auto equation = new G4EqMagElectricField(adaptiveSumField);
+  auto equation = new G4EqMagElectricField(adaptiveFieldMap);
   const G4int nvar = 8;
   auto stepper = new G4DormandPrince745(equation, nvar);
   auto driver  = new G4IntegrationDriver<G4DormandPrince745>(0.1*um, stepper, nvar);
