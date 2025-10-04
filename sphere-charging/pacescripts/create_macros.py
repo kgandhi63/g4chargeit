@@ -76,7 +76,8 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/sphere/worldX {worldX} um\n')
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
-    f.write(f'/sphere/fieldMapStep 10 um\n') # step size for field map solver
+    f.write(f'/sphere/field/MinimumStep 0.1 um\n') # step size for field map solver
+    f.write(f'/sphere/field/GradThreshold 1e-6 V/m\n') # step size for field map solver
     f.write(f'/sphere/field/file fieldmaps/field-{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}.txt \n')
     f.write('#\n')
     if input_files:
