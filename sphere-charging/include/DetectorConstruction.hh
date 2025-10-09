@@ -36,7 +36,6 @@
 #include "G4VUserDetectorConstruction.hh"
 #include "G4UniformElectricField.hh"
 #include "G4FieldManager.hh"
-#include "SumRadialFieldMap.hh"
 #include "AdaptiveSumRadialFieldMap.hh"
 
 #include <memory>

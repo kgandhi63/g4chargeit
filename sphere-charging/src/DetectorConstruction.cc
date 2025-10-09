@@ -65,7 +65,6 @@
 #include "G4Sphere.hh"
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
-#include "SumRadialFieldMap.hh"
 
 #include "G4GeometryManager.hh"
 #include "G4PhysicalVolumeStore.hh"
@@ -399,10 +398,7 @@ void DetectorConstruction::ConstructSDandField() {
   G4ThreeVector max(worldX_/2, worldY_/2, worldZ_/2); // 400*um,  400*um,  400*um);
   G4ThreeVector step(10*um, 10*um, 10*um);
 
-  // First create the uniform field map
-  // auto uniformFieldMap = new SumRadialFieldMap(allPositions, allCharges,
-  //                                             min, max, step, "uniform_field_map.bin",
-  //                                             SumRadialFieldMap::StorageType::Double);
+
 
   // Only create adaptive field map if we have charge data
   if (!allPositions.empty() && !allCharges.empty()) {
@@ -414,7 +410,7 @@ void DetectorConstruction::ConstructSDandField() {
         fieldMinimumStep_,
         filename_,
         min, max,
-        6,                 // max depth
+        8,                 // max depth
         AdaptiveSumRadialFieldMap::StorageType::Double
     );
 

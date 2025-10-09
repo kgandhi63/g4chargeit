@@ -48,6 +48,8 @@ target_link_libraries(charging_sphere g4pbc::g4pbc)
 find_package(ROOT REQUIRED)
 include_directories(${ROOT_INCLUDE_DIRS})
 target_link_libraries(charging_sphere ${ROOT_LIBRARIES})
+target_compile_options(charging_sphere PRIVATE -march=native)
+
 
 
 #----------------------------------------------------------------------------
