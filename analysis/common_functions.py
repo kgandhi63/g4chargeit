@@ -9,6 +9,7 @@ import pandas as pd
 import struct
 from typing import Dict, Any
 import glob
+import os
 
 import trimesh 
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -32,7 +33,7 @@ def read_rootfile(file,directory_path=None):
 
     return df 
 
-def read_field_map_binary_pandas(filename: str) -> pd.DataFrame:
+def read_uniform_fieldmap(filename: str) -> pd.DataFrame:
     """
     Read C++ binary field map into pandas DataFrame
     """
@@ -73,15 +74,72 @@ def read_field_map_binary_pandas(filename: str) -> pd.DataFrame:
             'x': X.flatten(),
             'y': Y.flatten(), 
             'z': Z.flatten(),
-            'Ex': field_data[:, :, :, 0].flatten(),
-            'Ey': field_data[:, :, :, 1].flatten(),
-            'Ez': field_data[:, :, :, 2].flatten()
+            'Ex': field_data[:, :, :, 0].flatten()*1e9, # convert field units from 1 MeV / e / mm = 1e6 V / mm = 1e9 V/m
+            'Ey': field_data[:, :, :, 1].flatten()*1e9,
+            'Ez': field_data[:, :, :, 2].flatten()*1e9
         })
         
         # Add magnitude column
-        df['E_magnitude'] = np.sqrt(df['Ex']**2 + df['Ey']**2 + df['Ez']**2)
+        df['E_mag'] = np.sqrt(df['Ex']**2 + df['Ey']**2 + df['Ez']**2)
         
         return df
+
+def read_adaptive_fieldmap(filename):
+    with open(filename, 'rb') as f:
+        # Read header
+        world_bounds = np.frombuffer(f.read(6 * 8), dtype=np.float64)
+        mesh_parameters = np.frombuffer(f.read(5 * 4), dtype=np.int32)
+
+        max_depth = mesh_parameters[0]
+        min_step_um = mesh_parameters[1]
+        total_nodes = mesh_parameters[2]
+        leaf_nodes = mesh_parameters[3]
+        storage_flag = mesh_parameters[4]
+
+        # Check remaining bytes in file
+        file_size = os.path.getsize(filename)
+        bytes_read_so_far = 6 * 8 + 5 * 4
+        remaining_bytes = file_size - bytes_read_so_far - 3 * 4  # minus statistics
+
+        expected_all_nodes = total_nodes * 6 * 8
+        expected_leaf_nodes = leaf_nodes * 6 * 8
+
+        if remaining_bytes == expected_all_nodes:
+            num_nodes = total_nodes
+        elif remaining_bytes == expected_leaf_nodes:
+            num_nodes = leaf_nodes
+        else:
+            raise ValueError(f"Unexpected data size in {filename}: {remaining_bytes} bytes remaining")
+
+        # Read node field data
+        field_data = np.frombuffer(f.read(num_nodes * 6 * 8), dtype=np.float64)
+        field_data = field_data.reshape((num_nodes, 6)) #*1e9 # convert field units from 1 MeV / e / mm = 1e6 V / mm = 1e9 V/m 
+
+        # Read statistics
+        statistics = np.frombuffer(f.read(3 * 4), dtype=np.int32)
+        gradient_refinements = statistics[0]
+        max_depth_reached = statistics[1]
+        num_positions = statistics[2]
+
+    df = pd.DataFrame(field_data, columns=['x', 'y', 'z', 'Ex', 'Ey', 'Ez'])
+
+    metadata = {
+        'world_bounds': world_bounds,
+        'mesh_parameters': {
+            'max_depth': max_depth,
+            'min_step_um': min_step_um,
+            'total_nodes': total_nodes,
+            'leaf_nodes': leaf_nodes,
+            'storage_flag': storage_flag,
+        },
+        'statistics': {
+            'gradient_refinements': gradient_refinements,
+            'max_depth_reached': max_depth_reached,
+            'fPositions_size': num_positions,
+        }
+    }
+
+    return df, metadata
 
 def plot_electron_positions(df,world_dimensions = (-0.05, 0.05), n_bins=100, iteration="iteration0", stacked_spheres=None):
 

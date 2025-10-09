@@ -155,7 +155,7 @@ SiO2->SetMaterialPropertiesTable(dielectric);
   // SiO2->AddElement(O, natoms=3);
   // //SiO2->SetMaterialPropertiesTable(dielectric);
  
-  G4bool checkOverlaps = false;
+  G4bool checkOverlaps = true;
   //     
   // World Characteristics
   //
@@ -347,7 +347,8 @@ new G4PVPlacement(0,                          	//no rotation
               SiO2->GetName(),               //its name
               logicWorld_,                        //its mother volume
               false,                              //no boolean operation
-              0);                                 //copy number
+              0, 
+              checkOverlaps);                                 //copy number
               
 
 //logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());

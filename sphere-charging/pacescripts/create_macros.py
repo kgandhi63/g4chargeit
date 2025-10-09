@@ -14,14 +14,14 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-eventnumbers_onlysolarwind = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-eventnumbers_onlyphotoemission = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlysolarwind = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlyphotoemission = 100 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 iterationNUM = 100 # number of iterations to perform
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
-config_list = ["onlyphotoemission"] #, "onlysolarwind"] #["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
+config_list = ["onlyphotoemission", "onlysolarwind"] #, "onlysolarwind"] #["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
 
 # define the size of the world
 CAD_dimensions = (200,600,546.410) # in units of microns
@@ -66,7 +66,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write('/process/em/PhotoeffectBelowKShell true\n')
     f.write('#\n')
     f.write('/process/em/lowestElectronEnergy 0 eV\n')
-    f.write('/process/em/lowestMuHadEnergy 10 eV\n')
+    f.write('/process/em/lowestMuHadEnergy 100 eV\n')
     f.write('/process/em/enableSamplingTable 1\n')
     f.write('#\n')
     f.write('/process/eLoss/CSDARange 1\n')
@@ -76,8 +76,8 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/sphere/worldX {worldX} um\n')
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
-    f.write(f'/sphere/field/MinimumStep 0.1 um\n') # step size for field map solver
-    f.write(f'/sphere/field/GradThreshold 1e-6 V/m\n') # step size for field map solver
+    f.write(f'/sphere/field/MinimumStep 1 um\n') # step size for field map solver
+    f.write(f'/sphere/field/GradThreshold 1e-2 V/m\n') # step size for field map solver
     f.write(f'/sphere/field/file fieldmaps/field-{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}.txt \n')
     f.write('#\n')
     if input_files:
@@ -240,38 +240,12 @@ batch_template = """#!/bin/bash
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=24
-#SBATCH --mem=32gb
-#SBATCH --time=20:00:00
+#SBATCH --mem-per-cpu=14gb
+#SBATCH --time=05:00:00
 #SBATCH --output=outputlogs/iteration{iter}_{config}_%A
-
-module load openmpi/4.1.5
 
 echo "Starting iteration{iter} for {config} configuration"
 srun {run_line}
-date
-"""
-#bash {run_script}
-
-batch_template_array = """#!/bin/bash
-#SBATCH --job-name=Iteration{iter}_Array
-#SBATCH --account=gts-{account}
-#SBATCH --mail-user={username}@gatech.edu
-#SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --nodes=1
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=32gb
-#SBATCH --time=15:00:00
-#SBATCH --output=outputlogs/iteration{iter}_%A_%a.out
-#SBATCH --array=1-{array_size}
-
-# Read in the array of commands
-readarray -t commands < {run_script}
-
-# Run the command corresponding to this array task
-cmd="${{commands[$SLURM_ARRAY_TASK_ID-1]}}"
-echo "Running task $SLURM_ARRAY_TASK_ID: $cmd"
-eval "$cmd"
-
 date
 """
 
@@ -312,37 +286,46 @@ print(f"Created all batchscripts: 0 through {i-1}")
 
 #############################################################
 
-# Directories
-batch_dir = "batchscripts"
-output_script = "submit_all_iterations.sh"
+# # Directories
+# batch_dir = "batchscripts"
+# output_script = "submit_all_iterations.sh"
 
-# Get and sort all batch script files
-batch_scripts = glob.glob(os.path.join(batch_dir, "*.sh"))
-batch_scripts.sort()  # Sort alphabetically (can be adjusted if needed)
+# # Get and sort all batch script files
+# batch_scripts = glob.glob(os.path.join(batch_dir, "*.sh"))
+# batch_scripts.sort()  # Sort alphabetically (can be adjusted if needed)
 
-# Start writing the master submission script
-with open(output_script, "w") as f:
-    f.write("#!/bin/bash\n\n")
+# # Define the section you want to submit (adjust these values as needed)
+# start_iteration = 0   # First iteration to include
+# end_iteration = iterationNUM    # Last iteration to include
 
-    previous_job_var = ""
-    for i, script_path in enumerate(batch_scripts):
+# # Start writing the master submission script
+# with open(output_script, "w") as f:
+#     f.write("#!/bin/bash\n\n")
 
-        # Use regex to find the iteration number
-        match = re.search(r"iteration(\d+)_for", script_path)
-        if match:
-            iteration = int(match.group(1))
+#     previous_job_var = ""
+#     first_job_in_section = True
+    
+#     for i, script_path in enumerate(batch_scripts):
+#         # Use regex to find the iteration number
+#         match = re.search(r"iteration(\d+)_for", script_path)
+#         if match:
+#             iteration = int(match.group(1))
+            
+#             # Skip scripts outside our desired range
+#             if iteration < start_iteration or iteration > end_iteration:
+#                 continue
+                
+#             if first_job_in_section:
+#                 f.write(f"# Submit first job in section (iteration {iteration})\n")
+#                 f.write(f"jid{i}=$(sbatch --parsable {script_path})\n")
+#                 f.write(f"echo \"Submitted job for iteration {iteration}: $jid{i}\"\n\n")
+#                 previous_job_var = f"$jid{i}"
+#                 first_job_in_section = False
+#             else:
+#                 f.write(f"# Submit job for iteration {iteration} with dependency on previous job\n")
+#                 f.write(f"jid{i}=$(sbatch --parsable --dependency=afterok:{previous_job_var} {script_path})\n")
+#                 f.write(f"echo \"Submitted job for iteration {iteration} (afterok dependency): $jid{i}\"\n\n")
+#                 previous_job_var = f"$jid{i}"
 
-        if iteration == 0:
-            f.write("# Submit the first job and capture its Job ID\n")
-            f.write(f"jid{i}=$(sbatch --parsable {script_path})\n")
-            f.write(f"echo \"Submitted job for runscript: $jid{i}\"\n\n")
-            previous_job_var = f"$jid{i}"
-        else:
-            f.write(f"# Submit job {i} with dependency on previous job\n")
-            f.write(f"jid{i}=$(sbatch --parsable --dependency=afterok:{previous_job_var} {script_path})\n")
-            f.write(f"echo \"Submitted job for runscript (afterok dependency): $jid{i}\"\n\n")
-            previous_job_var = f"$jid{i}"
-
-# Make the script executable
-os.chmod("submit_all_iterations.sh", 0o755)
-print(f"Created chained submission script: {output_script}")
+# # Make the script executable
+# os.chmod("submit_all_iterations.sh", 0o755)
