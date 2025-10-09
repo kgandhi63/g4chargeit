@@ -400,88 +400,50 @@ void DetectorConstruction::ConstructSDandField() {
   G4ThreeVector step(10*um, 10*um, 10*um);
 
   // First create the uniform field map
-  auto uniformFieldMap = new SumRadialFieldMap(allPositions, allCharges,
-                                              min, max, step, "uniform_field_map.bin",
-                                              SumRadialFieldMap::StorageType::Double);
+  // auto uniformFieldMap = new SumRadialFieldMap(allPositions, allCharges,
+  //                                             min, max, step, "uniform_field_map.bin",
+  //                                             SumRadialFieldMap::StorageType::Double);
 
-  // Then create adaptive field map using the uniform one
-  auto adaptiveFieldMap = new AdaptiveSumRadialFieldMap(
-      std::unique_ptr<G4VSolid>(sphereSolid_),
-      *uniformFieldMap,  // Pass the uniform field map
-      fieldGradThreshold_,               // Gradient threshold (V/m per micron)
-      fieldMinimumStep_,
-      filename_,
-      min, max,
-      6,                 // max depth
-      AdaptiveSumRadialFieldMap::StorageType::Double
-  );
+  // Only create adaptive field map if we have charge data
+  if (!allPositions.empty() && !allCharges.empty()) {
 
-  // End timer
-  auto end = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> duration = end - start;
-  G4cout << "Ending Adaptive Field Map Precomputation" << G4endl;
+    // Then create adaptive field map using the uniform one
+    auto adaptiveFieldMap = new AdaptiveSumRadialFieldMap(
+        allPositions, allCharges, // Pass the uniform field map
+        fieldGradThreshold_,               // Gradient threshold (V/m per micron)
+        fieldMinimumStep_,
+        filename_,
+        min, max,
+        6,                 // max depth
+        AdaptiveSumRadialFieldMap::StorageType::Double
+    );
 
-  // Convert seconds to minutes (1 minute = 60 seconds)
-  double duration_in_minutes = duration.count() / 60.0;
-  G4cout << "Precomputation took " << duration_in_minutes << " minutes." << G4endl;
+    // End timer
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end - start;
+    G4cout << "Ending Adaptive Field Map Precomputation" << G4endl;
 
-  // Set up the field manager - NOW IT WILL WORK!
-  auto worldFM = new G4FieldManager();
-  worldFM->SetDetectorField(adaptiveFieldMap);  // No error now!
-  worldFM->SetMinimumEpsilonStep(1.0e-7);
-  worldFM->SetMaximumEpsilonStep(1.0e-4);
-  worldFM->SetDeltaOneStep(0.1*um);
+    // Convert seconds to minutes (1 minute = 60 seconds)
+    double duration_in_minutes = duration.count() / 60.0;
+    G4cout << "Precomputation took " << duration_in_minutes << " minutes." << G4endl;
 
-  // This will also work now!
-  auto equation = new G4EqMagElectricField(adaptiveFieldMap);
-  const G4int nvar = 8;
-  auto stepper = new G4DormandPrince745(equation, nvar);
-  auto driver  = new G4IntegrationDriver<G4DormandPrince745>(0.1*um, stepper, nvar);
-  auto chord   = new G4ChordFinder(driver);
-  worldFM->SetChordFinder(chord);
+    // Set up the field manager - NOW IT WILL WORK!
+    auto worldFM = new G4FieldManager();
+    worldFM->SetDetectorField(adaptiveFieldMap);  // No error now!
+    worldFM->SetMinimumEpsilonStep(1.0e-7);
+    worldFM->SetMaximumEpsilonStep(1.0e-4);
+    worldFM->SetDeltaOneStep(0.1*um);
 
-  logicWorld_->SetFieldManager(worldFM, true);
+    // This will also work now!
+    auto equation = new G4EqMagElectricField(adaptiveFieldMap);
+    const G4int nvar = 8;
+    auto stepper = new G4DormandPrince745(equation, nvar);
+    auto driver  = new G4IntegrationDriver<G4DormandPrince745>(0.1*um, stepper, nvar);
+    auto chord   = new G4ChordFinder(driver);
+    worldFM->SetChordFinder(chord);
 
-  // G4cout << "Starting Field Map Precomputation" << G4endl;
-
-  // // Start timer
-  // auto start = std::chrono::high_resolution_clock::now();
-
-  // // Define grid: 800 µm cube centered at origin, 2 µm step
-  // G4ThreeVector min(-worldX_/2, -worldY_/2, -worldZ_/2); //-400*um, -400*um, -400*um);
-  // G4ThreeVector max(worldX_/2, worldY_/2, worldZ_/2); // 400*um,  400*um,  400*um);
-
-  // // // Create the precomputed field map
-  // // auto sumField = new SumRadialFieldMap(allPositions, allCharges,
-  // //                                       min, max, step, filename_,
-  // //                                       SumRadialFieldMap::StorageType::Double);
-
-
-
-  // // End timer
-  // auto end = std::chrono::high_resolution_clock::now();
-  // std::chrono::duration<double> duration = end - start;
-  // G4cout << "Ending Field Map Precomputation" << G4endl;
-
-  // // Convert seconds to minutes (1 minute = 60 seconds)
-  // double duration_in_minutes = duration.count() / 60.0;
-  // G4cout << "Precomputation took " << duration_in_minutes << " minutes." << G4endl;
-
-  // // Set up the field manager as before
-  // auto worldFM = new G4FieldManager();
-  // worldFM->SetDetectorField(adaptiveSumField);
-  // worldFM->SetMinimumEpsilonStep(1.0e-7);
-  // worldFM->SetMaximumEpsilonStep(1.0e-4);
-  // worldFM->SetDeltaOneStep(0.1*um);
-
-  // auto equation = new G4EqMagElectricField(adaptiveSumField);
-  // const G4int nvar = 8;
-  // auto stepper = new G4DormandPrince745(equation, nvar);
-  // auto driver  = new G4IntegrationDriver<G4DormandPrince745>(0.1*um, stepper, nvar);
-  // auto chord   = new G4ChordFinder(driver);
-  // worldFM->SetChordFinder(chord);
-
-  // logicWorld_->SetFieldManager(worldFM, true);
+    logicWorld_->SetFieldManager(worldFM, true);
+  }
 
   // Attach sensitive detector to daughters
   G4int nD = logicWorld_->GetNoDaughters();
