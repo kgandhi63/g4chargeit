@@ -14,16 +14,6 @@
 class AdaptiveSumRadialFieldMap : public G4ElectricField {
 public:
     enum class StorageType { Float, Double };
- 
-    // struct Node {
-    //     G4ThreeVector min, max;
-    //     G4ThreeVector center;
-    //     G4ThreeVector precomputed_field;  // Field value at center
-    //     bool is_leaf;
-    //     std::array<std::unique_ptr<Node>, 8> children;
-       
-    //     Node() : is_leaf(false) {}
-    // };
 
     struct Node {
         G4ThreeVector min;
@@ -32,8 +22,9 @@ public:
         G4ThreeVector precomputed_field;
         bool is_leaf;
         bool was_gradient_refined_ = false;
-
         std::array<std::unique_ptr<Node>, 8> children;
+       
+        Node() : is_leaf(false) {}
     };
 
  

@@ -95,87 +95,88 @@ AdaptiveSumRadialFieldMap::buildFromScratch() {
     return root;
 }
 
-std::unique_ptr<AdaptiveSumRadialFieldMap::Node>
-AdaptiveSumRadialFieldMap::createOctreeFromScratch(const G4ThreeVector& min,
-                                                  const G4ThreeVector& max,
-                                                  int depth) {
+std::unique_ptr<AdaptiveSumRadialFieldMap::Node> 
+AdaptiveSumRadialFieldMap::createOctreeFromScratch(const G4ThreeVector& min, const G4ThreeVector& max, int depth) {
     static int node_count = 0;
     node_count++;
-    
+
     // G4cout << "=== createOctreeFromScratch call #" << node_count 
     //        << ", depth: " << depth << " ===" << G4endl;
-    // G4cout << "  Bounds: [" << min.x()/um << ", " << min.y()/um << ", " << min.z()/um << "] um"
+    // G4cout << " Bounds: [" << min.x()/um << ", " << min.y()/um << ", " << min.z()/um << "] um"
     //        << " to [" << max.x()/um << ", " << max.y()/um << ", " << max.z()/um << "] um" << G4endl;
-    
+
     auto node = std::make_unique<Node>();
     node->min = min;
     node->max = max;
     node->center = (min + max) * 0.5;
-   
+
     #pragma omp atomic
     total_nodes_++;
- 
+
     #pragma omp critical
     max_depth_reached_ = std::max(max_depth_reached_, depth);
- 
+
     double size = (max.x() - min.x());
-    // G4cout << "  Node size: " << size/um << " um" << G4endl;
-   
+    // G4cout << " Node size: " << size/um << " um" << G4endl;
+
     bool should_create_children = (size > 2.0 * minStepSize_) && (depth < max_depth_);
-    
-    // G4cout << "  Size > 2*minStepSize: " << (size > 2.0 * minStepSize_) 
+
+    // G4cout << " Size > 2*minStepSize: " << (size > 2.0 * minStepSize_) 
     //        << " (minStepSize: " << minStepSize_/um << " um)" << G4endl;
-    // G4cout << "  Depth < max_depth: " << (depth < max_depth_) 
+    // G4cout << " Depth < max_depth: " << (depth < max_depth_) 
     //        << " (depth: " << depth << ", max_depth: " << max_depth_ << ")" << G4endl;
-    // G4cout << "  Should create children: " << should_create_children << G4endl;
-   
+    // G4cout << " Should create children: " << should_create_children << G4endl;
+
     if (should_create_children) {
-        // G4cout << "  Creating 8 children..." << G4endl;
+        // G4cout << " Creating 8 children..." << G4endl;
         G4ThreeVector center = node->center;
-       
+
         // Create children
-        #pragma omp parallel for schedule(dynamic)
+        //#pragma omp parallel for schedule(dynamic)
         for (int i = 0; i < 8; ++i) {
             G4ThreeVector child_min, child_max;
             calculateChildBounds(min, max, center, i, child_min, child_max);
-            // G4cout << "    Child " << i << ": [" << child_min.x()/um << ", " << child_min.y()/um << ", " 
-            //        << child_min.z()/um << "] um to [" << child_max.x()/um << ", " << child_max.y()/um << ", " 
-            //        << child_max.z()/um << "] um" << G4endl;
-            
-            #pragma omp critical
+            G4cout << " Child " << i << ": [" << child_min.x()/um << ", " 
+                   << child_min.y()/um << ", " << child_min.z()/um << "] um to [" 
+                   << child_max.x()/um << ", " << child_max.y()/um << ", " 
+                   << child_max.z()/um << "] um" << G4endl;
+
+            //#pragma omp critical
             node->children[i] = createOctreeFromScratch(child_min, child_max, depth + 1);
         }
+
         node->is_leaf = false;
-        // G4cout << "  Created internal node with 8 children" << G4endl;
+        // G4cout << " Created internal node with 8 children" << G4endl;
     } else {
         // This is a leaf node - compute field directly from charges
-        // G4cout << "  Creating LEAF node at center: [" << node->center.x()/um << ", " 
-        //        << node->center.y()/um << ", " << node->center.z()/um << "] um" << G4endl;
-        
+        G4cout << " Creating LEAF node at center: [" << node->center.x()/um << ", " 
+               << node->center.y()/um << ", " << node->center.z()/um << "] um" << G4endl;
+
         node->is_leaf = true;
-        
+
         // Check if we have charges available
         if (fPositions.empty()) {
-            G4cout << "  WARNING: No charges available - field will be zero!" << G4endl;
+            G4cout << " WARNING: No charges available - field will be zero!" << G4endl;
             node->precomputed_field = G4ThreeVector(0,0,0);
         } else {
             node->precomputed_field = computeFieldFromCharges(node->center);
         }
-       
+
         #pragma omp atomic
         leaf_nodes_++;
-        
-        G4cout << "  Leaf node created. Total leaves: " << leaf_nodes_ << G4endl;
-        G4cout << "  Field at leaf: [" << node->precomputed_field.x()/(volt/meter) << ", "
+
+        G4cout << " Leaf node created. Total leaves: " << leaf_nodes_ << G4endl;
+        G4cout << " Field at leaf: [" << node->precomputed_field.x()/(volt/meter) << ", "
                << node->precomputed_field.y()/(volt/meter) << ", "
                << node->precomputed_field.z()/(volt/meter) << "] V/m" << G4endl;
     }
-    
-    // G4cout << "=== Returning from createOctreeFromScratch #" << node_count 
-    //        << " (depth " << depth << ") ===" << G4endl;
-   
+
+    G4cout << "=== Returning from createOctreeFromScratch #" << node_count 
+           << " (depth " << depth << ") ===" << G4endl;
+
     return node;
 }
+
 
 void AdaptiveSumRadialFieldMap::refineMeshByGradient(Node* node, int depth) {
     if (!node) return;
