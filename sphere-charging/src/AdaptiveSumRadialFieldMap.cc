@@ -136,10 +136,10 @@ AdaptiveSumRadialFieldMap::createOctreeFromScratch(const G4ThreeVector& min, con
         for (int i = 0; i < 8; ++i) {
             G4ThreeVector child_min, child_max;
             calculateChildBounds(min, max, center, i, child_min, child_max);
-            G4cout << " Child " << i << ": [" << child_min.x()/um << ", " 
-                   << child_min.y()/um << ", " << child_min.z()/um << "] um to [" 
-                   << child_max.x()/um << ", " << child_max.y()/um << ", " 
-                   << child_max.z()/um << "] um" << G4endl;
+            // G4cout << " Child " << i << ": [" << child_min.x()/um << ", " 
+            //        << child_min.y()/um << ", " << child_min.z()/um << "] um to [" 
+            //        << child_max.x()/um << ", " << child_max.y()/um << ", " 
+            //        << child_max.z()/um << "] um" << G4endl;
 
             //#pragma omp critical
             node->children[i] = createOctreeFromScratch(child_min, child_max, depth + 1);
@@ -149,8 +149,8 @@ AdaptiveSumRadialFieldMap::createOctreeFromScratch(const G4ThreeVector& min, con
         // G4cout << " Created internal node with 8 children" << G4endl;
     } else {
         // This is a leaf node - compute field directly from charges
-        G4cout << " Creating LEAF node at center: [" << node->center.x()/um << ", " 
-               << node->center.y()/um << ", " << node->center.z()/um << "] um" << G4endl;
+        // G4cout << " Creating LEAF node at center: [" << node->center.x()/um << ", " 
+        //        << node->center.y()/um << ", " << node->center.z()/um << "] um" << G4endl;
 
         node->is_leaf = true;
 
@@ -165,14 +165,14 @@ AdaptiveSumRadialFieldMap::createOctreeFromScratch(const G4ThreeVector& min, con
         #pragma omp atomic
         leaf_nodes_++;
 
-        G4cout << " Leaf node created. Total leaves: " << leaf_nodes_ << G4endl;
+        // G4cout << " Leaf node created. Total leaves: " << leaf_nodes_ << G4endl;
         G4cout << " Field at leaf: [" << node->precomputed_field.x()/(volt/meter) << ", "
                << node->precomputed_field.y()/(volt/meter) << ", "
                << node->precomputed_field.z()/(volt/meter) << "] V/m" << G4endl;
     }
 
-    G4cout << "=== Returning from createOctreeFromScratch #" << node_count 
-           << " (depth " << depth << ") ===" << G4endl;
+    // G4cout << "=== Returning from createOctreeFromScratch #" << node_count 
+    //        << " (depth " << depth << ") ===" << G4endl;
 
     return node;
 }
