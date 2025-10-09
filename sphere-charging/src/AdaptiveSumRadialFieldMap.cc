@@ -256,7 +256,7 @@ void AdaptiveSumRadialFieldMap::refineMeshByGradient(Node* node, int depth) {
             }
         } 
     } else {
-        G4cout << "  Internal node - recursing to children" << G4endl;
+        //G4cout << "  Internal node - recursing to children" << G4endl;
         // Recursively check all children
         for (auto& child : node->children) {
             refineMeshByGradient(child.get(), depth + 1);
@@ -274,7 +274,7 @@ bool AdaptiveSumRadialFieldMap::hasHighFieldGradient(const G4ThreeVector& center
         return false;
     }
     
-    double actual_distance = std::min(sample_distance, 10.0 * um);
+    double actual_distance = std::min(sample_distance, 2.0 * um);
     
     std::vector<G4ThreeVector> sample_points = {
         center + G4ThreeVector(actual_distance, 0, 0),
