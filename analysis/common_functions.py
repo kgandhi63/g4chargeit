@@ -84,7 +84,7 @@ def read_uniform_fieldmap(filename: str) -> pd.DataFrame:
         
         return df
 
-def read_adaptive_fieldmap(filename):
+def read_adaptive_fieldmap(filename,scaling=True):
     with open(filename, 'rb') as f:
         # Read header
         world_bounds = np.frombuffer(f.read(6 * 8), dtype=np.float64)
@@ -113,7 +113,10 @@ def read_adaptive_fieldmap(filename):
 
         # Read node field data
         field_data = np.frombuffer(f.read(num_nodes * 6 * 8), dtype=np.float64)
-        field_data = field_data.reshape((num_nodes, 6)) #*1e9 # convert field units from 1 MeV / e / mm = 1e6 V / mm = 1e9 V/m 
+        if scaling == True:
+            field_data = field_data.reshape((num_nodes, 6)) *1e9 # convert field units from 1 MeV / e / mm = 1e6 V / mm = 1e9 V/m 
+        else:
+            field_data = field_data.reshape((num_nodes, 6))  # convert field units from 1 MeV / e / mm = 1e6 V / mm = 1e9 V/m 
 
         # Read statistics
         statistics = np.frombuffer(f.read(3 * 4), dtype=np.int32)
@@ -268,7 +271,7 @@ def plot_face_illumination(incident_particles, convex_combined, vmin=0, vmax=1):
     # Step 7: Apply colors to faces
     convex_combined.visual.face_colors = colors_f
 
-    return convex_combined, face_illum
+    return convex_combined, face_illum, colors_f
 
 def plot_surface_potential_fornegativepositive_charge(electrons, protons, convex_combined, vmin=-0.01,vmax=0.01):
 
@@ -335,7 +338,7 @@ def plot_surface_potential_fornegativepositive_charge(electrons, protons, convex
     # Apply colors to mesh
     convex_combined.visual.face_colors = colors_rgba
 
-    return convex_combined, face_potentials
+    return convex_combined, face_potentials, colors_rgba
 
 def plot_surface_potential_allparticle_case(gammas, photoelectrons, protons, electrons, convex_combined, vmin=-0.01, vmax=0.01):
     # --- Combine negative charges: electrons + photoelectrons ---

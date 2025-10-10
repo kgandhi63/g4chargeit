@@ -14,18 +14,18 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-eventnumbers_onlysolarwind = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-eventnumbers_onlyphotoemission = 100 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlysolarwind = 50000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlyphotoemission = 1000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-iterationNUM = 100 # number of iterations to perform
+iterationNUM = 300 # number of iterations to perform
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
-config_list = ["onlyphotoemission", "onlysolarwind"] #, "onlysolarwind"] #["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
+config_list = ["onlysolarwind"] #, "onlysolarwind"] #["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
 
 # define the size of the world
-CAD_dimensions = (200,600,546.410) # in units of microns
-particle_position = 30 # place all particles 200 microns above the geometry
+CAD_dimensions = (200,600,546.410) #(600, 400, 373.2)#(200,600,546.410) # in units of microns
+particle_position = 15 # place all particles 200 microns above the geometry
 bufferXY = 0 # in units of microns
 worldX = CAD_dimensions[0] + 2*bufferXY # in units of microns -- account for angle of beam
 worldY = CAD_dimensions[1] + 2*bufferXY # in units of microns
@@ -76,7 +76,7 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/sphere/worldX {worldX} um\n')
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
-    f.write(f'/sphere/field/MinimumStep 1 um\n') # step size for field map solver
+    f.write(f'/sphere/field/MinimumStep 10 um\n') # step size for field map solver
     f.write(f'/sphere/field/GradThreshold 1e-2 V/m\n') # step size for field map solver
     f.write(f'/sphere/field/file fieldmaps/field-{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}.txt \n')
     f.write('#\n')

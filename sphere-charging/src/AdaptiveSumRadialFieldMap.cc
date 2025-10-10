@@ -406,7 +406,7 @@ void AdaptiveSumRadialFieldMap::writeFieldPointsToFile(std::ofstream& outfile, c
     if (!node) return;
     if (node->is_leaf) {
         double position[3] = { node->center.x(), node->center.y(), node->center.z() };
-        double field_value[3] = { node->precomputed_field.x() / (volt/meter), node->precomputed_field.y() / (volt/meter), node->precomputed_field.z() / (volt/meter) };
+        double field_value[3] = { node->precomputed_field.x(), node->precomputed_field.y(), node->precomputed_field.z()};
         outfile.write(reinterpret_cast<const char*>(position), sizeof(position));
         outfile.write(reinterpret_cast<const char*>(field_value), sizeof(field_value));
     } else {
