@@ -49,7 +49,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
  detector_(Det), rootManager_(G4RootAnalysisManager::Instance()), 
  projectDir_(0), fileNameCmd_(0), PBCCmd_(0), EpsilonCmd_(0), WorldXCmd_(0),WorldYCmd_(0), WorldZCmd_(0), 
  FieldMinimumStepCmd_(0), FieldGradThresholdCmd_(0), RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0), 
- FieldFile_(nullptr)
+ FieldFile_(nullptr),FieldOctreeDepthCmd_(0)
  
 { 
   projectDir_ = new G4UIdirectory("/sphere/");
@@ -110,6 +110,11 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   FieldGradThresholdCmd_->SetParameterName("choice",false);
   FieldGradThresholdCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+  FieldOctreeDepthCmd_ = new G4UIcmdWithADouble("/sphere/field/OctreeDepth", this);
+  FieldOctreeDepthCmd_->SetGuidance("Set maximum depth for Octree adaptive mesh.");
+  FieldOctreeDepthCmd_->SetParameterName("choice",false);
+  FieldOctreeDepthCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
   FieldFile_ = new G4UIcmdWithAString("/sphere/field/file",this);
   FieldFile_->SetGuidance("Field Map Save File");
   FieldFile_->SetParameterName("choice",false);
@@ -133,6 +138,7 @@ DetectorMessenger::~DetectorMessenger()
   delete FieldMinimumStepCmd_;
   delete FieldGradThresholdCmd_;
   delete FieldFile_;
+  delete FieldOctreeDepthCmd_;
 
 }
 
@@ -175,8 +181,12 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   if( command == FieldGradThresholdCmd_ )
   { detector_->SetFieldGradThreshold(FieldGradThresholdCmd_->GetNewDoubleValue(newValue));}
 
+  if( command == FieldOctreeDepthCmd_ )
+  { detector_->SetOctreeMaxDepth(FieldOctreeDepthCmd_->GetNewDoubleValue(newValue));}
+
   if( command == FieldFile_ )
   { detector_->SetFieldFile(newValue);}
+
 
 }
 

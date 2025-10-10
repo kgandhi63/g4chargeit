@@ -70,6 +70,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetWorldZ (G4double);
     void SetFieldMinimumStep (G4double);
     void SetFieldGradThreshold (G4double);
+    void SetOctreeMaxDepth (G4double);
                        
   private:
     G4VPhysicalVolume* ConstructVolumes();  
@@ -89,6 +90,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     std::vector<G4ThreeVector> fElectronPositions;
     std::vector<G4ThreeVector> fProtonPositions;
     DetectorMessenger* detectorMessenger_;
+    G4double octreeDepth_;
 
     // CAD geometry
     G4VSolid* sphereSolid_;  // ← Make sure this exists

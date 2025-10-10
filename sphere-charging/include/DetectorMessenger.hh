@@ -74,6 +74,7 @@ class DetectorMessenger: public G4UImessenger
     G4UIcmdWithADoubleAndUnit*  FieldMinimumStepCmd_;
     G4UIcmdWithADoubleAndUnit*  FieldGradThresholdCmd_;
     G4UIcmdWithAString*         FieldFile_;
+    G4UIcmdWithADouble*         FieldOctreeDepthCmd_;
 
 
 };

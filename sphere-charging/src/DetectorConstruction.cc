@@ -93,7 +93,7 @@
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
 , PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMinimumStep_(0),sphereSolid_(0),
-fieldGradThreshold_(0), CADFile_(""), RootInput_(""), Scale_(1), filename_("")
+fieldGradThreshold_(0), CADFile_(""), RootInput_(""), Scale_(1), filename_(""),octreeDepth_(8)
 
 {
   // create commands for interactive definition of the detector 
@@ -410,7 +410,7 @@ void DetectorConstruction::ConstructSDandField() {
         fieldMinimumStep_,
         filename_,
         min, max,
-        8,                 // max depth
+        octreeDepth_,                 // max depth
         AdaptiveSumRadialFieldMap::StorageType::Double
     );
 
@@ -519,5 +519,11 @@ void DetectorConstruction::SetFieldMinimumStep(G4double value)
 void DetectorConstruction::SetFieldGradThreshold(G4double value)
 {
   fieldGradThreshold_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
+
+void DetectorConstruction::SetOctreeMaxDepth(G4double value)
+{
+  octreeDepth_ = value;
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }

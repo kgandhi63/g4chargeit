@@ -38,6 +38,7 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     // 64^3 is a good balance of speed and accuracy for the solver.
     int pic_grid_resolution = 64;
     G4cout << "Initializing PIC grid (" << pic_grid_resolution << "^3)..." << G4endl;
+    G4cout << "max depth input: " << max_depth_ << G4endl;
     initializePICGrid(pic_grid_resolution, pic_grid_resolution, pic_grid_resolution);
 
     G4cout << "Depositing charges onto PIC grid..." << G4endl;

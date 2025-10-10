@@ -17,7 +17,7 @@ username = "avira7"
 eventnumbers_onlysolarwind = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_onlyphotoemission = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-iterationNUM = 300 # number of iterations to perform
+iterationNUM = 500 # number of iterations to perform
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
@@ -76,8 +76,9 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/sphere/worldX {worldX} um\n')
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
-    f.write(f'/sphere/field/MinimumStep 1 um\n') # step size for field map solver
-    f.write(f'/sphere/field/GradThreshold 1e-2 V/m\n') # step size for field map solver
+    f.write(f'/sphere/field/MinimumStep 5 um\n') # step size for field map solver
+    f.write(f'/sphere/field/GradThreshold 1e-7 V/m\n') # step size for field map solver
+    f.write(f'/sphere/field/OctreeDepth 10\n') # step size for field map solver
     f.write(f'/sphere/field/file fieldmaps/field-{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}.txt \n')
     f.write('#\n')
     if input_files:
