@@ -9,12 +9,12 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <fftw3.h> // Include the FFTW library
 
 class AdaptiveSumRadialFieldMap : public G4ElectricField {
 public:
     enum class StorageType { Float, Double };
 
-    // This Node is for the FIELD MAP (your existing octree)
     struct Node {
         G4ThreeVector min, max, center, precomputed_field;
         bool is_leaf;
@@ -32,26 +32,15 @@ public:
                               int max_depth,
                               StorageType storage = StorageType::Double);
 
-    ~AdaptiveSumRadialFieldMap() override = default;
+    ~AdaptiveSumRadialFieldMap() override; // Must now have a destructor to clean up FFTW plans
     void GetFieldValue(const G4double point[4], G4double field[6]) const override;
     void ExportFieldMapToFile(const std::string& filename) const;
     void PrintMeshStatistics() const;
 
 private:
-    // --- NEW: A separate Node struct for the CHARGE OCTREE (for Barnes-Hut) ---
-    struct ChargeNode {
-        std::array<std::unique_ptr<ChargeNode>, 8> children;
-        G4ThreeVector center_of_mass;
-        G4double total_charge = 0.0;
-        int particle_index = -1; // -1 if not a leaf with a single particle
-        bool is_leaf = true;
-    };
-
-    // Main octree for the field map
     std::unique_ptr<Node> root_;
     int max_depth_;
     
-    // Original charge data
     std::vector<G4ThreeVector> fPositions;
     std::vector<G4double> fCharges;
     G4double worldX_, worldY_, worldZ_;
@@ -59,11 +48,19 @@ private:
     G4double minStepSize_;
     StorageType fStorage;
 
-    // --- NEW: Members for the Barnes-Hut Charge Octree ---
-    std::unique_ptr<ChargeNode> charge_root_;
-    const double barnes_hut_theta_ = 0.5;
+    // --- PIC Grid Members ---
+    int fNx_, fNy_, fNz_;
+    G4ThreeVector fStep_;
+    std::vector<double> charge_grid_;
+    std::vector<double> potential_grid_; // NEW: Grid for electric potential
+    std::vector<G4ThreeVector> field_grid_;
 
-    // --- NEW: A vector to hold pointers to all leaf nodes for parallel computation ---
+    // --- FFTW Members ---
+    fftw_plan fft_plan_forward_;
+    fftw_plan fft_plan_backward_;
+    fftw_complex* fft_charge_grid_;
+    fftw_complex* fft_potential_grid_;
+
     std::vector<Node*> all_leaves_;
 
     double fieldGradThreshold_;
@@ -75,12 +72,11 @@ private:
     std::unique_ptr<Node> createOctreeFromScratch(const G4ThreeVector& min, const G4ThreeVector& max, int depth);
     void refineMeshByGradient(Node* node, int depth);
     
-    // --- NEW: Methods for building and using the Charge Octree ---
-    void buildChargeOctree();
-    void insertCharge(ChargeNode* node, int particle_index, const G4ThreeVector& min, const G4ThreeVector& max);
-    
-    // FIXED: Declaration now matches the implementation (4 arguments)
-    G4ThreeVector computeFieldWithApproximation(const G4ThreeVector& point, const ChargeNode* node, const G4ThreeVector& node_min, const G4ThreeVector& node_max) const;
+    // PIC methods
+    void initializePICGrid(int nx, int ny, int nz);
+    void depositCharges();
+    void solveFieldOnGrid(); // This will be rewritten for FFT
+    G4ThreeVector interpolateFieldFromGrid(const G4ThreeVector& point) const;
 
     G4ThreeVector computeFieldFromCharges(const G4ThreeVector& point) const;
 
@@ -88,9 +84,7 @@ private:
     G4ThreeVector evaluateField(const G4ThreeVector& point, const Node* node) const;
     
     // Utility functions
-    // FIXED: Added const to allow calling from const functions
     void calculateBoundingBox(G4ThreeVector& min, G4ThreeVector& max) const;
-    
     void calculateChildBounds(const G4ThreeVector& min, const G4ThreeVector& max,
                               const G4ThreeVector& center, int child_index,
                               G4ThreeVector& child_min, G4ThreeVector& child_max) const;

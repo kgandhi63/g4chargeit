@@ -32,12 +32,25 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
 
     setWorldDimensions(worldMax_.x() - worldMin_.x(), worldMax_.y() - worldMin_.y(), worldMax_.z() - worldMin_.z());
 
-    G4cout << "Building Barnes-Hut charge octree..." << G4endl;
-    buildChargeOctree();
+    // --- PARTICLE-IN-CELL (PIC) WORKFLOW ---
+    
+    // The resolution of the PIC grid is a key performance parameter.
+    // 64^3 is a good balance of speed and accuracy for the solver.
+    int pic_grid_resolution = 64;
+    G4cout << "Initializing PIC grid (" << pic_grid_resolution << "^3)..." << G4endl;
+    initializePICGrid(pic_grid_resolution, pic_grid_resolution, pic_grid_resolution);
 
-    // --- MODIFIED: Initial Field Map Construction ---
+    G4cout << "Depositing charges onto PIC grid..." << G4endl;
+    depositCharges();
+
+    // This is now the FFT-based solver, which is O(N log N) and much faster.
+    G4cout << "Solving for electric field on PIC grid using FFT..." << G4endl;
+    solveFieldOnGrid();
+
+    // --- END PIC WORKFLOW ---
+
     G4cout << "Building initial field map octree structure..." << G4endl;
-    root_ = buildFromScratch(); // This now only builds the structure
+    root_ = buildFromScratch(); 
 
     G4cout << "Computing field values for " << all_leaves_.size() << " leaf nodes in parallel..." << G4endl;
     #pragma omp parallel for schedule(dynamic)
@@ -59,137 +72,198 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     PrintMeshStatistics();
 }
 
+// --- NEW: Destructor to clean up FFTW memory ---
+AdaptiveSumRadialFieldMap::~AdaptiveSumRadialFieldMap() {
+    fftw_destroy_plan(fft_plan_forward_);
+    fftw_destroy_plan(fft_plan_backward_);
+    fftw_free(fft_charge_grid_);
+    fftw_free(fft_potential_grid_);
+}
+
 // ===================================================================
-//  BARNES-HUT IMPLEMENTATION (Unchanged)
+//  PIC IMPLEMENTATION (with FFT solver)
 // ===================================================================
 
-void AdaptiveSumRadialFieldMap::buildChargeOctree() {
+void AdaptiveSumRadialFieldMap::initializePICGrid(int nx, int ny, int nz) {
+    fNx_ = nx;
+    fNy_ = ny;
+    fNz_ = nz;
+    
+    fStep_ = G4ThreeVector((fNx_ > 1) ? (worldMax_.x() - worldMin_.x()) / (fNx_ - 1) : 0.0,
+                           (fNy_ > 1) ? (worldMax_.y() - worldMin_.y()) / (fNy_ - 1) : 0.0,
+                           (fNz_ > 1) ? (worldMax_.z() - worldMin_.z()) / (fNz_ - 1) : 0.0);
+
+    size_t gridSize = static_cast<size_t>(fNx_) * fNy_ * fNz_;
+    charge_grid_.assign(gridSize, 0.0);
+    potential_grid_.assign(gridSize, 0.0);
+    field_grid_.assign(gridSize, G4ThreeVector(0,0,0));
+
+    // --- Initialize FFTW ---
+    fft_charge_grid_ = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * gridSize);
+    fft_potential_grid_ = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * gridSize);
+
+    // Create plans for the 3D FFT. This is done once and reused.
+    fft_plan_forward_ = fftw_plan_dft_3d(fNz_, fNy_, fNx_, fft_charge_grid_, fft_charge_grid_, FFTW_FORWARD, FFTW_ESTIMATE);
+    fft_plan_backward_ = fftw_plan_dft_3d(fNz_, fNy_, fNx_, fft_potential_grid_, fft_potential_grid_, FFTW_BACKWARD, FFTW_ESTIMATE);
+}
+
+void AdaptiveSumRadialFieldMap::depositCharges() {
     if (fPositions.empty()) return;
 
-    G4ThreeVector min, max;
-    calculateBoundingBox(min, max);
-    charge_root_ = std::make_unique<ChargeNode>();
-
+    #pragma omp parallel for
     for (size_t i = 0; i < fPositions.size(); ++i) {
-        insertCharge(charge_root_.get(), i, min, max);
-    }
-}
+        const G4ThreeVector& pos = fPositions[i];
+        const double charge = fCharges[i];
 
-void AdaptiveSumRadialFieldMap::insertCharge(ChargeNode* node, int particle_index, const G4ThreeVector& min, const G4ThreeVector& max) {
-    if (node->is_leaf) {
-        if (node->particle_index == -1) {
-            node->particle_index = particle_index;
-        } else {
-            node->is_leaf = false;
-            int old_particle_index = node->particle_index;
-            node->particle_index = -1;
+        double ix_f = (fStep_.x() > 0) ? (pos.x() - worldMin_.x()) / fStep_.x() : 0;
+        double iy_f = (fStep_.y() > 0) ? (pos.y() - worldMin_.y()) / fStep_.y() : 0;
+        double iz_f = (fStep_.z() > 0) ? (pos.z() - worldMin_.z()) / fStep_.z() : 0;
 
-            G4ThreeVector center = (min + max) * 0.5;
-            for (int i = 0; i < 8; ++i) {
-                G4ThreeVector child_min, child_max;
-                calculateChildBounds(min, max, center, i, child_min, child_max);
-                if (pointInside(child_min, child_max, fPositions[old_particle_index])) {
-                    if (!node->children[i]) node->children[i] = std::make_unique<ChargeNode>();
-                    insertCharge(node->children[i].get(), old_particle_index, child_min, child_max);
-                    break;
+        int ix = static_cast<int>(ix_f);
+        int iy = static_cast<int>(iy_f);
+        int iz = static_cast<int>(iz_f);
+
+        double wx = ix_f - ix;
+        double wy = iy_f - iy;
+        double wz = iz_f - iz;
+
+        for (int l = 0; l < 2; ++l) {
+            for (int m = 0; m < 2; ++m) {
+                for (int n = 0; n < 2; ++n) {
+                    int grid_ix = ix + l;
+                    int grid_iy = iy + m;
+                    int grid_iz = iz + n;
+
+                    if (grid_ix >= 0 && grid_ix < fNx_ && grid_iy >= 0 && grid_iy < fNy_ && grid_iz >= 0 && grid_iz < fNz_) {
+                        double weight = (l == 0 ? 1 - wx : wx) * (m == 0 ? 1 - wy : wy) * (n == 0 ? 1 - wz : wz);
+                        size_t index = static_cast<size_t>(grid_iz) * fNx_ * fNy_ + static_cast<size_t>(grid_iy) * fNx_ + grid_ix;
+                        
+                        #pragma omp atomic
+                        charge_grid_[index] += charge * weight;
+                    }
                 }
             }
-            
-            for (int i = 0; i < 8; ++i) {
-                G4ThreeVector child_min, child_max;
-                calculateChildBounds(min, max, center, i, child_min, child_max);
-                if (pointInside(child_min, child_max, fPositions[particle_index])) {
-                    if (!node->children[i]) node->children[i] = std::make_unique<ChargeNode>();
-                    insertCharge(node->children[i].get(), particle_index, child_min, child_max);
-                    break;
+        }
+    }
+}
+
+// --- REWRITTEN: This is now the high-performance FFT-based Poisson Solver ---
+void AdaptiveSumRadialFieldMap::solveFieldOnGrid() {
+    size_t gridSize = static_cast<size_t>(fNx_) * fNy_ * fNz_;
+
+    // 1. Copy charge density to FFTW input array
+    for (size_t i = 0; i < gridSize; ++i) {
+        fft_charge_grid_[i][0] = charge_grid_[i]; // Real part
+        fft_charge_grid_[i][1] = 0.0;            // Imaginary part
+    }
+
+    // 2. Execute forward FFT (charge density -> Fourier space)
+    fftw_execute(fft_plan_forward_);
+
+    // 3. Apply the Green's function (1/k^2) in Fourier space
+    const double kx_factor = (worldX_ > 0) ? 2.0 * CLHEP::pi / worldX_ : 0;
+    const double ky_factor = (worldY_ > 0) ? 2.0 * CLHEP::pi / worldY_ : 0;
+    const double kz_factor = (worldZ_ > 0) ? 2.0 * CLHEP::pi / worldZ_ : 0;
+
+    #pragma omp parallel for collapse(3)
+    for (int iz = 0; iz < fNz_; ++iz) {
+        for (int iy = 0; iy < fNy_; ++iy) {
+            for (int ix = 0; ix < fNx_; ++ix) {
+                // FFTW shifts the frequencies, so we need to map them back
+                int kx = (ix > fNx_ / 2) ? ix - fNx_ : ix;
+                int ky = (iy > fNy_ / 2) ? iy - fNy_ : iy;
+                int kz = (iz > fNz_ / 2) ? iz - fNz_ : iz;
+
+                double k2 = (kx*kx_factor)*(kx*kx_factor) + 
+                              (ky*ky_factor)*(ky*ky_factor) + 
+                              (kz*kz_factor)*(kz*kz_factor);
+
+                size_t index = static_cast<size_t>(iz) * fNx_ * fNy_ + static_cast<size_t>(iy) * fNx_ + ix;
+
+                if (k2 > 1e-12) { // Avoid division by zero for the DC component (k=0)
+                    fft_potential_grid_[index][0] = fft_charge_grid_[index][0] / (k2 * epsilon0);
+                    fft_potential_grid_[index][1] = fft_charge_grid_[index][1] / (k2 * epsilon0);
+                } else {
+                    fft_potential_grid_[index][0] = 0.0;
+                    fft_potential_grid_[index][1] = 0.0;
                 }
             }
         }
-    } else {
-        G4ThreeVector center = (min + max) * 0.5;
-        for (int i = 0; i < 8; ++i) {
-            G4ThreeVector child_min, child_max;
-            calculateChildBounds(min, max, center, i, child_min, child_max);
-            if (pointInside(child_min, child_max, fPositions[particle_index])) {
-                if (!node->children[i]) node->children[i] = std::make_unique<ChargeNode>();
-                insertCharge(node->children[i].get(), particle_index, child_min, child_max);
-                break;
+    }
+
+    // 4. Execute backward FFT (Fourier space -> electric potential)
+    fftw_execute(fft_plan_backward_);
+
+    // 5. Copy potential back and normalize
+    for (size_t i = 0; i < gridSize; ++i) {
+        potential_grid_[i] = fft_potential_grid_[i][0] / gridSize;
+    }
+
+    // 6. Calculate E-field by taking the gradient of the potential (E = -∇φ)
+    #pragma omp parallel for collapse(3)
+    for (int iz = 0; iz < fNz_; ++iz) {
+        for (int iy = 0; iy < fNy_; ++iy) {
+            for (int ix = 0; ix < fNx_; ++ix) {
+                size_t idx = static_cast<size_t>(iz) * fNx_ * fNy_ + static_cast<size_t>(iy) * fNx_ + ix;
+                double Ex = 0, Ey = 0, Ez = 0;
+
+                // X-component using central differences
+                if (ix > 0 && ix < fNx_ - 1) {
+                    Ex = -(potential_grid_[idx + 1] - potential_grid_[idx - 1]) / (2 * fStep_.x());
+                } // Note: Boundary conditions are implicitly handled by setting E to 0 here.
+
+                // Y-component
+                if (iy > 0 && iy < fNy_ - 1) {
+                    Ey = -(potential_grid_[idx + fNx_] - potential_grid_[idx - fNx_]) / (2 * fStep_.y());
+                }
+
+                // Z-component
+                 if (iz > 0 && iz < fNz_ - 1) {
+                    Ez = -(potential_grid_[idx + fNx_ * fNy_] - potential_grid_[idx - fNx_ * fNy_]) / (2 * fStep_.z());
+                }
+                
+                field_grid_[idx] = G4ThreeVector(Ex, Ey, Ez);
             }
         }
     }
-
-    G4double old_total_charge = node->total_charge;
-    G4double new_charge = fCharges[particle_index];
-    node->total_charge += new_charge;
-    if (std::abs(node->total_charge) > 1e-18) {
-        node->center_of_mass = (node->center_of_mass * old_total_charge + fPositions[particle_index] * new_charge) / node->total_charge;
-    } else {
-        node->center_of_mass = (min+max)*0.5;
-    }
 }
 
+G4ThreeVector AdaptiveSumRadialFieldMap::interpolateFieldFromGrid(const G4ThreeVector& point) const {
+    double ix_f = (fStep_.x() > 0) ? (point.x() - worldMin_.x()) / fStep_.x() : 0;
+    double iy_f = (fStep_.y() > 0) ? (point.y() - worldMin_.y()) / fStep_.y() : 0;
+    double iz_f = (fStep_.z() > 0) ? (point.z() - worldMin_.z()) / fStep_.z() : 0;
 
-G4ThreeVector AdaptiveSumRadialFieldMap::computeFieldWithApproximation(const G4ThreeVector& point, const ChargeNode* node, const G4ThreeVector& node_min, const G4ThreeVector& node_max) const {
-    if (!node || std::abs(node->total_charge) < 1e-18) {
-        return G4ThreeVector(0, 0, 0);
-    }
+    int ix = static_cast<int>(ix_f);
+    int iy = static_cast<int>(iy_f);
+    int iz = static_cast<int>(iz_f);
 
-    if (node->is_leaf) {
-        if (node->particle_index != -1) {
-            const G4double coulombsConstant = 1.0 / (4.0 * CLHEP::pi * epsilon0);
-            const G4double dx = point.x() - node->center_of_mass.x();
-            const G4double dy = point.y() - node->center_of_mass.y();
-            const G4double dz = point.z() - node->center_of_mass.z();
-            const G4double d2 = dx*dx + dy*dy + dz*dz;
-            if (d2 < 1e-16) return G4ThreeVector(0,0,0);
-            const G4double invd = 1.0 / std::sqrt(d2);
-            const G4double invr3 = invd * invd * invd;
-            const G4double scaled = node->total_charge * coulombsConstant * invr3;
-            return G4ThreeVector(dx * scaled, dy * scaled, dz * scaled);
-        }
-        return G4ThreeVector(0,0,0);
-    }
+    ix = std::max(0, std::min(ix, fNx_ - 2));
+    iy = std::max(0, std::min(iy, fNy_ - 2));
+    iz = std::max(0, std::min(iz, fNz_ - 2));
 
-    double width = (node_max - node_min).x();
-    double distance = (point - node->center_of_mass).mag();
-    
-    if (distance > 0 && (width / distance < barnes_hut_theta_)) {
-        const G4double coulombsConstant = 1.0 / (4.0 * CLHEP::pi * epsilon0);
-        const G4double dx = point.x() - node->center_of_mass.x();
-        const G4double dy = point.y() - node->center_of_mass.y();
-        const G4double dz = point.z() - node->center_of_mass.z();
-        const G4double d2 = dx*dx + dy*dy + dz*dz;
-        if (d2 < 1e-16) return G4ThreeVector(0,0,0);
-        const G4double invd = 1.0 / std::sqrt(d2);
-        const G4double invr3 = invd * invd * invd;
-        const G4double scaled = node->total_charge * coulombsConstant * invr3;
-        return G4ThreeVector(dx * scaled, dy * scaled, dz * scaled);
-    } else {
-        G4ThreeVector E(0,0,0);
-        G4ThreeVector center = (node_min + node_max) * 0.5;
-        for(int i=0; i < 8; ++i) {
-            if(node->children[i]) {
-                G4ThreeVector child_min, child_max;
-                calculateChildBounds(node_min, node_max, center, i, child_min, child_max);
-                E += computeFieldWithApproximation(point, node->children[i].get(), child_min, child_max);
+    double wx = ix_f - ix;
+    double wy = iy_f - iy;
+    double wz = iz_f - iz;
+
+    G4ThreeVector result(0,0,0);
+    for (int l = 0; l < 2; ++l) {
+        for (int m = 0; m < 2; ++m) {
+            for (int n = 0; n < 2; ++n) {
+                size_t index = static_cast<size_t>(iz+n) * fNx_ * fNy_ + static_cast<size_t>(iy+m) * fNx_ + (ix+l);
+                double weight = (l == 0 ? 1 - wx : wx) * (m == 0 ? 1 - wy : wy) * (n == 0 ? 1 - wz : wz);
+                result += field_grid_[index] * weight;
             }
         }
-        return E;
     }
+    return result;
 }
-
 
 G4ThreeVector AdaptiveSumRadialFieldMap::computeFieldFromCharges(const G4ThreeVector& point) const {
-    if (!charge_root_) {
-        return G4ThreeVector(0,0,0);
-    }
-    G4ThreeVector min_box, max_box;
-    calculateBoundingBox(min_box, max_box);
-    return computeFieldWithApproximation(point, charge_root_.get(), min_box, max_box);
+    return interpolateFieldFromGrid(point);
 }
 
 // ===================================================================
-//  FIELD MAP LOGIC
+//  ADAPTIVE OCTREE LOGIC (Now using the fast PIC solver)
 // ===================================================================
 
 std::unique_ptr<AdaptiveSumRadialFieldMap::Node> 
@@ -199,7 +273,6 @@ AdaptiveSumRadialFieldMap::buildFromScratch() {
     return createOctreeFromScratch(min, max, 0);
 }
 
-// --- MODIFIED: This function now only builds the tree structure ---
 std::unique_ptr<AdaptiveSumRadialFieldMap::Node> 
 AdaptiveSumRadialFieldMap::createOctreeFromScratch(const G4ThreeVector& min, const G4ThreeVector& max, int depth) {
     auto node = std::make_unique<Node>();
@@ -223,7 +296,6 @@ AdaptiveSumRadialFieldMap::createOctreeFromScratch(const G4ThreeVector& min, con
         }
     } else {
         node->is_leaf = true;
-        // DO NOT compute field here. Add to list for parallel processing.
         all_leaves_.push_back(node.get());
         leaf_nodes_++;
     }
@@ -232,47 +304,26 @@ AdaptiveSumRadialFieldMap::createOctreeFromScratch(const G4ThreeVector& min, con
 
 void AdaptiveSumRadialFieldMap::refineMeshByGradient(Node* node, int depth) {
     if (!node) return;
-    
     if (node->is_leaf) {
         double size = (node->max.x() - node->min.x());
-
         if (depth < max_depth_ && size > minStepSize_ && hasHighFieldGradient(node->center, node->precomputed_field, size * 0.2)) {
             #pragma omp atomic
             gradient_refinements_++;
-            
             node->is_leaf = false;
             #pragma omp atomic
             leaf_nodes_--;
-            
-            // Temporarily store new leaves to add to the global list later
-            std::vector<Node*> new_leaves;
-            new_leaves.reserve(8);
-
             for (int i = 0; i < 8; ++i) {
                 G4ThreeVector child_min, child_max;
                 calculateChildBounds(node->min, node->max, node->center, i, child_min, child_max);
-
                 auto child = std::make_unique<Node>();
-                child->min = child_min;
-                child->max = child_max;
-                child->center = (child_min + child_max) * 0.5;
-                child->is_leaf = true;
+                child->min = child_min; child->max = child_max; child->center = (child_min + child_max) * 0.5; child->is_leaf = true;
                 child->precomputed_field = computeFieldFromCharges(child->center);
-                
                 #pragma omp atomic
                 total_nodes_++;
                 #pragma omp atomic
                 leaf_nodes_++;
-                
-                new_leaves.push_back(child.get());
                 node->children[i] = std::move(child);
             }
-            
-            // This refinement might happen in parallel, so new leaves need to be handled carefully.
-            // For now, let's assume refinement is less frequent and adding to a global list is OK if protected.
-            // Note: The `all_leaves_` vector is not updated here, which is a potential issue if it's used later.
-            // However, since it's only for the initial build, this is acceptable.
-
             for (int i = 0; i < 8; ++i) {
                 if(node->children[i]) {
                     #pragma omp task
@@ -293,31 +344,22 @@ void AdaptiveSumRadialFieldMap::refineMeshByGradient(Node* node, int depth) {
 }
 
 bool AdaptiveSumRadialFieldMap::hasHighFieldGradient(const G4ThreeVector& center, const G4ThreeVector& center_field, double sample_distance) const {
-    if (fPositions.empty()) {
-        return false;
-    }
-    
+    if (fPositions.empty()) return false;
     double actual_distance = std::min(sample_distance, 2.0 * um);
-    
     const std::vector<G4ThreeVector> sample_points = {
         center + G4ThreeVector(actual_distance, 0, 0), center - G4ThreeVector(actual_distance, 0, 0),
         center + G4ThreeVector(0, actual_distance, 0), center - G4ThreeVector(0, actual_distance, 0),
         center + G4ThreeVector(0, 0, actual_distance), center - G4ThreeVector(0, 0, actual_distance)
     };
-    
     std::vector<double> field_magnitudes(6);
-    
-    #pragma omp parallel for
+    // This loop is intentionally sequential to avoid nested parallelism crashes.
     for (int i = 0; i < 6; ++i) {
         field_magnitudes[i] = computeFieldFromCharges(sample_points[i]).mag();
     }
-    
     double grad_x = (field_magnitudes[0] - field_magnitudes[1]) / (2 * actual_distance);
     double grad_y = (field_magnitudes[2] - field_magnitudes[3]) / (2 * actual_distance);
     double grad_z = (field_magnitudes[4] - field_magnitudes[5]) / (2 * actual_distance);
-    
     double gradient_magnitude = std::sqrt(grad_x * grad_x + grad_y * grad_y + grad_z * grad_z);
-    
     return (gradient_magnitude / 1e6) > fieldGradThreshold_;
 }
 
@@ -331,7 +373,6 @@ void AdaptiveSumRadialFieldMap::GetFieldValue(const G4double point[4], G4double 
 G4ThreeVector AdaptiveSumRadialFieldMap::evaluateField(const G4ThreeVector& point, const Node* node) const {
     if (!node) return G4ThreeVector(0, 0, 0);
     if (node->is_leaf) return node->precomputed_field;
-    
     for (const auto& child : node->children) {
         if (child && pointInside(child->min, child->max, point)) {
             return evaluateField(point, child.get());
@@ -406,7 +447,7 @@ void AdaptiveSumRadialFieldMap::writeFieldPointsToFile(std::ofstream& outfile, c
     if (!node) return;
     if (node->is_leaf) {
         double position[3] = { node->center.x(), node->center.y(), node->center.z() };
-        double field_value[3] = { node->precomputed_field.x(), node->precomputed_field.y(), node->precomputed_field.z()};
+        double field_value[3] = { node->precomputed_field.x(), node->precomputed_field.y() , node->precomputed_field.z()};
         outfile.write(reinterpret_cast<const char*>(position), sizeof(position));
         outfile.write(reinterpret_cast<const char*>(field_value), sizeof(field_value));
     } else {

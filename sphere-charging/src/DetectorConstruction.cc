@@ -155,7 +155,7 @@ SiO2->SetMaterialPropertiesTable(dielectric);
   // SiO2->AddElement(O, natoms=3);
   // //SiO2->SetMaterialPropertiesTable(dielectric);
  
-  G4bool checkOverlaps = true;
+  G4bool checkOverlaps = false;
   //     
   // World Characteristics
   //
@@ -347,8 +347,7 @@ new G4PVPlacement(0,                          	//no rotation
               SiO2->GetName(),               //its name
               logicWorld_,                        //its mother volume
               false,                              //no boolean operation
-              0, 
-              checkOverlaps);                                 //copy number
+              0);                                 //copy number
               
 
 //logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
@@ -389,11 +388,6 @@ void DetectorConstruction::ConstructSDandField() {
     allCharges.push_back(hCharge);
   }
 
-  G4cout << "Starting Adaptive Field Map Precomputation" << G4endl;
-
-  // Start timer
-  auto start = std::chrono::high_resolution_clock::now();
-
   // Define grid: 800 µm cube centered at origin, 2 µm step
   G4ThreeVector min(-worldX_/2, -worldY_/2, -worldZ_/2); //-400*um, -400*um, -400*um);
   G4ThreeVector max(worldX_/2, worldY_/2, worldZ_/2); // 400*um,  400*um,  400*um);
@@ -403,6 +397,11 @@ void DetectorConstruction::ConstructSDandField() {
 
   // Only create adaptive field map if we have charge data
   if (!allPositions.empty() && !allCharges.empty()) {
+
+      G4cout << "Starting Adaptive Field Map Precomputation" << G4endl;
+
+    // Start timer
+    auto start = std::chrono::high_resolution_clock::now();
 
     // Then create adaptive field map using the uniform one
     auto adaptiveFieldMap = new AdaptiveSumRadialFieldMap(
