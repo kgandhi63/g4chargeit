@@ -14,8 +14,8 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 # define the number of particles for the each iteration
 account = "pf17"
 username = "avira7"
-eventnumbers_onlysolarwind = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-eventnumbers_onlyphotoemission = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlysolarwind = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlyphotoemission = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 iterationNUM = 500 # number of iterations to perform
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
