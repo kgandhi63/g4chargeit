@@ -484,7 +484,9 @@ def calculate_stats(df, config="photoemission"):
     last_e_event = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] > 0.0)].drop_duplicates(subset="Event_Number", keep="last")
     # get new dataframe of all e- that left the world
     world_e_energy=last_e_event[(last_e_event["Volume_Name_Post"]=="physical_cyclic") | (last_e_event["Volume_Name_Pre"]=="physical_cyclic")]
-    volume_e_event=last_e_event[(last_e_event["Volume_Name_Post"]=="G4_SILICON_DIOXIDE")]
+
+    # get all the electrons stopped in the material 
+    electrons_stopped = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] > 0.0) & (df["Kinetic_Energy_Post_MeV"] ==0.0) & (df["Volume_Name_Post"]=="G4_SILICON_DIOXIDE")]
 
     # get all the initial gamma energy that leads to an e- escaping
     matching_event_numbers = np.intersect1d(df["Event_Number"], world_e_energy["Event_Number"])
@@ -517,10 +519,10 @@ def calculate_stats(df, config="photoemission"):
 
         print(f"Photoelectric yield (holes/ γ): {photoelectric_yield:.4f} "
             f"({len(gamma_initial_leading_e_creation)} / {len(incident_gamma)})")
-        print(f"e- stopped in material, from photoelectric effect: {len(volume_e_event)}")
+        print(f"e- stopped in material: {len(electrons_stopped)}")
         print(f"Electrons ejected, from photoelectric effect: {len(gamma_initial_leading_to_e_ejection)}\n")
 
-        return gamma_initial_leading_e_creation, gamma_initial_leading_to_e_ejection, volume_e_event
+        return gamma_initial_leading_e_creation, electrons_stopped, gamma_initial_leading_to_e_ejection
     
     elif "solarwind" in config:
         print(f"Incident H+ stopped in material: {protons_capture_fraction:.2%} "
@@ -534,11 +536,11 @@ def calculate_stats(df, config="photoemission"):
 
         print(f"Photoelectric yield (holes/ γ): {photoelectric_yield:.4f} "
             f"({len(gamma_initial_leading_e_creation)} / {len(incident_gamma)})")
-        print(f"e- stopped in material, from photoelectric effect: {len(volume_e_event)}")
+        print(f"e- stopped in material: {len(electrons_stopped)}")
         print(f"Electrons ejected, from photoelectric effect: {len(gamma_initial_leading_to_e_ejection)}")
         print(f"Incident H+ stopped in material: {protons_capture_fraction:.2%} "
             f"({len(protons_inside)} / {len(protons_incident)})")
         print(f"Incident e- stopped in material: {electrons_capture_fraction:.2%} "
             f"({len(electrons_inside)} / {len(electrons_incident)})\n")
 
-        return gamma_initial_leading_e_creation, volume_e_event, protons_inside, electrons_inside 
+        return gamma_initial_leading_e_creation, electrons_stopped, protons_inside, electrons_inside 
