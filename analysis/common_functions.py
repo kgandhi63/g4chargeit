@@ -112,11 +112,13 @@ def read_adaptive_fieldmap(filename,scaling=True):
             raise ValueError(f"Unexpected data size in {filename}: {remaining_bytes} bytes remaining")
 
         # Read node field data
-        field_data = np.frombuffer(f.read(num_nodes * 6 * 8), dtype=np.float64)
+        field_data = np.frombuffer(f.read(num_nodes * 6 * 8), dtype=np.float64).copy()
+        field_data = field_data.reshape((num_nodes, 6))
+
         if scaling == True:
-            field_data = field_data.reshape((num_nodes, 6)) *1e9 # convert field units from 1 MeV / e / mm = 1e6 V / mm = 1e9 V/m 
-        else:
-            field_data = field_data.reshape((num_nodes, 6))  # convert field units from 1 MeV / e / mm = 1e6 V / mm = 1e9 V/m 
+            field_data[:, 3:] *= 1e9  # scale only the last three columns
+
+            # convert field units from 1 MeV / e / mm = 1e6 V / mm = 1e9 V/m 
 
         # Read statistics
         statistics = np.frombuffer(f.read(3 * 4), dtype=np.int32)
