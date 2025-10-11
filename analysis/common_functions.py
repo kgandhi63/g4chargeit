@@ -14,6 +14,9 @@ import os
 import trimesh 
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
+from numba import njit, prange
+import numpy as np
+import glob
 
 def read_rootfile(file,directory_path=None):
     #file = '00_iteration0_num5000.root' #'13_iteration5_from_num1000000.root'
@@ -434,175 +437,42 @@ def plot_surface_potential_one_particle_type(electrons, convex_combined, vmin=-0
 
     return convex_combined, face_potentials
 
+# Fast norm function with Numba
+@njit(parallel=True)
+def compute_E_mag(Ex, Ey, Ez):
+    n = Ex.shape[0]
+    result = np.empty(n)
+    for i in prange(n):
+        result[i] = np.sqrt(Ex[i]**2 + Ey[i]**2 + Ez[i]**2)
+    return result
 
-def plot_electron_positions_slice(
-    df,
-    world_dimensions=(-0.05, 0.05),
-    n_bins=100,
-    iteration="Plot",
-    stacked_spheres=None,
-    plane="zx"  # "zx" or "zy"
-):
-    """
-    plane: 'zx' plots Z vs X, 'zy' plots Z vs Y
-    """
-    # Define voxel edges
-    x_edges = np.linspace(world_dimensions[0], world_dimensions[1], n_bins + 1)
-    y_edges = np.linspace(world_dimensions[0], world_dimensions[1], n_bins + 1)
-    z_edges = np.linspace(world_dimensions[0], world_dimensions[1], n_bins + 1)
+# Efficient, memory-aware loader
+def read_data_format_efficient(filenames, scaling=True):
+    fields_all = {}
 
-    coords = np.vstack(df["Post_Step_Position_mm"])
-    x, y, z = coords[:, 0], coords[:, 1], coords[:, 2]
+    for fileIN in filenames:
+        iteration = int(fileIN.split("-")[-2])
 
-    # Choose axes based on plane
-    if plane.lower() == "zx":
-        xdata, ydata = x, z
-        ylabel, xlabel = "Z position (m)", "X position (m)"
-    elif plane.lower() == "zy":
-        xdata, ydata = y, z
-        ylabel, xlabel = "Z position (m)", "Y position (m)"
-    else:
-        raise ValueError("plane must be 'zx' or 'zy'")
+        # Minimal fieldmap reader - replace with your efficient implementation
+        data, _ = read_adaptive_fieldmap(fileIN,scaling=scaling)  # assume this returns a pandas dataframe
 
-    # Create 2D histogram for density coloring
-    hist, xedges, yedges = np.histogram2d(
-        xdata, ydata,
-        bins=n_bins,
-        range=[[world_dimensions[0], world_dimensions[1]],
-               [world_dimensions[0], world_dimensions[1]]]
-    )
+        # Convert to NumPy arrays once, then drop pandas
+        pos = data[["x", "y", "z"]].to_numpy(dtype=np.float32)
+        Ex = data["Ex"].to_numpy(dtype=np.float32)
+        Ey = data["Ey"].to_numpy(dtype=np.float32)
+        Ez = data["Ez"].to_numpy(dtype=np.float32)
 
-    # Plot 2D slice
-    fig, ax = plt.subplots(figsize=(7, 6))
-    sc = ax.scatter(xdata, ydata, s=2, c="red", alpha=0.7)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    ax.set_title(f"{iteration} — {plane.upper()} slice")
-    ax.set_aspect('equal', adjustable='box')
+        # Compute magnitude
+        E_mag = compute_E_mag(Ex, Ey, Ez)
 
-    plt.show()
-    return fig, ax
+        # Store in dict
+        fields_all[iteration] = {
+            "pos": pos,
+            "E": np.stack((Ex, Ey, Ez), axis=1),  # shape (N, 3)
+            "E_mag": E_mag
+        }
 
-def plot_positions_slice(
-    df1,
-    df2=None,
-    iteration="Plot",
-    stacked_spheres=None,
-    plane="zx",  # "zx" or "zy"
-    labels=["e-","protons"]
-):
-    """
-    Plots a 2D slice of electron positions from one or two dataframes.
-    
-    Parameters:
-        df1: First dataframe containing 'Post_Step_Position_mm' as list of 3D coordinates.
-        df2: (Optional) Second dataframe to overlay.
-        world_dimensions: Tuple specifying (min, max) bounds in meters.
-        n_bins: Number of bins for histogram (if used).
-        iteration: Title/label for plot.
-        stacked_spheres: (Not used in this version).
-        plane: 'zx' plots Z vs X, 'zy' plots Z vs Y.
-    """
-    
-    # Convert from mm to meters
-    coords1 = np.vstack(df1["Post_Step_Position_mm"]) * 1000
-    x1, y1, z1 = coords1[:, 0], coords1[:, 1], coords1[:, 2]
-
-    if df2 is not None:
-        coords2 = np.vstack(df2["Post_Step_Position_mm"]) * 1000
-        x2, y2, z2 = coords2[:, 0], coords2[:, 1], coords2[:, 2]
-    else:
-        x2 = y2 = z2 = None
-
-    # Choose axes based on plane
-    if plane.lower() == "zx":
-        xdata1, ydata1 = x1, z1
-        if df2 is not None:
-            xdata2, ydata2 = x2, z2
-        xlabel, ylabel = "X position (um)", "Z position (um)"
-    elif plane.lower() == "zy":
-        xdata1, ydata1 = y1, z1
-        if df2 is not None:
-            xdata2, ydata2 = y2, z2
-        xlabel, ylabel = "Y position (um)", "Z position (um)"
-    else:
-        raise ValueError("plane must be 'zx' or 'zy'")
-
-    # Plot
-    fig, ax = plt.subplots(figsize=(7, 6))
-
-    # Plot first dataset
-    ax.scatter(xdata1, ydata1, s=2, c="red", alpha=0.6, label=labels[0])
-
-    # Optionally overlay second dataset
-    if df2 is not None:
-        ax.scatter(xdata2, ydata2, s=2, c="blue", alpha=0.6, label=labels[1])
-
-    
-    if stacked_spheres is not None: 
-        for contour in stacked_spheres.discrete:
-            ax.plot(contour[:, 1], contour[:, 0], 'k-')  # black solid line
-
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    ax.set_title(f"{iteration} — {plane.upper()} slice")
-    ax.set_aspect('equal', adjustable='box')
-    ax.legend()
-
-    
-    plt.show()
-    return fig, ax
-
-def plot_potential_on_sphere(df, vmin=-0.07, vmax=0, iteration="iteration0"):
-
-    coords_m = np.vstack(np.array(df["Post_Step_Position_mm"]))* 1e-3
-
-    R = np.linalg.norm(coords_m, axis=1).max()
-
-    n_theta = 200  # polar angle divisions
-    n_phi = 400    # azimuthal divisions
-
-    theta = np.linspace(0, np.pi, n_theta)
-    phi = np.linspace(0, 2*np.pi, n_phi)
-    theta_grid, phi_grid = np.meshgrid(theta, phi)
-
-    x_s = R * np.sin(theta_grid) * np.cos(phi_grid)
-    y_s = R * np.sin(theta_grid) * np.sin(phi_grid)
-    z_s = R * np.cos(theta_grid)
-    sphere_points = np.column_stack([x_s.ravel(), y_s.ravel(), z_s.ravel()])
-
-    K = 1.0 / (4.0 * np.pi * epsilon_0 * 3.9)  # eps_r=3.9 for SiO2
-    q = -q_e
-    V_sphere = np.zeros(sphere_points.shape[0])
-
-    for i, p in enumerate(sphere_points):
-        r_vec = coords_m - p
-        r = np.linalg.norm(r_vec, axis=1)
-        V_sphere[i] = K * q * np.sum(1.0 / r)
-
-    V_sphere_grid = V_sphere.reshape(theta_grid.shape)
-    print(np.min(V_sphere_grid), np.max(V_sphere_grid))
-
-    # Normalize colormap
-    norm = mcolors.Normalize(vmin=vmin, vmax=vmax)
-    facecolors = plt.cm.plasma(norm(V_sphere_grid))
-
-    fig = plt.figure(figsize=(4, 6))
-    ax = fig.add_subplot(111, projection='3d')
-    surf = ax.plot_surface(
-        x_s*1e3, y_s*1e3, z_s*1e3,  # back to mm for display
-        facecolors=facecolors,  
-        rstride=1, cstride=1, antialiased=False, shade=False
-    )
-    mappable = plt.cm.ScalarMappable(cmap='plasma', norm=norm)
-    mappable.set_array(V_sphere_grid)
-    fig.colorbar(mappable, ax=ax, shrink=0.5, aspect=20, label='Potential (V)',orientation='horizontal',pad=-0.1)
-    ax.set_aspect('equal')
-    ax.set_title(iteration)
-    ax.set_axis_off()
-    plt.show()
-
-    return fig, ax 
+    return fields_all
 
 def calculate_stats(df, config="photoemission"):
 
