@@ -17,11 +17,12 @@ username = "avira7"
 eventnumbers_onlysolarwind = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_onlyphotoemission = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-iterationNUM = 500 # number of iterations to perform
+iterationNUM = 100 # number of iterations to perform
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
 config_list = ["onlysolarwind", "onlyphotoemission"] #, "onlysolarwind"] #["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
+minStepList = [5, 0.1]
 
 # define the size of the world
 CAD_dimensions = (600, 600, 373.2) #(200,600,546.410) #(600, 400, 373.2)#(200,600,546.410) # in units of microns
@@ -42,7 +43,7 @@ output_files = []
 seedIN = [10008859, 10005380]
 i = 0
 
-def write_macro(f, increment_filename, event_num, input_files=None):
+def write_macro(f, increment_filename, event_num, input_files=None, minStep=1):
     f.write(f'# Macro file for {increment_filename}\n')
     f.write('#\n')
     f.write('/control/verbose 0\n')
@@ -76,9 +77,9 @@ def write_macro(f, increment_filename, event_num, input_files=None):
     f.write(f'/sphere/worldX {worldX} um\n')
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
-    f.write(f'/sphere/field/MinimumStep 5 um\n') # step size for field map solver
+    f.write(f'/sphere/field/MinimumStep {minStep} um\n') # step size for field map solver
     f.write(f'/sphere/field/GradThreshold 1e-7 V/m\n') # step size for field map solver
-    f.write(f'/sphere/field/OctreeDepth 10\n') # step size for field map solver
+    f.write(f'/sphere/field/OctreeDepth 8\n') # step size for field map solver
     f.write(f'/sphere/field/file fieldmaps/field-{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}.txt \n')
     f.write('#\n')
     if input_files:
@@ -184,9 +185,8 @@ def write_macro(f, increment_filename, event_num, input_files=None):
 #############################################################
 
 output_files = []
-i = 0
 
-for optionIN in config_list:
+for j, optionIN in enumerate(config_list):
 
     select_num = vars()['eventnumbers_' + optionIN] # selected_numSW, selected_numPE, selected_numall
 
@@ -196,7 +196,7 @@ for optionIN in config_list:
             # Iteration 0 with selected_num
             increment_filename = f"{i:03d}_stackediteration0_{optionIN}_num{select_num}"
             with open(f"macros/{increment_filename}.mac", 'w') as f:
-                write_macro(f, increment_filename, select_num)
+                write_macro(f, increment_filename, select_num, minStep=minStepList[j])
             output_files.append((increment_filename + ".root", select_num, incrementIN, optionIN))
             i += 1
 
@@ -210,7 +210,7 @@ for optionIN in config_list:
     
             increment_filename = f"{i:03d}_stackediteration{incrementIN}_{optionIN}_num{select_num}"
             with open(f"macros/{increment_filename}.mac", 'w') as f:
-                write_macro(f, increment_filename, select_num, input_files=[input_list])
+                write_macro(f, increment_filename, select_num, input_files=[input_list], minStep=minStepList[j])
             output_files.append((increment_filename + ".root", select_num, incrementIN, optionIN))
             i += 1
 
@@ -285,47 +285,3 @@ for configIN in config_list:
 print(f"Created all batchscripts: 0 through {i-1}")
 
 #############################################################
-
-# # Directories
-# batch_dir = "batchscripts"
-# output_script = "submit_all_iterations.sh"
-
-# # Get and sort all batch script files
-# batch_scripts = glob.glob(os.path.join(batch_dir, "*.sh"))
-# batch_scripts.sort()  # Sort alphabetically (can be adjusted if needed)
-
-# # Define the section you want to submit (adjust these values as needed)
-# start_iteration = 0   # First iteration to include
-# end_iteration = iterationNUM    # Last iteration to include
-
-# # Start writing the master submission script
-# with open(output_script, "w") as f:
-#     f.write("#!/bin/bash\n\n")
-
-#     previous_job_var = ""
-#     first_job_in_section = True
-    
-#     for i, script_path in enumerate(batch_scripts):
-#         # Use regex to find the iteration number
-#         match = re.search(r"iteration(\d+)_for", script_path)
-#         if match:
-#             iteration = int(match.group(1))
-            
-#             # Skip scripts outside our desired range
-#             if iteration < start_iteration or iteration > end_iteration:
-#                 continue
-                
-#             if first_job_in_section:
-#                 f.write(f"# Submit first job in section (iteration {iteration})\n")
-#                 f.write(f"jid{i}=$(sbatch --parsable {script_path})\n")
-#                 f.write(f"echo \"Submitted job for iteration {iteration}: $jid{i}\"\n\n")
-#                 previous_job_var = f"$jid{i}"
-#                 first_job_in_section = False
-#             else:
-#                 f.write(f"# Submit job for iteration {iteration} with dependency on previous job\n")
-#                 f.write(f"jid{i}=$(sbatch --parsable --dependency=afterok:{previous_job_var} {script_path})\n")
-#                 f.write(f"echo \"Submitted job for iteration {iteration} (afterok dependency): $jid{i}\"\n\n")
-#                 previous_job_var = f"$jid{i}"
-
-# # Make the script executable
-# os.chmod("submit_all_iterations.sh", 0o755)
