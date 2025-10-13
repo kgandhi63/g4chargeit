@@ -39,7 +39,6 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     G4cout << "Building initial field map octree structure..." << G4endl;
     root_ = buildFromScratch(); // This now only builds the structure
 
-    G4cout << "Computing field values for " << all_leaves_.size() << " leaf nodes in parallel..." << G4endl;
     #pragma omp parallel for schedule(dynamic)
     for (Node* leaf : all_leaves_) {
         leaf->precomputed_field = computeFieldFromCharges(leaf->center);
@@ -75,115 +74,72 @@ void AdaptiveSumRadialFieldMap::buildChargeOctree() {
     }
 
 }
-
-// void AdaptiveSumRadialFieldMap::insertCharge(ChargeNode* node, int particle_index, const G4ThreeVector& min, const G4ThreeVector& max) {
-//     // --- Prevent infinite subdivision when particles are too close ---
-//     G4double minBoxSize = 1e-15 * mm; // or smaller, depending on your precision
-//     if ((max - min).mag() < minBoxSize) {
-//         //G4cout << "Minimum octree box size reached. Skipping further subdivision." << G4endl;
-//         node->is_leaf = true;
-//         node->particle_index = -1;  // Multiple particles case
-//         return;
-//     }
-
-//     if (node->is_leaf) {
-        
-//         if (node->particle_index == -1) {
-//             node->particle_index = particle_index;
-//             // Already a multi-particle leaf
-//             node->total_charge += fCharges[particle_index];
-//             return;
-//         } else {
-//             // Try to split this leaf node
-//             node->is_leaf = false;
-//             int old_particle_index = node->particle_index;
-//             node->particle_index = -1;
-
-//             G4ThreeVector center = (min + max) * 0.5;
-//             bool inserted = false;
-
-//             for (int i = 0; i < 8; ++i) {
-//                 G4ThreeVector child_min, child_max;
-//                 calculateChildBounds(min, max, center, i, child_min, child_max);
-//                 if (pointInside(child_min, child_max, fPositions[old_particle_index])) {
-//                     if (!node->children[i]) node->children[i] = std::make_unique<ChargeNode>();
-//                     insertCharge(node->children[i].get(), old_particle_index, child_min, child_max);
-//                     inserted = true;
-//                     break;
-//                 }
-//             }
-
-//             if (!inserted) {
-//                 G4Exception("insertCharge", "NoChildMatched", FatalException, "Failed to insert charge into any octree child (old particle).");
-//             }
-
-//             // Now insert the new particle
-//             for (int i = 0; i < 8; ++i) {
-//                 G4ThreeVector child_min, child_max;
-//                 calculateChildBounds(min, max, center, i, child_min, child_max);
-//                 if (pointInside(child_min, child_max, fPositions[particle_index])) {
-//                     if (!node->children[i]) node->children[i] = std::make_unique<ChargeNode>();
-//                     insertCharge(node->children[i].get(), particle_index, child_min, child_max);
-//                     break;
-//                 }
-//             }
-//         }
-//     } else {
-//         G4ThreeVector center = (min + max) * 0.5;
-//         for (int i = 0; i < 8; ++i) {
-//             G4ThreeVector child_min, child_max;
-//             calculateChildBounds(min, max, center, i, child_min, child_max);
-//             if (pointInside(child_min, child_max, fPositions[particle_index])) {
-//                 if (!node->children[i]) node->children[i] = std::make_unique<ChargeNode>();
-//                 insertCharge(node->children[i].get(), particle_index, child_min, child_max);
-//                 break;
-//             }
-//         }
-//     }
-
-//     // Update node’s total charge and center of mass
-//     G4double old_total_charge = node->total_charge;
-//     G4double new_charge = fCharges[particle_index];
-//     node->total_charge += new_charge;
-
-//     if (std::abs(node->total_charge) > 1e-18) {
-//         node->center_of_mass = (node->center_of_mass * old_total_charge + fPositions[particle_index] * new_charge) / node->total_charge;
-//     } else {
-//         node->center_of_mass = (min + max) * 0.5;
-//     }
-// }
-
 void AdaptiveSumRadialFieldMap::insertCharge(ChargeNode* node, int particle_index, const G4ThreeVector& min, const G4ThreeVector& max) {
     if (node->is_leaf) {
+        // --- MODIFIED LOGIC ---
         if (node->particle_index == -1) {
+            // Case 1: The leaf is empty. Claim it.
             node->particle_index = particle_index;
+        } else if (node->particle_index == -2) {
+            // Case 2: The leaf already holds multiple particles.
+            // We must aggregate the new one here. No further subdivision is possible.
+            // The charge/mass update at the end of the function handles the aggregation.
         } else {
-            node->is_leaf = false;
+            // Case 3: The leaf is occupied by a single particle.
             int old_particle_index = node->particle_index;
-            node->particle_index = -1;
 
-            G4ThreeVector center = (min + max) * 0.5;
-            for (int i = 0; i < 8; ++i) {
-                G4ThreeVector child_min, child_max;
-                calculateChildBounds(min, max, center, i, child_min, child_max);
-                if (pointInside(child_min, child_max, fPositions[old_particle_index])) {
-                    if (!node->children[i]) node->children[i] = std::make_unique<ChargeNode>();
-                    insertCharge(node->children[i].get(), old_particle_index, child_min, child_max);
-                    break;
-                }
-            }
-            
-            for (int i = 0; i < 8; ++i) {
-                G4ThreeVector child_min, child_max;
-                calculateChildBounds(min, max, center, i, child_min, child_max);
-                if (pointInside(child_min, child_max, fPositions[particle_index])) {
-                    if (!node->children[i]) node->children[i] = std::make_unique<ChargeNode>();
-                    insertCharge(node->children[i].get(), particle_index, child_min, child_max);
-                    break;
+            // Check for identical positions first to prevent deep recursion.
+            if (fPositions[particle_index] == fPositions[old_particle_index]) {
+                node->particle_index = -2; // Aggregate and stop.
+            } else {
+                // Particles are at different positions, so we subdivide.
+                const G4double minBoxSize = minStepSize_;
+
+                if ((max - min).mag() < minBoxSize) {
+                    // This cell is too small to subdivide. Aggregate them.
+                    node->particle_index = -2;
+                } else {
+                    // Subdivide the node.
+                    node->is_leaf = false;
+                    node->particle_index = -1; // Now an internal node.
+
+                    G4ThreeVector center = (min + max) * 0.5;
+
+                    // Re-insert the original particle.
+                    bool inserted_old = false;
+                    for (int i = 0; i < 8; ++i) {
+                        G4ThreeVector child_min, child_max;
+                        calculateChildBounds(min, max, center, i, child_min, child_max);
+                        if (pointInside(child_min, child_max, fPositions[old_particle_index])) {
+                            if (!node->children[i]) node->children[i] = std::make_unique<ChargeNode>();
+                            insertCharge(node->children[i].get(), old_particle_index, child_min, child_max);
+                            inserted_old = true;
+                            break;
+                        }
+                    }
+
+                    // Insert the new particle.
+                    bool inserted_new = false;
+                    for (int i = 0; i < 8; ++i) {
+                        G4ThreeVector child_min, child_max;
+                        calculateChildBounds(min, max, center, i, child_min, child_max);
+                        if (pointInside(child_min, child_max, fPositions[particle_index])) {
+                            if (!node->children[i]) node->children[i] = std::make_unique<ChargeNode>();
+                            insertCharge(node->children[i].get(), particle_index, child_min, child_max);
+                            inserted_new = true;
+                            break;
+                        }
+                    }
+
+                    // Sanity check in case of floating-point issues at boundaries.
+                    if (!inserted_old || !inserted_new) {
+                        G4Exception("insertCharge", "ParticleInsertionError", FatalException, "A particle failed to be placed in any child octant.");
+                    }
                 }
             }
         }
     } else {
+        // This is already an internal node. Recurse into the correct child.
         G4ThreeVector center = (min + max) * 0.5;
         for (int i = 0; i < 8; ++i) {
             G4ThreeVector child_min, child_max;
@@ -196,13 +152,15 @@ void AdaptiveSumRadialFieldMap::insertCharge(ChargeNode* node, int particle_inde
         }
     }
 
+    // After handling the insertion, update the current node's properties.
     G4double old_total_charge = node->total_charge;
     G4double new_charge = fCharges[particle_index];
     node->total_charge += new_charge;
+    
     if (std::abs(node->total_charge) > 1e-18) {
         node->center_of_mass = (node->center_of_mass * old_total_charge + fPositions[particle_index] * new_charge) / node->total_charge;
     } else {
-        node->center_of_mass = (min+max)*0.5;
+        node->center_of_mass = (min + max) * 0.5;
     }
 }
 
@@ -278,39 +236,32 @@ AdaptiveSumRadialFieldMap::buildFromScratch() {
 }
 
 // --- MODIFIED: This function now only builds the tree structure ---
-std::unique_ptr<AdaptiveSumRadialFieldMap::Node> 
+std::unique_ptr<AdaptiveSumRadialFieldMap::Node>
 AdaptiveSumRadialFieldMap::createOctreeFromScratch(const G4ThreeVector& min, const G4ThreeVector& max, int depth) {
     auto node = std::make_unique<Node>();
     node->min = min;
     node->max = max;
     node->center = (min + max) * 0.5;
 
+    // Update statistics for this single root node.
     total_nodes_++;
     max_depth_reached_ = std::max(max_depth_reached_, depth);
 
-    double size = (max.x() - min.x());
-    bool should_create_children = (size > 2.0 * minStepSize_) && (depth < max_depth_);
+    // Force this single node to be a leaf.
+    node->is_leaf = true;
+    all_leaves_.push_back(node.get());
+    leaf_nodes_++;
 
-    if (should_create_children) {
-        node->is_leaf = false;
-        G4ThreeVector center = node->center;
-        for (int i = 0; i < 8; ++i) {
-            G4ThreeVector child_min, child_max;
-            calculateChildBounds(min, max, center, i, child_min, child_max);
-            node->children[i] = createOctreeFromScratch(child_min, child_max, depth + 1);
-        }
-    } else {
-        node->is_leaf = true;
-        // DO NOT compute field here. Add to list for parallel processing.
-        all_leaves_.push_back(node.get());
-        leaf_nodes_++;
-    }
     return node;
 }
+
 
 void AdaptiveSumRadialFieldMap::refineMeshByGradient(Node* node, int depth) {
     if (!node) return;
     
+
+    max_depth_reached_ = std::max(max_depth_reached_, depth);
+
     if (node->is_leaf) {
         double size = (node->max.x() - node->min.x());
 
