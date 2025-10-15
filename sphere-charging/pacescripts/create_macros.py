@@ -15,14 +15,14 @@ os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
 account = "pf17"
 username = "avira7"
 eventnumbers_onlysolarwind = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-eventnumbers_onlyphotoemission = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlyphotoemission = 1000000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 iterationNUM = 100 # number of iterations to perform
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
 config_list = ["onlysolarwind", "onlyphotoemission"] #, "onlysolarwind"] #["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
-minStepList = [5, 0.1]
+minStepList = [0.1, 0.1]
 
 # define the size of the world
 CAD_dimensions = (600, 600, 373.2) #(200,600,546.410) #(600, 400, 373.2)#(200,600,546.410) # in units of microns

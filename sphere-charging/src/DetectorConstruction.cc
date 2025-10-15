@@ -386,7 +386,7 @@ void DetectorConstruction::ConstructSDandField() {
   for (const auto& pos : fHolePositions) {
     allPositions.push_back(pos);
     allCharges.push_back(hCharge);
-  }
+  } 
 
   // Define grid: 800 µm cube centered at origin, 2 µm step
   G4ThreeVector min(-worldX_/2, -worldY_/2, -worldZ_/2); //-400*um, -400*um, -400*um);

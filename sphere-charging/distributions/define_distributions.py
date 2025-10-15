@@ -85,7 +85,7 @@ print(min(solar_xdata), max(solar_xdata))
 
 # Define new evenly spaced energy values (e.g., 1 to 5 eV with 0.01 eV steps)
 vmin = 8.1
-vmax = 330.0
+vmax = 80 #330.0
 x_interp = np.linspace(vmin, vmax, 1000)
 # Create interpolation function (linear or cubic)
 interp_func = interp1d(solar_xdata, solar_ydata, kind='linear', bounds_error=False, fill_value="extrapolate")
@@ -99,7 +99,7 @@ lines = [
 ]
 
 # Export to file
-output_path = "photon_distribution.txt"
+output_path = "photon_distribution_until80eV.txt"
 with open(output_path, "w") as f_out:
     f_out.write("\n".join(lines))
 

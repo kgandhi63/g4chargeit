@@ -27,16 +27,17 @@
 /process/eLoss/UseICRU90 1
 /process/eLoss/UseAngularGenerator true
 #
-/sphere/worldX 200 um
+/sphere/worldX 600 um
 /sphere/worldY 600 um
-/sphere/worldZ 606.41 um
-/sphere/field/MinimumStep 10 um
-/sphere/field/GradThreshold 1e-20 V/m
+/sphere/worldZ 403.2 um
+/sphere/field/MinimumStep 1 um
+/sphere/field/GradThreshold 1e-7 V/m
+/sphere/field/OctreeDepth 8
 /sphere/field/file test-FieldMap.txt
-/sphere/rootinput/file 000_stackediteration0_onlyphotoemission_num500000.root
-/sphere/cadinput/file stacked_spheres_frompython.stl
-#/sphere/cadinput/scale 0.001
+#
 /sphere/rootoutput/file test-rootOutput.root
+/sphere/cadinput/file stacked_spheres_frompython_cropped.stl
+#/sphere/cadinput/scale 0.001
 /sphere/epsilon 4
 /sphere/PBC true
 /run/initialize
@@ -44,9 +45,9 @@
 /gps/particle gamma
 /gps/pos/type Plane
 /gps/pos/shape Square
-/gps/pos/halfx 100.0 um
+/gps/pos/halfx 300.0 um
 /gps/pos/halfy 300.0 um
-/gps/pos/centre 30.0 0 303.205 um #180.0 0 459.8075 um
+/gps/pos/centre 15.0 0 201.6 um
 /gps/direction -0.7071067811865475 0 -0.7071067811865475 
 /gps/ene/type Arb
 /gps/hist/type arb
@@ -54,6 +55,6 @@
 /gps/hist/file photon_distribution.txt
 /gps/hist/inter Lin
 #
-#/control/execute vis.mac
+/control/execute vis.mac
 /run/printProgress 100
 /run/beamOn 100

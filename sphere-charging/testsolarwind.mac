@@ -26,15 +26,17 @@
 /process/eLoss/UseICRU90 1
 /process/eLoss/UseAngularGenerator true
 #
-/sphere/worldX 200 um
+/sphere/worldX 600 um
 /sphere/worldY 600 um
-/sphere/worldZ 606.41 um
+/sphere/worldZ 403.2 um
 /sphere/field/MinimumStep 1 um
 /sphere/field/GradThreshold 1e-6 V/m
+/sphere/field/OctreeDepth 8
 /sphere/field/file test-FieldMap.txt
-/sphere/cadinput/file stacked_spheres_frompython.stl
-#/sphere/cadinput/scale 0.001
+#
 /sphere/rootoutput/file test-rootOutput.root
+/sphere/cadinput/file stacked_spheres_frompython_cropped.stl
+#/sphere/cadinput/scale 0.001
 /sphere/epsilon 4
 /sphere/PBC true
 /run/initialize
@@ -42,27 +44,27 @@
 /gps/particle proton
 /gps/pos/type Plane
 /gps/pos/shape Square
-/gps/pos/halfx 100.0 um
+/gps/pos/halfx 300.0 um
 /gps/pos/halfy 300.0 um
-/gps/pos/centre 30.0 0 303.205 um
+/gps/pos/centre 15.0 0 201.6 um
 /gps/direction -0.7071067811865475 0 -0.7071067811865475 
 /gps/ene/type Mono
 /gps/ene/mono 1 keV
 #
-#/gps/source/add 1
-#/gps/particle e-
-#/gps/source/intensity 5
-#/gps/ene/type Arb
-#/gps/hist/type arb
-#/gps/ene/diffspec true
-#/gps/hist/file electron_distribution.txt
-#/gps/hist/inter Lin
-#/gps/pos/type Plane
-#/gps/pos/shape Square
-#/gps/pos/halfx 100.0 um
-#/gps/pos/halfy 300.0 um
-#/gps/pos/centre 0 0 303.205 um
-#/gps/ang/type iso
+/gps/source/add 1
+/gps/particle e-
+/gps/source/intensity 2
+/gps/ene/type Arb
+/gps/hist/type arb
+/gps/ene/diffspec true
+/gps/hist/file electron_distribution.txt
+/gps/hist/inter Lin
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 300.0 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre 0 0 201.6 um
+/gps/ang/type iso
 #
 /control/execute vis.mac
 #
