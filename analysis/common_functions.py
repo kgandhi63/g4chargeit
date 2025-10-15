@@ -87,49 +87,57 @@ def read_uniform_fieldmap(filename: str) -> pd.DataFrame:
         
         return df
 
-def read_adaptive_fieldmap(filename,scaling=True):
+@njit(fastmath=True, cache=True)
+def scale_fields_numba(field_data):
+    """
+    Scale Ex, Ey, Ez components (columns 3 to 5) by 1e9 in place.
+    """
+    for i in range(field_data.shape[0]):
+        for j in range(3, 6):
+            field_data[i, j] *= 1e9
+    return field_data
+
+# Fast norm function with Numba
+@njit(parallel=True)
+def compute_E_mag(Ex, Ey, Ez):
+    n = Ex.shape[0]
+    result = np.empty(n)
+    for i in prange(n):
+        result[i] = np.sqrt(Ex[i]**2 + Ey[i]**2 + Ez[i]**2)
+    return result
+
+def read_adaptive_fieldmap(filename, scaling=True):
     with open(filename, 'rb') as f:
-        # Read header
+        # --- Read header ---
         world_bounds = np.frombuffer(f.read(6 * 8), dtype=np.float64)
-        mesh_parameters = np.frombuffer(f.read(5 * 4), dtype=np.int32)
+        mesh_parameters = np.frombuffer(f.read(5 * 4), dtype=np.uint32)
 
-        max_depth = mesh_parameters[0]
-        min_step_um = mesh_parameters[1]
-        total_nodes = mesh_parameters[2]
-        leaf_nodes = mesh_parameters[3]
-        storage_flag = mesh_parameters[4]
+        max_depth, min_step_um, total_nodes, leaf_nodes, storage_flag = mesh_parameters
 
-        # Check remaining bytes in file
+        # --- File layout ---
         file_size = os.path.getsize(filename)
-        bytes_read_so_far = 6 * 8 + 5 * 4
-        remaining_bytes = file_size - bytes_read_so_far - 3 * 4  # minus statistics
+        header_bytes = 6 * 8 + 5 * 4
+        statistics_bytes = 3 * 4
+        remaining_bytes = file_size - header_bytes
 
-        expected_all_nodes = total_nodes * 6 * 8
-        expected_leaf_nodes = leaf_nodes * 6 * 8
+        node_size_bytes = 6 * 8  # 6 doubles = 48 bytes
+        field_data_bytes = remaining_bytes - statistics_bytes
 
-        if remaining_bytes == expected_all_nodes:
-            num_nodes = total_nodes
-        elif remaining_bytes == expected_leaf_nodes:
-            num_nodes = leaf_nodes
-        else:
-            raise ValueError(f"Unexpected data size in {filename}: {remaining_bytes} bytes remaining")
+        if field_data_bytes % node_size_bytes != 0:
+            raise ValueError(f"Field data size not divisible by node size (48 bytes).")
 
-        # Read node field data
-        field_data = np.frombuffer(f.read(num_nodes * 6 * 8), dtype=np.float64).copy()
-        field_data = field_data.reshape((num_nodes, 6))
+        num_nodes = field_data_bytes // node_size_bytes
 
-        if scaling == True:
-            field_data[:, 3:] *= 1e9  # scale only the last three columns
+        # --- Read and reshape field data ---
+        field_data = np.frombuffer(f.read(field_data_bytes), dtype=np.float64)
+        field_data = field_data.reshape((num_nodes, 6)).copy()  
+        
+        if scaling:
+            field_data = scale_fields_numba(field_data)
 
-            # convert field units from 1 MeV / e / mm = 1e6 V / mm = 1e9 V/m 
-
-        # Read statistics
-        statistics = np.frombuffer(f.read(3 * 4), dtype=np.int32)
-        gradient_refinements = statistics[0]
-        max_depth_reached = statistics[1]
-        num_positions = statistics[2]
-
-    df = pd.DataFrame(field_data, columns=['x', 'y', 'z', 'Ex', 'Ey', 'Ez'])
+        # --- Read statistics ---
+        statistics = np.frombuffer(f.read(statistics_bytes), dtype=np.int32)
+        gradient_refinements, max_depth_reached, num_positions = statistics
 
     metadata = {
         'world_bounds': world_bounds,
@@ -147,7 +155,89 @@ def read_adaptive_fieldmap(filename,scaling=True):
         }
     }
 
-    return df, metadata
+    return field_data, metadata
+
+
+# Efficient, memory-aware loader
+def read_data_format_efficient(filenames, scaling=True):
+    fields_all = {}
+
+    for fileIN in filenames:
+        iteration = int(fileIN.split("-")[-2])
+
+        # Minimal fieldmap reader - replace with your efficient implementation
+        data, _ = read_adaptive_fieldmap(fileIN,scaling=scaling)  # assume this returns a pandas dataframe
+
+        # Slice columns directly from NumPy array
+        pos = data[:, :3].astype(np.float32, copy=False)    # x, y, z
+        Ex  = data[:, 3].astype(np.float32, copy=False)
+        Ey  = data[:, 4].astype(np.float32, copy=False)
+        Ez  = data[:, 5].astype(np.float32, copy=False)
+
+        # Compute E-field magnitude
+        E_mag = compute_E_mag(Ex, Ey, Ez)
+
+        # Store in dictionary
+        fields_all[iteration] = {
+            "pos": pos,
+            "E": np.stack((Ex, Ey, Ez), axis=1),  # shape (N, 3)
+            "E_mag": E_mag
+        }
+
+    return fields_all
+
+def compute_nearest_field_vector(fields_SW, target=None, start=1, end=None):
+    """
+    For each field iteration, find the electric field vector (Ex, Ey, Ez)
+    at the grid point closest to the specified target location.
+
+    Parameters:
+        fields_SW (dict): Dictionary mapping iteration number to field data. 
+                          Each field must have keys 'pos' (Nx3) and 'E' (Nx3).
+        target (array-like): 3D point to compare distances to. If None, defaults to [-0.1, 0, 0.122].
+        start (int): First iteration number to consider.
+        end (int or None): Last iteration number to consider. If None, uses max key in fields_SW.
+        compute_magnitude (bool): Whether to return E-field magnitudes.
+
+    Returns:
+        pd.DataFrame: Columns = ["iter", "Ex", "Ey", "Ez"] (+ optional "|E|")
+    """
+
+    if target is None:
+        target = np.array([-0.1, 0, 0.122])  # Default based on original code
+    else:
+        target = np.asarray(target)
+
+    if end is None:
+        end = max(fields_SW)
+
+    iterations = range(start, end + 1)
+
+    # Pre-allocate results
+    result_array = np.empty((len(iterations), 5), dtype=np.float64)
+
+    for i, iteration in enumerate(iterations):
+        field = fields_SW[iteration]
+        positions = field["pos"]
+        efield = field["E"]
+        emag = field["E_mag"]
+
+        # Vectorized distance computation
+        distances = np.linalg.norm(positions - target, axis=1)
+
+        # Index of closest point
+        idx = np.argmin(distances)
+
+        # Extract E-field components
+        result_array[i, 0] = iteration
+        result_array[i, 1:-1] = efield[idx] # 3 components
+        result_array[i, 4] = emag[idx]
+
+    # Create DataFrame
+    df = pd.DataFrame(result_array, columns=["iter", "Ex", "Ey", "Ez", "E_mag"])
+
+    return df
+
 
 def plot_electron_positions(df,world_dimensions = (-0.05, 0.05), n_bins=100, iteration="iteration0", stacked_spheres=None):
 
@@ -436,43 +526,6 @@ def plot_surface_potential_one_particle_type(electrons, convex_combined, vmin=-0
     convex_combined.visual.face_colors = colors_rgba
 
     return convex_combined, face_potentials
-
-# Fast norm function with Numba
-@njit(parallel=True)
-def compute_E_mag(Ex, Ey, Ez):
-    n = Ex.shape[0]
-    result = np.empty(n)
-    for i in prange(n):
-        result[i] = np.sqrt(Ex[i]**2 + Ey[i]**2 + Ez[i]**2)
-    return result
-
-# Efficient, memory-aware loader
-def read_data_format_efficient(filenames, scaling=True):
-    fields_all = {}
-
-    for fileIN in filenames:
-        iteration = int(fileIN.split("-")[-2])
-
-        # Minimal fieldmap reader - replace with your efficient implementation
-        data, _ = read_adaptive_fieldmap(fileIN,scaling=scaling)  # assume this returns a pandas dataframe
-
-        # Convert to NumPy arrays once, then drop pandas
-        pos = data[["x", "y", "z"]].to_numpy(dtype=np.float32)
-        Ex = data["Ex"].to_numpy(dtype=np.float32)
-        Ey = data["Ey"].to_numpy(dtype=np.float32)
-        Ez = data["Ez"].to_numpy(dtype=np.float32)
-
-        # Compute magnitude
-        E_mag = compute_E_mag(Ex, Ey, Ez)
-
-        # Store in dict
-        fields_all[iteration] = {
-            "pos": pos,
-            "E": np.stack((Ex, Ey, Ez), axis=1),  # shape (N, 3)
-            "E_mag": E_mag
-        }
-
-    return fields_all
 
 def calculate_stats(df, config="photoemission"):
 

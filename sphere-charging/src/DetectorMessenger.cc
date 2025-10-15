@@ -49,7 +49,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
  detector_(Det), rootManager_(G4RootAnalysisManager::Instance()), 
  projectDir_(0), fileNameCmd_(0), PBCCmd_(0), EpsilonCmd_(0), WorldXCmd_(0),WorldYCmd_(0), WorldZCmd_(0), 
  FieldMinimumStepCmd_(0), FieldGradThresholdCmd_(0), RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0), 
- FieldFile_(nullptr),FieldOctreeDepthCmd_(0)
+ FieldFile_(nullptr),FieldOctreeDepthCmd_(0), EquivalentIterationTimeCmd_(0), MaterialTemperatureCmd_(0)
  
 { 
   projectDir_ = new G4UIdirectory("/sphere/");
@@ -100,6 +100,16 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   WorldZCmd_->SetParameterName("choice",false);
   WorldZCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+  MaterialTemperatureCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/MaterialTemperature", this);
+  MaterialTemperatureCmd_->SetGuidance("Set temperature of material (units of Kelvin).");
+  MaterialTemperatureCmd_->SetParameterName("choice",false);
+  MaterialTemperatureCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  EquivalentIterationTimeCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/IterationTime", this);
+  EquivalentIterationTimeCmd_->SetGuidance("Set equivalent iteration time in lunar equivalent photoemission flux (units of seconds).");
+  EquivalentIterationTimeCmd_->SetParameterName("choice",false);
+  EquivalentIterationTimeCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
   FieldMinimumStepCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/field/MinimumStep", this);
   FieldMinimumStepCmd_->SetGuidance("Set minimum step size for adapative field map.");
   FieldMinimumStepCmd_->SetParameterName("choice",false);
@@ -139,7 +149,8 @@ DetectorMessenger::~DetectorMessenger()
   delete FieldGradThresholdCmd_;
   delete FieldFile_;
   delete FieldOctreeDepthCmd_;
-
+  delete MaterialTemperatureCmd_;
+  delete EquivalentIterationTimeCmd_;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -183,6 +194,12 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 
   if( command == FieldOctreeDepthCmd_ )
   { detector_->SetOctreeMaxDepth(FieldOctreeDepthCmd_->GetNewDoubleValue(newValue));}
+
+  if( command == MaterialTemperatureCmd_ )
+  { detector_->SetMaterialTemperature(MaterialTemperatureCmd_->GetNewDoubleValue(newValue));}
+
+  if( command == EquivalentIterationTimeCmd_ )
+  { detector_->SetEquivalentIterationTime(EquivalentIterationTimeCmd_->GetNewDoubleValue(newValue));}
 
   if( command == FieldFile_ )
   { detector_->SetFieldFile(newValue);}

@@ -71,6 +71,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetFieldMinimumStep (G4double);
     void SetFieldGradThreshold (G4double);
     void SetOctreeMaxDepth (G4double);
+    void SetMaterialTemperature (G4double);
+    void SetEquivalentIterationTime (G4double);
                        
   private:
     G4VPhysicalVolume* ConstructVolumes();  
@@ -86,11 +88,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4String RootInput_;
     G4String filename_;
     G4double Scale_;
+    G4double materialTemperature_;
     std::vector<G4ThreeVector> fHolePositions;
     std::vector<G4ThreeVector> fElectronPositions;
     std::vector<G4ThreeVector> fProtonPositions;
     DetectorMessenger* detectorMessenger_;
     G4double octreeDepth_;
+    G4double equivalentIterationTime_;
 
     // CAD geometry
     G4VSolid* sphereSolid_;  // ← Make sure this exists

@@ -75,6 +75,8 @@ class DetectorMessenger: public G4UImessenger
     G4UIcmdWithADoubleAndUnit*  FieldGradThresholdCmd_;
     G4UIcmdWithAString*         FieldFile_;
     G4UIcmdWithADouble*         FieldOctreeDepthCmd_;
+    G4UIcmdWithADoubleAndUnit*  MaterialTemperatureCmd_;
+    G4UIcmdWithADoubleAndUnit*  EquivalentIterationTimeCmd_;
 
 
 };
