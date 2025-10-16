@@ -72,7 +72,6 @@ void AdaptiveSumRadialFieldMap::ApplyChargeDissipation(G4double dt, G4double tem
 
     #pragma omp parallel for schedule(dynamic)
     for (const auto& leaf : all_leaves_) {
-        if (isNodeOnSurface(leaf)) {
             G4ThreeVector E_field = leaf->precomputed_field;
             double leakage_current_density = conductivity * E_field.mag();
             double node_width = leaf->max.x() - leaf->min.x();
@@ -82,7 +81,6 @@ void AdaptiveSumRadialFieldMap::ApplyChargeDissipation(G4double dt, G4double tem
             if (charge_to_remove > 0) {
                 removeChargeFromRegion(leaf->min, leaf->max, charge_to_remove);
             }
-        }
     }
 }
 
@@ -112,13 +110,6 @@ void AdaptiveSumRadialFieldMap::removeChargeFromRegion(const G4ThreeVector& min_
     }
 }
 
-// CRITICAL PLACEHOLDER for your geometry-specific surface check.
-bool AdaptiveSumRadialFieldMap::isNodeOnSurface(const Node* node) const {
-    // This function MUST be implemented correctly for your specific geometry.
-    // It must return 'true' only if the node's volume overlaps with the
-    // surface of your physical CAD model or sphere.
-    return true; // For now, it assumes ALL nodes are on the surface for testing.
-}
 
 
 // ===================================================================
