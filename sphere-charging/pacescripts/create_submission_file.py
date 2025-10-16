@@ -52,7 +52,7 @@ allparticles_scripts = []
 
 for script_path in batch_scripts:
     # Use regex to find the iteration number and type
-    match = re.search(r"iteration(\d+)_for(onlyphotoemission|onlysolarwind|allparticles)", script_path)
+    match = re.search(r"iteration(\d+)_(onlyphotoemission|onlysolarwind|allparticles)", script_path)
     if match:
         iteration = int(match.group(1))
         script_type = match.group(2)

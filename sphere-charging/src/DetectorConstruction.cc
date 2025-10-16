@@ -398,11 +398,15 @@ void DetectorConstruction::ConstructSDandField() {
   // Only create adaptive field map if we have charge data
   if (!allPositions.empty() && !allCharges.empty()) {
 
-      G4cout << "Starting Adaptive Field Map Precomputation" << G4endl;
+    const G4double time_step_dt = equivalentIterationTime_ / second;
+    G4cout << "Equivalent iteration time for charge leakage: "
+       << G4BestUnit(equivalentIterationTime_, "Time") << G4endl;
+
+    G4cout << "Starting Adaptive Field Map Precomputation" << G4endl;
 
     // Start timer
     auto start = std::chrono::high_resolution_clock::now();
-    const G4double time_step_dt = equivalentIterationTime_ / second;
+
     const G4double material_temperature = materialTemperature_ / kelvin;
     // Then create adaptive field map using the uniform one
     auto adaptiveFieldMap = new AdaptiveSumRadialFieldMap(

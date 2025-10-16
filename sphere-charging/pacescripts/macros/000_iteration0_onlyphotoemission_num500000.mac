@@ -1,0 +1,59 @@
+# Macro file for 000_iteration0_onlyphotoemission_num500000
+#
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+/process/verbose 0
+/process/had/verbose 0
+/process/em/verbose 0
+#
+/random/setSeeds 10008859 10005380
+/random/setSavingFlag 1
+#
+/process/em/fluo true
+/process/em/auger true
+/process/em/augerCascade true
+/process/em/deexcitationIgnoreCut true
+/process/em/Polarisation true
+/process/em/PhotoeffectBelowKShell true
+#
+/process/em/lowestElectronEnergy 0 eV
+/process/em/lowestMuHadEnergy 100 eV
+/process/em/enableSamplingTable 1
+#
+/process/eLoss/CSDARange 1
+/process/eLoss/UseICRU90 1
+/process/eLoss/UseAngularGenerator true
+#
+/sphere/worldX 600 um
+/sphere/worldY 600 um
+/sphere/worldZ 403.2 um
+/sphere/MaterialTemperature 300 K
+/sphere/IterationTime 0 s
+/sphere/field/MinimumStep 0.1 um
+/sphere/field/GradThreshold 1e-7 V/m
+/sphere/field/OctreeDepth 8
+/sphere/field/file fieldmaps/000-onlyphotoemission-fieldmap.txt 
+#
+/sphere/rootoutput/file root/000_iteration0_onlyphotoemission_num500000.root
+/sphere/cadinput/file stacked_spheres_frompython_cropped.stl
+/sphere/epsilon 4
+/sphere/PBC true
+/run/initialize
+#
+/gps/particle gamma
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 300.0 um
+/gps/pos/halfy 300.0 um
+/gps/pos/centre 15.0 0 201.6 um
+/gps/direction -0.7071067811865476 0 -0.7071067811865476 
+/gps/ene/type Arb
+/gps/hist/type arb
+/gps/ene/diffspec true
+/gps/hist/file photon_distribution.txt
+/gps/hist/inter Lin
+#
+/run/printProgress 5000
+/run/beamOn 500000

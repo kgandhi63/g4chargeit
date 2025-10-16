@@ -3,30 +3,31 @@ import re
 import glob
 import shutil
 import numpy as np
+import pandas as pd
 from collections import defaultdict
 
-# Overwrite the "macros" folder
-if os.path.exists("macros"):
-    shutil.rmtree("macros")  # Delete the folder and all its contents
+import uproot
+import numpy as np
 
-os.makedirs("macros", exist_ok=True)  # Recreate it cleanly
+#############################################################
+###################### USER PARAMETERS ######################
+#############################################################
 
 # define the number of particles for the each iteration
-account = "pf17"
-username = "avira7"
+account, username = "pf17", "avira7"
 eventnumbers_onlysolarwind = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-eventnumbers_onlyphotoemission = 1000000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlyphotoemission = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 iterationNUM = 100 # number of iterations to perform
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
-config_list = ["onlysolarwind", "onlyphotoemission"] #, "onlysolarwind"] #["onlysolarwind", "onlyphotoemission", "allparticles"] #["onlysolarwind", "onlyphotoemission", "allparticles"]
-minStepList = [0.1, 0.1]
+config_list = ["onlysolarwind", "onlyphotoemission"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
+minStepList = [0.1, 0.1] # minimum step for Octree mesh for each case (units of um)
 
 # define the size of the world
-CAD_dimensions = (600, 600, 373.2) #(200,600,546.410) #(600, 400, 373.2)#(200,600,546.410) # in units of microns
-particle_position = 15 # place all particles 200 microns above the geometry
+CAD_dimensions = (600, 600, 373.2) # in units of microns
+particle_position = 15 # place all particles microns above the geometry
 bufferXY = 0 # in units of microns
 worldX = CAD_dimensions[0] + 2*bufferXY # in units of microns -- account for angle of beam
 worldY = CAD_dimensions[1] + 2*bufferXY # in units of microns
@@ -36,14 +37,48 @@ worldZ = CAD_dimensions[2] + 2*particle_position # in units of microns
 Z_position = CAD_dimensions[2]/2 + particle_position
 XY_offset = Z_position - CAD_dimensions[2]/2 + bufferXY
 rotation = np.sin(45*np.pi/180)
-#worldX += XY_offset # increase to account for offset in X direction
+
+# flux values from Zimmerman 2016 manuscript
+PEflux, SWelectrons, SWions = np.array([4e-6, 1.5e-6, 3e-7])*6.241509e18 #units: A/m2 -> e/m2/s
+planeArea = worldX*worldY/(1e6**2) # units: m2
+
+# Template for SLURM batch file
+batch_template = """#!/bin/bash
+#SBATCH --job-name=Iteration{iter}_Configuration{config}
+#SBATCH --account=gts-{account}
+#SBATCH --mail-user={username}@gatech.edu
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=24
+#SBATCH --mem-per-cpu=2048
+#SBATCH --time=05:00:00
+#SBATCH --output=outputlogs/%A_iteration{iter}_{config}
+
+echo "Starting iteration{iter} for {config} configuration"
+{run_line}
+date
+"""
+
+seedIN = [10008859, 10005380]
+
+#############################################################
+###################### MACRO CODE ###########################
+#############################################################
+
+def reset_folder(folder_path):
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)
+    os.makedirs(folder_path, exist_ok=True)
+
+# Reset both folders
+reset_folder("macros")
+reset_folder("batchscripts")
 
 # Output files tracking
 output_files = []
-seedIN = [10008859, 10005380]
 i = 0
 
-def write_macro(f, increment_filename, event_num, input_files=None, minStep=1):
+def write_macro(f, increment_filename, event_num, iterationTime, input_files=None, minStep=1):
     f.write(f'# Macro file for {increment_filename}\n')
     f.write('#\n')
     f.write('/control/verbose 0\n')
@@ -77,10 +112,12 @@ def write_macro(f, increment_filename, event_num, input_files=None, minStep=1):
     f.write(f'/sphere/worldX {worldX} um\n')
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
+    f.write(f'/sphere/MaterialTemperature 300 K\n')
+    f.write(f'/sphere/IterationTime {iterationTime} s\n')
     f.write(f'/sphere/field/MinimumStep {minStep} um\n') # step size for field map solver
     f.write(f'/sphere/field/GradThreshold 1e-7 V/m\n') # step size for field map solver
     f.write(f'/sphere/field/OctreeDepth 8\n') # step size for field map solver
-    f.write(f'/sphere/field/file fieldmaps/field-{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}.txt \n')
+    f.write(f'/sphere/field/file fieldmaps/{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}-fieldmap.txt \n')
     f.write('#\n')
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
@@ -182,37 +219,163 @@ def write_macro(f, increment_filename, event_num, input_files=None, minStep=1):
     f.write('/run/printProgress 5000\n')
     f.write(f'/run/beamOn {event_num}\n')
 
+def read_rootfile(file,directory_path=None):
+    #file = '00_iteration0_num5000.root' #'13_iteration5_from_num1000000.root'
+
+    if directory_path:
+        file_path = f"{directory_path}/{file}"
+    else:
+        file_path = file
+    tree_name = "Hit Data"
+
+    with uproot.open(file_path) as file:
+        
+        tree = file[tree_name]
+        branch_names = tree.keys()
+        branch_vars = {}
+        for name in branch_names:
+            branch_vars[name] = tree[name].array(library="np")
+
+    df = pd.DataFrame(branch_vars)
+
+    return df 
+
+def get_particle_counts_by_type(root_file, directory_path=None):
+    try:
+        df = read_rootfile(root_file, directory_path)
+        counts = {}
+        unique_particles = df["Particle_Type"].unique()
+        for particleIN in unique_particles:
+
+            if particleIN == "gamma":
+                # get dataframe of the last e- event within the sensitive detector
+                last_e_event = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] > 0.0)].drop_duplicates(subset="Event_Number", keep="last")
+                # get new dataframe of all e- that left the world
+                world_e_energy=last_e_event[(last_e_event["Volume_Name_Post"]=="physical_cyclic") | (last_e_event["Volume_Name_Pre"]=="physical_cyclic")]
+                # get all the initial gamma energy that leads to an e- escaping
+                matching_event_numbers = np.intersect1d(df["Event_Number"], world_e_energy["Event_Number"])
+
+                #  get all the initial gamma energy that leds to the creation of e-
+                matching_event_numbers = np.intersect1d(df["Event_Number"], last_e_event["Event_Number"])
+                gamma_initial_leading_e_creation = df[df["Event_Number"].isin(matching_event_numbers)].drop_duplicates(subset="Event_Number", keep="first")
+                counts[particleIN] = gamma_initial_leading_e_creation.shape[0]
+            else:
+                counts[particleIN] = df[(df["Particle_Type"] == particleIN)& (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="first").shape[0]
+        
+        return counts
+
+    except Exception as e:
+        print(f"Error reading {root_file}: {e}")
+        return {}
+
+
+#############################################################
+############### CREATE ITERATIONS ###########################
 #############################################################
 
 output_files = []
 
-for j, optionIN in enumerate(config_list):
+for optionIN,minStepIN in zip(config_list, minStepList):
 
-    select_num = vars()['eventnumbers_' + optionIN] # selected_numSW, selected_numPE, selected_numall
+    select_num = vars()['eventnumbers_' + optionIN]
+    i = 0  # Reset iteration counter for each config
 
-    for incrementIN in range(iterationNUM):
+    while i < iterationNUM:
 
-        if incrementIN == 0:
-            # Iteration 0 with selected_num
-            increment_filename = f"{i:03d}_stackediteration0_{optionIN}_num{select_num}"
-            with open(f"macros/{increment_filename}.mac", 'w') as f:
-                write_macro(f, increment_filename, select_num, minStep=minStepList[j])
-            output_files.append((increment_filename + ".root", select_num, incrementIN, optionIN))
+        if i == 0:
+            # Create macro for iteration 0
+            increment_filename = f"{i:03d}_iteration0_{optionIN}_num{select_num}"
+            macro_path = f"macros/{increment_filename}.mac"
+            with open(macro_path, 'w') as f:
+                write_macro(f, increment_filename, select_num, 0, minStep=minStepIN)
+            output_files.append((increment_filename + ".root", select_num, i, optionIN))
+
+            # Create batch script
+            batch_path = f"batchscripts/{i:03d}_submit_iteration0_{optionIN}.sh"
+            cmd = f"./charging_sphere {macro_path}"
+            with open(batch_path, "w") as f:
+                batch_script = batch_template.format(
+                    iter=i,
+                    config=optionIN,
+                    run_line=cmd,
+                    account=account,
+                    username=username
+                )
+                f.write(batch_script)
+
             i += 1
 
-        elif incrementIN > 0:
-            # Iteration 2+ using only iteration 1 files with 1000000 particles
-            #filtered = [fname for fname, evnum, iterID in output_files if iterID ==0 or evnum == selected_num]
-            filtered = [fname for fname, evnum, iterID, option in output_files if option == optionIN] # or (evnum == selected_num)
+        elif i == 1:
+            # Wait for and read ROOT file from iteration 0
+            previous_root_file = f"root/{output_files[-1][0]}"
 
+            if not os.path.exists(previous_root_file):
+                print(f"[{optionIN}] requires to advance: {previous_root_file}")
+                break  # STOP iteration for this config until ROOT exists
+
+            particlesforIteration = get_particle_counts_by_type(previous_root_file)
+
+            if particlesforIteration == 0:
+                print(f"[{optionIN}] No particles found in {previous_root_file}")
+                break  # STOP and wait for valid ROOT file
+
+            # Calculate iteration time
+            if optionIN == "onlyphotoemission":
+                iterationTime = (particlesforIteration["gamma"] / planeArea) / PEflux
+            elif optionIN == "onlysolarwind":
+                iterationTime = (particlesforIteration["proton"] / planeArea) / SWions
+            else:
+                iterationTime = 0
+
+            print(f"[{optionIN}] Particle counts: {particlesforIteration} Iteration time (s): {iterationTime}")
+
+            increment_filename = f"{i:03d}_iteration{i}_{optionIN}_num{select_num}"
+            macro_path = f"macros/{increment_filename}.mac"
+            with open(macro_path, 'w') as f:
+                write_macro(f, increment_filename, select_num, iterationTime,
+                            input_files=[f"{output_files[-1][0]}"], minStep=minStepIN)
+            output_files.append((increment_filename + ".root", select_num, i, optionIN))
+
+            batch_path = f"batchscripts/{i:03d}_submit_iteration{i}_{optionIN}.sh"
+            cmd = f"./charging_sphere {macro_path}"
+            with open(batch_path, "w") as f:
+                batch_script = batch_template.format(
+                    iter=i,
+                    config=optionIN,
+                    run_line=cmd,
+                    account=account,
+                    username=username
+                )
+                f.write(batch_script)
+
+            i += 1
+
+        else:  # i > 1
+            filtered = [fname for fname, _, _, option in output_files if option == optionIN]
             input_list = ' '.join(filtered)
-            #print(input_list)
-    
-            increment_filename = f"{i:03d}_stackediteration{incrementIN}_{optionIN}_num{select_num}"
-            with open(f"macros/{increment_filename}.mac", 'w') as f:
-                write_macro(f, increment_filename, select_num, input_files=[input_list], minStep=minStepList[j])
-            output_files.append((increment_filename + ".root", select_num, incrementIN, optionIN))
+
+            increment_filename = f"{i:03d}_iteration{i}_{optionIN}_num{select_num}"
+            macro_path = f"macros/{increment_filename}.mac"
+            with open(macro_path, 'w') as f:
+                write_macro(f, increment_filename, select_num, iterationTime,
+                            input_files=filtered, minStep=minStepIN)
+            output_files.append((increment_filename + ".root", select_num, i, optionIN))
+
+            batch_path = f"batchscripts/{i:03d}_submit_iteration{i}_{optionIN}.sh"
+            cmd = f"./charging_sphere {macro_path}"
+            with open(batch_path, "w") as f:
+                batch_script = batch_template.format(
+                    iter=i,
+                    config=optionIN,
+                    run_line=cmd,
+                    account=account,
+                    username=username
+                )
+                f.write(batch_script)
+
             i += 1
+
+print(f"Created batchscripts for iterations: 0 through {i}")
 
 # for optionIN in config_list:
 
@@ -224,64 +387,4 @@ for j, optionIN in enumerate(config_list):
 #     output_files.append((increment_filename + ".root", select_num, 0, optionIN))
 
 #############################################################
-
-# Define directories
-batch_dir = "batchscripts"
-if os.path.exists(batch_dir):
-    shutil.rmtree(batch_dir)  # Delete the folder and all its contents
-
-os.makedirs(batch_dir, exist_ok=True)  # Recreate it cleanly
-
-# Template for SLURM batch file
-batch_template = """#!/bin/bash
-#SBATCH --job-name=Iteration{iter}_Configuration{config}
-#SBATCH --account=gts-{account}
-#SBATCH --mail-user={username}@gatech.edu
-#SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=24
-#SBATCH --mem-per-cpu=2048
-#SBATCH --time=05:00:00
-#SBATCH --output=outputlogs/iteration{iter}_{config}_%A
-
-echo "Starting iteration{iter} for {config} configuration"
-{run_line}
-date
-"""
-
-# Define paths
-macro_dir = "macros"
-
-# Pattern to match iteration number
-pattern = re.compile(r'iteration(\d+)')
-
-# loop over all configurations
-i=0
-for configIN in config_list:
-
-    # Collect and categorize macro files
-    for fname in sorted(os.listdir(macro_dir)):
-        if configIN in fname and fname.endswith(".mac"):
-            match = pattern.search(fname)
-            if match:
-                iteration_num = int(match.group(1))
-                cmd = f"./charging_sphere {os.path.join(macro_dir, fname)}"
-                batch_script = batch_template.format(
-                    iter=iteration_num,
-                    config=configIN,
-                    run_line=cmd,                
-                    account=account, 
-                    username=username
-                )
-                #iteration_commands[iteration_num].append(cmd)
-
-                batch_filename = f"{i:03d}_submit_iteration{iteration_num}_for{configIN}.sh"
-                batch_path = os.path.join(batch_dir, batch_filename)
-                with open(batch_path, "w") as f:
-                    f.write(batch_script)
-
-                i+=1
-
-print(f"Created all batchscripts: 0 through {i-1}")
-
 #############################################################

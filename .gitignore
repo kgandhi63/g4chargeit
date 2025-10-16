@@ -1,6 +1,4 @@
 root/
-sphere-charging/pacescripts/macros/
-sphere-charging/pacescripts/batchscripts/
 build-sphere-charging/
 build*
 figures/*
