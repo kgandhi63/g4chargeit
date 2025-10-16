@@ -92,8 +92,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
-, PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMinimumStep_(0),sphereSolid_(0), equivalentIterationTime_(0)
-fieldGradThreshold_(0), CADFile_(""), RootInput_(""), Scale_(1), filename_(""),octreeDepth_(8), materialTemperature_(300)
+, PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMinimumStep_(0),sphereSolid_(0), equivalentIterationTime_(0),
+fieldGradThreshold_(0), CADFile_(""), RootInput_(""), Scale_(1), filename_(""), octreeDepth_(8), materialTemperature_(300)
 
 {
   // create commands for interactive definition of the detector 
@@ -408,10 +408,12 @@ void DetectorConstruction::ConstructSDandField() {
         allPositions, allCharges, // Pass the uniform field map
         fieldGradThreshold_,               // Gradient threshold (V/m per micron)
         fieldMinimumStep_,
+        equivalentIterationTime_, // <-- Pass the time step
+        materialTemperature_,     // <-- Pass the temperature
         filename_,
         min, max,
-        octreeDepth_,                 // max depth
-        AdaptiveSumRadialFieldMap::StorageType::Double
+        octreeDepth_,
+        AdaptiveSumRadialFieldMap::StorageType::Full
     );
 
     // End timer
@@ -452,73 +454,6 @@ void DetectorConstruction::ConstructSDandField() {
 }
 
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-// In DetectorConstruction.cc
- 
-// --- ADD THESE NEW FUNCTION IMPLEMENTATIONS ---
- 
-// This is the main physics function that applies one step of dissipation.
-void DetectorConstruction::ApplyChargeDissipation(std::vector<G4ThreeVector>& positions, std::vector<G4double>& charges, const AdaptiveSumRadialFieldMap* fieldMap)
-{
-    const G4double time_step_dt = equivalentIterationTime_ / picosecond;       // equivalent lunar time for one iteration
-    const G4double material_temperature = materialTemperature_ / kelvin; // units of kelvin
-    double conductivity = calculateConductivity(material_temperature)/epsilon0;
- 
-    for (const auto& leaf : fieldMap->getLeafNodes()) {
-        if (isNodeOnSurface(leaf)) {
-            G4ThreeVector E_field = leaf->precomputed_field;
-            double leakage_current_density = conductivity * E_field.mag();
-            double node_width = leaf->max.x() - leaf->min.x();
-            double leaf_area = node_width * node_width; // Approximate area of the surface patch
-            double charge_to_remove = leakage_current_density * leaf_area * time_step_dt;
- 
-            if (charge_to_remove > 0) {
-                removeChargeFromRegion(positions, charges, leaf->min, leaf->max, charge_to_remove);
-            }
-        }
-    }
-}
- 
-// Implements the conductivity formula from the paper.
-double DetectorConstruction::calculateConductivity(double temperature_K) {
-    if (temperature_K <= 0) return 0.0;
-    return 6.0e-18 * std::exp(0.0230 * temperature_K);
-}
- 
-// Finds and reduces positive charge (holes) within a given region.
-void DetectorConstruction::removeChargeFromRegion(std::vector<G4ThreeVector>& positions, std::vector<G4double>& charges, const G4ThreeVector& min_bounds, const G4ThreeVector& max_bounds, double charge_to_remove) {
-    std::vector<int> particle_indices_in_region;
-    for (size_t i = 0; i < positions.size(); ++i) {
-        if (charges[i] > 0 && // Only remove positive charge
-            positions[i].x() >= min_bounds.x() && positions[i].x() <= max_bounds.x() &&
-            positions[i].y() >= min_bounds.y() && positions[i].y() <= max_bounds.y() &&
-            positions[i].z() >= min_bounds.z() && positions[i].z() <= max_bounds.z())
-        {
-            particle_indices_in_region.push_back(i);
-        }
-    }
- 
-    if (particle_indices_in_region.empty()) return;
- 
-    double charge_to_remove_per_particle = charge_to_remove / particle_indices_in_region.size();
-    for (int idx : particle_indices_in_region) {
-        charges[idx] -= charge_to_remove_per_particle;
-        if (charges[idx] < 1e-21 * eplus) {
-            charges[idx] = 0; // Effectively neutralize it
-        }
-    }
-}
- 
-// CRITICAL PLACEHOLDER: You must implement this for your geometry.
-bool DetectorConstruction::isNodeOnSurface(const AdaptiveSumRadialFieldMap::Node* node) const {
-    // This function must return 'true' only if the node's volume overlaps
-    // with the surface of your CAD model or sphere.
-    // For now, it assumes ALL nodes are on the surface for testing.
-    return true;
-}
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void DetectorConstruction::SetPBC(G4bool value)
 {
