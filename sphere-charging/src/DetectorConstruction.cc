@@ -92,7 +92,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
-, PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMinimumStep_(0),sphereSolid_(0), equivalentIterationTime_(0),
+, PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMinimumStep_(0),sphereSolid_(0), equivalentIterationTime_(0.02),
 fieldGradThreshold_(0), CADFile_(""), RootInput_(""), Scale_(1), filename_(""), octreeDepth_(8), materialTemperature_(300)
 
 {
@@ -402,14 +402,15 @@ void DetectorConstruction::ConstructSDandField() {
 
     // Start timer
     auto start = std::chrono::high_resolution_clock::now();
-
+    const G4double time_step_dt = equivalentIterationTime_ / second;
+    const G4double material_temperature = materialTemperature_ / kelvin;
     // Then create adaptive field map using the uniform one
     auto adaptiveFieldMap = new AdaptiveSumRadialFieldMap(
         allPositions, allCharges, // Pass the uniform field map
         fieldGradThreshold_,               // Gradient threshold (V/m per micron)
         fieldMinimumStep_,
-        equivalentIterationTime_, // <-- Pass the time step
-        materialTemperature_,     // <-- Pass the temperature
+        time_step_dt, // <-- Pass the time step
+        material_temperature,     // <-- Pass the temperature
         filename_,
         min, max,
         octreeDepth_,
