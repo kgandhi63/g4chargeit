@@ -163,7 +163,7 @@ def read_data_format_efficient(filenames, scaling=True):
     fields_all = {}
 
     for fileIN in filenames:
-        iteration = int(fileIN.split("-")[-2])
+        iteration = int(fileIN.split("/")[-1].split("-")[0])
 
         # Minimal fieldmap reader - replace with your efficient implementation
         data, _ = read_adaptive_fieldmap(fileIN,scaling=scaling)  # assume this returns a pandas dataframe
