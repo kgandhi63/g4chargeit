@@ -393,8 +393,6 @@ void DetectorConstruction::ConstructSDandField() {
   G4ThreeVector max(worldX_/2, worldY_/2, worldZ_/2); // 400*um,  400*um,  400*um);
   G4ThreeVector step(10*um, 10*um, 10*um);
 
-
-
   // Only create adaptive field map if we have charge data
   if (!allPositions.empty() && !allCharges.empty()) {
 
@@ -457,7 +455,6 @@ void DetectorConstruction::ConstructSDandField() {
     }
   }
 }
-
 
 
 void DetectorConstruction::SetPBC(G4bool value)
