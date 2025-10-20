@@ -416,7 +416,7 @@ void DetectorConstruction::ConstructSDandField() {
         filename_,
         min, max,
         octreeDepth_,
-        AdaptiveSumRadialFieldMap::StorageType::Full
+        AdaptiveSumRadialFieldMap::StorageType::Double
     );
 
     // End timer

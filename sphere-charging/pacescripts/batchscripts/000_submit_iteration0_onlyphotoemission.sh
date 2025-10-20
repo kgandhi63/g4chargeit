@@ -5,7 +5,7 @@
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=24
-#SBATCH --mem-per-cpu=32gb
+#SBATCH --mem-per-cpu=2048
 #SBATCH --time=05:00:00
 #SBATCH --output=outputlogs/%A_iteration0_onlyphotoemission
 

@@ -29,7 +29,7 @@
 /sphere/worldX 600 um
 /sphere/worldY 600 um
 /sphere/worldZ 403.2 um
-/sphere/MaterialTemperature 300 K
+/sphere/MaterialTemperature 425 K
 /sphere/IterationTime 0 s
 /sphere/field/MinimumStep 0.1 um
 /sphere/field/GradThreshold 1e-7 V/m
