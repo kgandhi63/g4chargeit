@@ -115,7 +115,7 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
     f.write(f'/sphere/MaterialTemperature 425 K\n')
     f.write(f'/sphere/IterationTime {iterationTime} s\n')
     f.write(f'/sphere/field/MinimumStep {minStep} um\n') # step size for field map solver
-    f.write(f'/sphere/field/GradThreshold 1e-7 V/m\n') # step size for field map solver
+    f.write(f'/sphere/field/GradThreshold 1e-2 V/m\n') # step size for field map solver
     f.write(f'/sphere/field/OctreeDepth 8\n') # step size for field map solver
     f.write(f'/sphere/field/file fieldmaps/{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}-fieldmap.txt \n')
     f.write('#\n')

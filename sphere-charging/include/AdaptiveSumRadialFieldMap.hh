@@ -125,8 +125,9 @@ private:
                               G4ThreeVector& child_min, G4ThreeVector& child_max) const;
     void setWorldDimensions(G4double wx, G4double wy, G4double wz);
     void collectStatistics(const Node* node, int depth);
+ 
+    // File I/O Helpers
     void writeFieldPointsToFile(std::ofstream& outfile, const Node* node) const;
-
  
 }; // End of class AdaptiveSumRadialFieldMap
  
