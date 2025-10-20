@@ -10,6 +10,7 @@ import struct
 from typing import Dict, Any
 import glob
 import os
+import struct
 
 import trimesh 
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
@@ -146,7 +147,7 @@ def read_adaptive_fieldmap(filename, scaling=True):
             'min_step_um': min_step_um,
             'total_nodes': total_nodes,
             'leaf_nodes': leaf_nodes,
-            'storage_flag': storage_flag,
+            'storage_flag': storage_flag
         },
         'statistics': {
             'gradient_refinements': gradient_refinements,
@@ -156,7 +157,6 @@ def read_adaptive_fieldmap(filename, scaling=True):
     }
 
     return field_data, metadata
-
 
 # Efficient, memory-aware loader
 def read_data_format_efficient(filenames, scaling=True):
@@ -211,12 +211,10 @@ def compute_nearest_field_vector(fields_SW, target=None, start=1, end=None):
     if end is None:
         end = max(fields_SW)
 
-    iterations = range(start, end + 1)
-
     # Pre-allocate results
-    result_array = np.empty((len(iterations), 5), dtype=np.float64)
+    result_array = np.empty((len(fields_SW.keys()), 5), dtype=np.float64)
 
-    for i, iteration in enumerate(iterations):
+    for i, iteration in enumerate(fields_SW.keys()):
         field = fields_SW[iteration]
         positions = field["pos"]
         efield = field["E"]

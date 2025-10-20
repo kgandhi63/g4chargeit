@@ -98,7 +98,7 @@ void AdaptiveSumRadialFieldMap::ApplyChargeDissipation(G4double dt, G4double tem
 
             if (charge_to_remove > 0) {
                 removeChargeFromRegion(leaf->min, leaf->max, charge_to_remove);
-                G4cout << "--> amount of charge to remove: "<< charge_to_remove << "E_field: "<< 
+                G4cout << "--> amount of charge to remove: "<< charge_to_remove << ", E_field: "<< 
                         G4BestUnit(E_field.mag(), "Electric field") << G4endl;
             }
     }
@@ -466,77 +466,77 @@ void AdaptiveSumRadialFieldMap::calculateChildBounds(const G4ThreeVector& min, c
     );
 }
 
-// void AdaptiveSumRadialFieldMap::ExportFieldMapToFile(const std::string& filename) const {
-//     std::ofstream outfile(filename, std::ios::binary);
-//     if (!outfile.is_open()) {
-//         G4Exception("AdaptiveSumRadialFieldMap::ExportFieldMapToFile", "FileOpenError", FatalException, ("Failed to open file: " + filename).c_str());
-//         return;
-//     }
-//     double world_bounds[6] = { worldMin_.x(), worldMin_.y(), worldMin_.z(), worldMax_.x(), worldMax_.y(), worldMax_.z() };
-//     int mesh_parameters[5] = { max_depth_, static_cast<int>(minStepSize_ / um), total_nodes_, leaf_nodes_, static_cast<int>(fStorage) };
-//     outfile.write(reinterpret_cast<const char*>(world_bounds), sizeof(world_bounds));
-//     outfile.write(reinterpret_cast<const char*>(mesh_parameters), sizeof(mesh_parameters));
-//     writeFieldPointsToFile(outfile, root_.get());
-//     int statistics[3] = { gradient_refinements_, max_depth_reached_, static_cast<int>(fPositions.size()) };
-//     outfile.write(reinterpret_cast<const char*>(statistics), sizeof(statistics));
-//     outfile.close();
-//     G4cout << "Adaptive binary field map exported to: " << filename << G4endl;
-// }
-
 void AdaptiveSumRadialFieldMap::ExportFieldMapToFile(const std::string& filename) const {
     std::ofstream outfile(filename, std::ios::binary);
     if (!outfile.is_open()) {
         G4Exception("AdaptiveSumRadialFieldMap::ExportFieldMapToFile", "FileOpenError", FatalException, ("Failed to open file: " + filename).c_str());
         return;
     }
-
-    // World bounds
-    double world_bounds[6] = {
-        worldMin_.x(), worldMin_.y(), worldMin_.z(),
-        worldMax_.x(), worldMax_.y(), worldMax_.z()
-    };
+    double world_bounds[6] = { worldMin_.x(), worldMin_.y(), worldMin_.z(), worldMax_.x(), worldMax_.y(), worldMax_.z() };
+    int mesh_parameters[5] = { max_depth_, static_cast<int>(minStepSize_ / um), total_nodes_, leaf_nodes_, static_cast<int>(fStorage) };
     outfile.write(reinterpret_cast<const char*>(world_bounds), sizeof(world_bounds));
-
-    // Mesh parameters
-    int mesh_parameters[5] = {
-        max_depth_,
-        static_cast<int>(minStepSize_ / um),
-        total_nodes_,
-        leaf_nodes_,
-        static_cast<int>(fStorage)
-    };
     outfile.write(reinterpret_cast<const char*>(mesh_parameters), sizeof(mesh_parameters));
-
-    // Write field point data
     writeFieldPointsToFile(outfile, root_.get());
-
-    // Statistics metadata
-    int statistics[3] = {
-        gradient_refinements_,
-        max_depth_reached_,
-        static_cast<int>(fPositions.size())
-    };
+    int statistics[3] = { gradient_refinements_, max_depth_reached_, static_cast<int>(fPositions.size()) };
     outfile.write(reinterpret_cast<const char*>(statistics), sizeof(statistics));
-
-    // NEW SECTION: Particle data (positions and charges)
-    size_t num_particles = fPositions.size();
-    outfile.write(reinterpret_cast<const char*>(&num_particles), sizeof(size_t));
-
-    for (size_t i = 0; i < num_particles; ++i) {
-        double pos[3] = {
-            fPositions[i].x() / meter,
-            fPositions[i].y() / meter,
-            fPositions[i].z() / meter
-        };
-        double charge = fCharges[i] / coulomb;
-
-        outfile.write(reinterpret_cast<const char*>(pos), sizeof(pos));
-        outfile.write(reinterpret_cast<const char*>(&charge), sizeof(double));
-    }
-
     outfile.close();
     G4cout << "Adaptive binary field map exported to: " << filename << G4endl;
 }
+
+// void AdaptiveSumRadialFieldMap::ExportFieldMapToFile(const std::string& filename) const {
+//     std::ofstream outfile(filename, std::ios::binary);
+//     if (!outfile.is_open()) {
+//         G4Exception("AdaptiveSumRadialFieldMap::ExportFieldMapToFile", "FileOpenError", FatalException, ("Failed to open file: " + filename).c_str());
+//         return;
+//     }
+
+//     // World bounds
+//     double world_bounds[6] = {
+//         worldMin_.x(), worldMin_.y(), worldMin_.z(),
+//         worldMax_.x(), worldMax_.y(), worldMax_.z()
+//     };
+//     outfile.write(reinterpret_cast<const char*>(world_bounds), sizeof(world_bounds));
+
+//     // Mesh parameters
+//     int mesh_parameters[5] = {
+//         max_depth_,
+//         static_cast<int>(minStepSize_ / um),
+//         total_nodes_,
+//         leaf_nodes_,
+//         static_cast<int>(fStorage)
+//     };
+//     outfile.write(reinterpret_cast<const char*>(mesh_parameters), sizeof(mesh_parameters));
+
+//     // Write field point data
+//     writeFieldPointsToFile(outfile, root_.get());
+
+//     // Statistics metadata
+//     int statistics[3] = {
+//         gradient_refinements_,
+//         max_depth_reached_,
+//         static_cast<int>(fPositions.size())
+//     };
+//     outfile.write(reinterpret_cast<const char*>(statistics), sizeof(statistics));
+
+//     // NEW SECTION: Particle data (positions and charges)
+//     size_t num_particles = fPositions.size();
+//     outfile.write(reinterpret_cast<const char*>(&num_particles), sizeof(size_t));
+
+//     for (size_t i = 0; i < num_particles; ++i) {
+//         double pos[3] = {
+//             fPositions[i].x() / meter,
+//             fPositions[i].y() / meter,
+//             fPositions[i].z() / meter
+//         };
+//         double charge = fCharges[i] / coulomb;
+
+//         outfile.write(reinterpret_cast<const char*>(pos), sizeof(pos));
+//         outfile.write(reinterpret_cast<const char*>(&charge), sizeof(double));
+//     }
+
+//     outfile.close();
+//     G4cout << "Adaptive binary field map exported to: " << filename << G4endl;
+// }
 
 
 void AdaptiveSumRadialFieldMap::writeFieldPointsToFile(std::ofstream& outfile, const Node* node) const {
