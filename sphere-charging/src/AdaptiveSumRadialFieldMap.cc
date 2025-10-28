@@ -183,55 +183,55 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     collectFinalLeaves(root_.get()); // Collect final leaves
     leaf_nodes_.store(static_cast<int>(all_leaves_.size())); // Update count based on final leaves
 
-    // G4cout << "   --> Saving refined field to " <<filename << G4endl; // Log clarification
-    // if (!filename.empty()) {
-    //     ExportFieldMapToFile(filename); // Export the final refined map
-    // }
-    // PrintMeshStatistics(); // Print final stats
-    // SaveFinalParticleState(state_filename);
-
-    // --- START OF NEW BLOCK: Calculate and Print Final Refined Field Statistics ---
-    std::vector<double> final_field_magnitudes;
-    final_field_magnitudes.reserve(all_leaves_.size());
-
-    G4cout << "Recomputing field values at FINAL refined leaves (" << all_leaves_.size() << " nodes)..." << G4endl;
-
-    // 1. Recompute field for all final leaves
-    #pragma omp parallel for schedule(dynamic)
-    for (size_t i = 0; i < all_leaves_.size(); ++i) { // Use index loop
-        Node* leaf = all_leaves_[i];
-        if (leaf) {
-            // Recompute the field for the leaf's center. This is necessary 
-            // because refinement doesn't automatically update the field.
-            leaf->precomputed_field = computeFieldFromCharges(leaf->center); 
-        }
-    }
-
-    // 2. Collect all final field magnitudes
-    for (size_t i = 0; i < all_leaves_.size(); ++i) {
-        Node* leaf = all_leaves_[i];
-        if (leaf) {
-            final_field_magnitudes.push_back(leaf->precomputed_field.mag());
-        }
-    }
-    
-    // 3. Calculate and Print Final Statistics
-    if (!final_field_magnitudes.empty()) {
-        FieldStats final_stats = calculateFieldStats(final_field_magnitudes);
-        
-        G4cout << std::fixed << std::setprecision(3);
-        G4cout << "   >>> FINAL Mean of Field Magnitude: " << final_stats.mean / (volt/m) << " V/m <<<" << G4endl;
-        G4cout << "   >>> FINAL Max Field Magnitude: " << final_stats.max / (volt/m) << " V/m <<<" << G4endl;
-        G4cout << std::defaultfloat << std::setprecision(6);
-    }
-    // --- END OF NEW BLOCK ---
-
     G4cout << "   --> Saving refined field to " <<filename << G4endl; // Log clarification
     if (!filename.empty()) {
         ExportFieldMapToFile(filename); // Export the final refined map
     }
     PrintMeshStatistics(); // Print final stats
     SaveFinalParticleState(state_filename);
+
+    // // --- START OF NEW BLOCK: Calculate and Print Final Refined Field Statistics ---
+    // std::vector<double> final_field_magnitudes;
+    // final_field_magnitudes.reserve(all_leaves_.size());
+
+    // G4cout << "Recomputing field values at FINAL refined leaves (" << all_leaves_.size() << " nodes)..." << G4endl;
+
+    // // 1. Recompute field for all final leaves
+    // #pragma omp parallel for schedule(dynamic)
+    // for (size_t i = 0; i < all_leaves_.size(); ++i) { // Use index loop
+    //     Node* leaf = all_leaves_[i];
+    //     if (leaf) {
+    //         // Recompute the field for the leaf's center. This is necessary 
+    //         // because refinement doesn't automatically update the field.
+    //         leaf->precomputed_field = computeFieldFromCharges(leaf->center); 
+    //     }
+    // }
+
+    // // 2. Collect all final field magnitudes
+    // for (size_t i = 0; i < all_leaves_.size(); ++i) {
+    //     Node* leaf = all_leaves_[i];
+    //     if (leaf) {
+    //         final_field_magnitudes.push_back(leaf->precomputed_field.mag());
+    //     }
+    // }
+    
+    // // 3. Calculate and Print Final Statistics
+    // if (!final_field_magnitudes.empty()) {
+    //     FieldStats final_stats = calculateFieldStats(final_field_magnitudes);
+        
+    //     G4cout << std::fixed << std::setprecision(3);
+    //     G4cout << "   >>> FINAL Mean of Field Magnitude: " << final_stats.mean / (volt/m) << " V/m <<<" << G4endl;
+    //     G4cout << "   >>> FINAL Max Field Magnitude: " << final_stats.max / (volt/m) << " V/m <<<" << G4endl;
+    //     G4cout << std::defaultfloat << std::setprecision(6);
+    // }
+    // // --- END OF NEW BLOCK ---
+
+    // G4cout << "   --> Saving refined field to " <<filename << G4endl; // Log clarification
+    // if (!filename.empty()) {
+    //     ExportFieldMapToFile(filename); // Export the final refined map
+    // }
+    // PrintMeshStatistics(); // Print final stats
+    // SaveFinalParticleState(state_filename);
 }
 
 // --- Destructor (If needed, likely empty with unique_ptr) ---
