@@ -92,8 +92,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
-, PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMinimumStep_(0),sphereSolid_(0), equivalentIterationTime_(0.02),
-fieldGradThreshold_(0), CADFile_(""), RootInput_(""), Scale_(1), filename_(""), octreeDepth_(8), materialTemperature_(300)
+, PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMinimumStep_(0),sphereSolid_(0), equivalentIterationTime_(0.02),density_(2.1),
+fieldGradThreshold_(0), CADFile_(""), RootInput_(""), Scale_(1), filename_(""), octreeDepth_(8), materialTemperature_(450), charges_filename_("")
 
 {
   // create commands for interactive definition of the detector 
@@ -126,85 +126,72 @@ G4SolidStore::GetInstance()->Clean();
 G4MaterialPropertiesTable* dielectric = new G4MaterialPropertiesTable();
 dielectric->AddConstProperty("Epsilon",  Epsilon_, true);
 
+// Set Property to SiO2
+// G4Material* SiO2 = G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
+// SiO2->SetMaterialPropertiesTable(dielectric);
 
 // Set Property to SiO2
-G4Material* SiO2 = G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
+G4int ncomponents,natoms; //, abundance;
+
+// mixture of HDPE and h10BN
+G4Material* SiO2 = new G4Material("SiO2", density_, ncomponents=2,
+    kStateSolid, materialTemperature_); //, 293.15*kelvin, 1*atmosphere
+
+// polyethlyene elements
+G4Element* Si = new G4Element("Silion","Si", 14., 28.0855*g/mole);
+G4Element* O = new G4Element("Oxygen", "O", 8., 16.00*g/mole);
+
+// add components
+SiO2->AddElement(Si, natoms=1);
+SiO2->AddElement(O, natoms=2);
 SiO2->SetMaterialPropertiesTable(dielectric);
 
-// G4cout << "SiO2 Material: " << SiO2->GetName() << G4endl;
-// G4cout << "SiO2 Temperature: " << SiO2->GetTemperature() / kelvin << " K" << G4endl;
-// G4cout << "SiO2 Pressure: " << SiO2->GetPressure() / pascal << " Pa" << G4endl;
-// G4cout << "SiO2 Density: " << SiO2->GetDensity() / (g/cm3) << " g/cm3" << G4endl;
-// G4cout << "SiO2 Ionization Potential: " << SiO2->GetIonisation()->GetMeanExcitationEnergy() / eV << " eV" << G4endl;
+G4cout << "Density of " << SiO2->GetName() << ": " << G4BestUnit(SiO2->GetDensity(), "Volumic Mass")  
+       << "at a temperature of " << SiO2->GetTemperature() << " K" << G4endl;
 
-// Set Property to SiO2
-//G4int ncomponents,natoms; //, abundance;
- 
-  // // mixture of HDPE and h10BN
-  // G4Material* SiO2 = new G4Material("SiO2", 4.78*g/cm3, ncomponents=3,
-  //     kStateSolid); //, 293.15*kelvin, 1*atmosphere
-  
-  // // polyethlyene elements
-  // G4Element* Fe = new G4Element("Iron","Fe", 26., 55.845*g/mole);
-  // G4Element* Ti = new G4Element("Titanium", "Ti", 22., 47.87*g/mole);
-  // G4Element* O = new G4Element("Oxygen", "O", 8., 16.00*g/mole);
- 
-  // // add components
-  // SiO2->AddElement(Fe, natoms=1);
-  // SiO2->AddElement(Ti, natoms=1);
-  // SiO2->AddElement(O, natoms=3);
-  // //SiO2->SetMaterialPropertiesTable(dielectric);
- 
-  G4bool checkOverlaps = false;
-  //     
-  // World Characteristics
-  //
-  // G4double world_sizeX = 900*um;
-  // G4double world_sizeY = 900*um;
-  // G4double world_sizeZ  = 900*um;
+G4bool checkOverlaps = false;
+
+// define vacuum 
+G4Material* world_mat = G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic");
+// G4Material* world_mat = new G4Material("Galactic", 1, 1.01*g/mole, universe_mean_density,
+//                 kStateGas, 400*kelvin, 1.e-7*pascal);
+
+// G4cout << "World Material: " << world_mat->GetName() << G4endl;
+// G4cout << "World Temperature: " << world_mat->GetTemperature() / kelvin << " K" << G4endl;
+// G4cout << "World Pressure: " << world_mat->GetPressure() / pascal << " Pa" << G4endl;
+// G4cout << "World Density: " << world_mat->GetDensity() / (g/cm3) << " g/cm3" << G4endl;
+
+G4Box* solidWorld =    
+  new G4Box("World",                       //its name
+      worldX_/2, worldY_/2, worldZ_/2);     //its size
+
+G4cout << "World size: "
+      << "X: " << G4BestUnit(worldX_, "Length") << ", "
+      << "Y: " << G4BestUnit(worldY_, "Length") << ", "
+      << "Z: " << G4BestUnit(worldZ_, "Length") << G4endl;
 
 
-  // define vacuum 
-  G4Material* world_mat = G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic");
-  // G4Material* world_mat = new G4Material("Galactic", 1, 1.01*g/mole, universe_mean_density,
-  //                 kStateGas, 400*kelvin, 1.e-7*pascal);
+logicWorld_ =                         
+  new G4LogicalVolume(solidWorld,          //its solid
+                      world_mat,           //its material
+                      "World");            //its name
 
-  // G4cout << "World Material: " << world_mat->GetName() << G4endl;
-  // G4cout << "World Temperature: " << world_mat->GetTemperature() / kelvin << " K" << G4endl;
-  // G4cout << "World Pressure: " << world_mat->GetPressure() / pascal << " Pa" << G4endl;
-  // G4cout << "World Density: " << world_mat->GetDensity() / (g/cm3) << " g/cm3" << G4endl;
-  
-  G4Box* solidWorld =    
-    new G4Box("World",                       //its name
-       worldX_/2, worldY_/2, worldZ_/2);     //its size
+G4VPhysicalVolume* physWorld = 
+  new G4PVPlacement(0,                     //no rotation
+                    G4ThreeVector(),       //at (0,0,0)
+                    logicWorld_,           //its logical volume
+                    "World",               //its name
+                    0,                     //its mother  volume
+                    false,                 //no boolean operation
+                    0,                     //copy number
+                    checkOverlaps);        //overlaps checking
 
-  G4cout << "World size: "
-       << "X: " << G4BestUnit(worldX_, "Length") << ", "
-       << "Y: " << G4BestUnit(worldY_, "Length") << ", "
-       << "Z: " << G4BestUnit(worldZ_, "Length") << G4endl;
-
-
-  logicWorld_ =                         
-    new G4LogicalVolume(solidWorld,          //its solid
-                        world_mat,           //its material
-                        "World");            //its name
-
-  G4VPhysicalVolume* physWorld = 
-    new G4PVPlacement(0,                     //no rotation
-                      G4ThreeVector(),       //at (0,0,0)
-                      logicWorld_,           //its logical volume
-                      "World",               //its name
-                      0,                     //its mother  volume
-                      false,                 //no boolean operation
-                      0,                     //copy number
-                      checkOverlaps);        //overlaps checking
-
-  if (PBC_)
-  {
-    G4PeriodicBoundaryBuilder* pbb = new G4PeriodicBoundaryBuilder();
-    logicWorld_ = pbb->Construct(logicWorld_);
-    std::cout << "PBC set to logicWorld" << std::endl;
-  }
+if (PBC_)
+{
+  G4PeriodicBoundaryBuilder* pbb = new G4PeriodicBoundaryBuilder();
+  logicWorld_ = pbb->Construct(logicWorld_);
+  std::cout << "PBC set to logicWorld" << std::endl;
+}
 
 //G4VSolid* sphereSolid_;
  // Load In CAD Files (Check repo for other input files -KG) // Create Input from global variable
@@ -280,7 +267,7 @@ if (!RootInput_.empty()) {
         tree->SetBranchAddress("Particle_Type", &particle_type);
 
         // Define the specific volume to filter
-        const std::string target_volume = "G4_SILICON_DIOXIDE";
+        const std::string target_volume = "SiO2";
 
         // Sets to track photon stops and unique holes
         std::set<int> photonStops;
@@ -402,10 +389,17 @@ void DetectorConstruction::ConstructSDandField() {
 
     G4cout << "Starting Adaptive Field Map Precomputation" << G4endl;
 
+    // --- Print the requested values here ---
+    G4cout << "   Octree Depth: " << octreeDepth_ << G4endl;
+    G4cout << "   Field Gradient Threshold (V/m): " << G4BestUnit(fieldGradThreshold_,"Electric field") << G4endl;
+    G4cout << "   Minimum Step: " << G4BestUnit(fieldMinimumStep_,"Length") << G4endl;
+    // --------------------------------------
+
     // Start timer
     auto start = std::chrono::high_resolution_clock::now();
 
     const G4double material_temperature = materialTemperature_ / kelvin;
+    //std::string state_filename = "charges.txt";
     // Then create adaptive field map using the uniform one
     auto adaptiveFieldMap = new AdaptiveSumRadialFieldMap(
         allPositions, allCharges, // Pass the uniform field map
@@ -413,11 +407,14 @@ void DetectorConstruction::ConstructSDandField() {
         fieldMinimumStep_,
         time_step_dt, // <-- Pass the time step
         material_temperature,     // <-- Pass the temperature
+        charges_filename_,
         filename_,
         min, max,
         octreeDepth_,
         AdaptiveSumRadialFieldMap::StorageType::Double
     );
+
+
 
     // End timer
     auto end = std::chrono::high_resolution_clock::now();
@@ -481,9 +478,15 @@ void DetectorConstruction::SetWorldZ(G4double value)
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 
- void DetectorConstruction::SetEpsilon(G4double value)
+void DetectorConstruction::SetEpsilon(G4double value)
 {
   Epsilon_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
+
+void DetectorConstruction::SetMaterialDensity(G4double value)
+{
+  density_ = value;
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
  
@@ -494,6 +497,12 @@ void DetectorConstruction::SetRootInput(G4String value)
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
  
+
+void DetectorConstruction::SetChargesFile(G4String value)
+{
+  charges_filename_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
 
 void DetectorConstruction::SetCADFile(G4String value)
 {

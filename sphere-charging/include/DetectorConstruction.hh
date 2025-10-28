@@ -62,6 +62,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetRoot (G4bool);
     void SetEpsilon (G4double);
     void SetCADFile (G4String);
+    void SetChargesFile (G4String);
     void SetRootInput (G4String);
     void SetCADScale (G4double);
     void SetFieldFile (G4String);
@@ -73,6 +74,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetOctreeMaxDepth (G4double);
     void SetMaterialTemperature (G4double);
     void SetEquivalentIterationTime (G4double);
+    void SetMaterialDensity(G4double);
                        
   private:
     G4VPhysicalVolume* ConstructVolumes();  
@@ -86,6 +88,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4double Epsilon_;
     G4String CADFile_;
     G4String RootInput_;
+    G4String charges_filename_;
     G4String filename_;
     G4double Scale_;
     G4double materialTemperature_;
@@ -95,6 +98,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     DetectorMessenger* detectorMessenger_;
     G4double octreeDepth_;
     G4double equivalentIterationTime_;
+    G4double density_;
 
     // CAD geometry
     G4VSolid* sphereSolid_;  // ← Make sure this exists

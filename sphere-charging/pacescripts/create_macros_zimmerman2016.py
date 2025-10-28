@@ -14,16 +14,18 @@ import numpy as np
 #############################################################
 
 # define the number of particles for the each iteration
-account, username = "pf17", "avira7"
+account, username = "zjiang33", "avira7"
 eventnumbers_onlysolarwind = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_onlyphotoemission = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-iterationNUM = 100 # number of iterations to perform
+iterationNUM = 200 # number of iterations to perform
+temperature = 600 # temperature for dissipation model, units: kelvin
 # be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
 
 # list of configurations
 config_list = ["onlysolarwind", "onlyphotoemission"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
 minStepList = [0.1, 0.1] # minimum step for Octree mesh for each case (units of um)
+density = 2.20 # density of SiO2, units: g/cm3
 
 # define the size of the world
 CAD_dimensions = (600, 600, 373.2) # in units of microns
@@ -50,7 +52,7 @@ batch_template = """#!/bin/bash
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=24
-#SBATCH --mem-per-cpu=2048
+#SBATCH --mem-per-cpu=6gb
 #SBATCH --time=05:00:00
 #SBATCH --output=outputlogs/%A_iteration{iter}_{config}
 
@@ -112,12 +114,14 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
     f.write(f'/sphere/worldX {worldX} um\n')
     f.write(f'/sphere/worldY {worldY} um\n')
     f.write(f'/sphere/worldZ {worldZ} um\n')
-    f.write(f'/sphere/MaterialTemperature 425 K\n')
+    f.write(f'/sphere/MaterialTemperature {temperature} K\n')
+    f.write(f'/sphere/MaterialDensity {density} g/cm3\n')
     f.write(f'/sphere/IterationTime {iterationTime} s\n')
     f.write(f'/sphere/field/MinimumStep {minStep} um\n') # step size for field map solver
-    f.write(f'/sphere/field/GradThreshold 1e-2 V/m\n') # step size for field map solver
-    f.write(f'/sphere/field/OctreeDepth 8\n') # step size for field map solver
+    f.write(f'/sphere/field/GradThreshold 5e3 V/m\n') # step size for field map solver
+    f.write(f'/sphere/field/OctreeDepth 9\n') # step size for field map solver
     f.write(f'/sphere/field/file fieldmaps/{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}-fieldmap.txt \n')
+    f.write(f'/sphere/charges/file charges-{increment_filename.split("_")[2]}.txt\n')
     f.write('#\n')
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
@@ -332,7 +336,7 @@ for optionIN,minStepIN in zip(config_list, minStepList):
             increment_filename = f"{i:03d}_iteration{i}_{optionIN}_num{select_num}"
             macro_path = f"macros/{increment_filename}.mac"
             with open(macro_path, 'w') as f:
-                write_macro(f, increment_filename, select_num, iterationTime*(i+1),
+                write_macro(f, increment_filename, select_num, iterationTime,
                             input_files=[f"{output_files[-1][0]}"], minStep=minStepIN)
             output_files.append((increment_filename + ".root", select_num, i, optionIN))
 
@@ -351,14 +355,15 @@ for optionIN,minStepIN in zip(config_list, minStepList):
             i += 1
 
         else:  # i > 1
-            filtered = [fname for fname, _, _, option in output_files if option == optionIN]
-            input_list = ' '.join(filtered)
+            #filtered = [fname for fname, _, _, option in output_files if option == optionIN]
+            #input_list = ' '.join(filtered)
+            previous_root_file = f"root/{output_files[-1][0]}"
 
             increment_filename = f"{i:03d}_iteration{i}_{optionIN}_num{select_num}"
             macro_path = f"macros/{increment_filename}.mac"
             with open(macro_path, 'w') as f:
-                write_macro(f, increment_filename, select_num, iterationTime*(i+1),
-                            input_files=filtered, minStep=minStepIN)
+                write_macro(f, increment_filename, select_num, iterationTime,
+                            input_files=[f"{output_files[-1][0]}"], minStep=minStepIN)
             output_files.append((increment_filename + ".root", select_num, i, optionIN))
 
             batch_path = f"batchscripts/{i:03d}_submit_iteration{i}_{optionIN}.sh"

@@ -107,56 +107,128 @@ def compute_E_mag(Ex, Ey, Ez):
         result[i] = np.sqrt(Ex[i]**2 + Ey[i]**2 + Ez[i]**2)
     return result
 
+import numpy as np
+import os
+import struct # Used for reading specific C++ types like uint64_t
+
+# Assuming the scale_fields_numba function is defined elsewhere
+# from your environment (e.g., in a numba-compatible module).
+
 def read_adaptive_fieldmap(filename, scaling=True):
+    """
+    Reads the adaptive field map binary file created by the modified C++ code.
+    
+    The structure expected is:
+    1. Header: world_bounds (6*float64)
+    2. Parameters: max_d (uint32), min_s (float64), storage_type (uint32), 
+                   total_node_count (uint64), final_leaf_count (uint64)
+    3. Field Nodes: total_node_count * (center(3*float32), field(3*float32), size(float32), is_leaf(uint8))
+    4. Statistics: grad_ref (uint32), max_depth_r (uint32)
+    """
+    
+    # Define C++ data types for Python
+    C_FLOAT = np.dtype(np.float32).itemsize  # 4 bytes
+    C_DOUBLE = np.dtype(np.float64).itemsize # 8 bytes
+    C_UINT32 = np.dtype(np.uint32).itemsize   # 4 bytes
+    C_UINT64 = np.dtype(np.uint64).itemsize   # 8 bytes
+    C_UINT8 = np.dtype(np.uint8).itemsize     # 1 byte
+
+    # The size of a single node block in bytes: 
+    # 3*float32 (pos) + 3*float32 (field) + 1*float32 (size) + 1*uint8 (is_leaf)
+    NODE_SIZE_BYTES = 3 * C_FLOAT + 3 * C_FLOAT + 1 * C_FLOAT + 1 * C_UINT8 # 25 bytes
+
     with open(filename, 'rb') as f:
-        # --- Read header ---
-        world_bounds = np.frombuffer(f.read(6 * 8), dtype=np.float64)
-        mesh_parameters = np.frombuffer(f.read(5 * 4), dtype=np.uint32)
-
-        max_depth, min_step_um, total_nodes, leaf_nodes, storage_flag = mesh_parameters
-
-        # --- File layout ---
-        file_size = os.path.getsize(filename)
-        header_bytes = 6 * 8 + 5 * 4
-        statistics_bytes = 3 * 4
-        remaining_bytes = file_size - header_bytes
-
-        node_size_bytes = 6 * 8  # 6 doubles = 48 bytes
-        field_data_bytes = remaining_bytes - statistics_bytes
-
-        if field_data_bytes % node_size_bytes != 0:
-            raise ValueError(f"Field data size not divisible by node size (48 bytes).")
-
-        num_nodes = field_data_bytes // node_size_bytes
-
-        # --- Read and reshape field data ---
-        field_data = np.frombuffer(f.read(field_data_bytes), dtype=np.float64)
-        field_data = field_data.reshape((num_nodes, 6)).copy()  
         
+        # 1. Read world_bounds (6 * float64)
+        world_bounds = np.frombuffer(f.read(6 * C_DOUBLE), dtype=np.float64)
+        
+        # 2. Read Octree Parameters
+        
+        # max_d (uint32)
+        max_d = np.frombuffer(f.read(C_UINT32), dtype=np.uint32)[0]
+        
+        # min_s (float64)
+        min_s = np.frombuffer(f.read(C_DOUBLE), dtype=np.float64)[0]
+        
+        # storage_type (uint32)
+        storage_type = np.frombuffer(f.read(C_UINT32), dtype=np.uint32)[0]
+        
+        # total_node_count (uint64)
+        total_node_count = struct.unpack('<Q', f.read(C_UINT64))[0] 
+        
+        # final_leaf_count (uint64)
+        final_leaf_count = struct.unpack('<Q', f.read(C_UINT64))[0] 
+        
+        # 3. Read ALL Field Nodes Data
+        
+        total_field_data_bytes = total_node_count * NODE_SIZE_BYTES
+        node_raw_data = f.read(total_field_data_bytes)
+        
+        node_data = []
+        is_leaf_flags = []
+        
+        for i in range(total_node_count):
+            start = i * NODE_SIZE_BYTES
+            end = (i + 1) * NODE_SIZE_BYTES
+            block = node_raw_data[start:end]
+            
+            # Unpack 7 floats and 1 uint8_t
+            unpacked_data = struct.unpack('<7f B', block) 
+            
+            # Separate the 7 floats (pos, field, size) from the last element (is_leaf)
+            pos_field_size = unpacked_data[:7]
+            is_leaf = unpacked_data[7]
+            
+            node_data.append(pos_field_size)
+            is_leaf_flags.append(is_leaf)
+
+        # Convert to numpy arrays
+        # field_data columns: 0,1,2 (center) | 3,4,5 (field E) | 6 (size)
+        field_data = np.array(node_data, dtype=np.float32)
+        is_leaf_flags = np.array(is_leaf_flags, dtype=np.uint8)
+        
+        # --- ROBUST SCALING LOGIC (Fix: Force copy before scaling) ---
         if scaling:
-            field_data = scale_fields_numba(field_data)
+            # 1. Extract the field vector columns (3, 4, 5) and force a copy.
+            field_vectors_copy = field_data[:, 3:6].copy() 
+            
+            # 2. Apply scaling function to the copy.
+            scaled_vectors = scale_fields_numba(field_vectors_copy)
+            
+            # 3. Assign the scaled result back to the specific columns.
+            field_data[:, 3:6] = scaled_vectors 
+        
+        
+        # 4. Read Final Statistics
+        
+        # grad_ref (uint32)
+        grad_ref = np.frombuffer(f.read(C_UINT32), dtype=np.uint32)[0]
+        
+        # max_depth_r (uint32)
+        max_depth_r = np.frombuffer(f.read(C_UINT32), dtype=np.uint32)[0]
 
-        # --- Read statistics ---
-        statistics = np.frombuffer(f.read(statistics_bytes), dtype=np.int32)
-        gradient_refinements, max_depth_reached, num_positions = statistics
-
+    # --- Construct Metadata and Output ---
     metadata = {
         'world_bounds': world_bounds,
         'mesh_parameters': {
-            'max_depth': max_depth,
-            'min_step_um': min_step_um,
-            'total_nodes': total_nodes,
-            'leaf_nodes': leaf_nodes,
-            'storage_flag': storage_flag
+            'max_depth': max_d,
+            'min_step_internal': min_s, 
+            'total_nodes': total_node_count,
+            'final_leaf_nodes': final_leaf_count,
+            'storage_flag': storage_type,
         },
         'statistics': {
-            'gradient_refinements': gradient_refinements,
-            'max_depth_reached': max_depth_reached,
-            'fPositions_size': num_positions,
-        }
+            'gradient_refinements': grad_ref,
+            'max_depth_reached': max_depth_r,
+        },
+        'is_leaf_flags': is_leaf_flags
     }
-
-    return field_data, metadata
+    
+    # field_data contains (center_x, center_y, center_z, E_x, E_y, E_z, size)
+    return {
+        'field_data': field_data, 
+        'metadata': metadata
+    }
 
 # Efficient, memory-aware loader
 def read_data_format_efficient(filenames, scaling=True):

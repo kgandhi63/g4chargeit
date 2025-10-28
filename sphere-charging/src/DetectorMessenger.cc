@@ -49,7 +49,7 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
  detector_(Det), rootManager_(G4RootAnalysisManager::Instance()), 
  projectDir_(0), fileNameCmd_(0), PBCCmd_(0), EpsilonCmd_(0), WorldXCmd_(0),WorldYCmd_(0), WorldZCmd_(0), 
  FieldMinimumStepCmd_(0), FieldGradThresholdCmd_(0), RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0), 
- FieldFile_(nullptr),FieldOctreeDepthCmd_(0), EquivalentIterationTimeCmd_(0), MaterialTemperatureCmd_(0)
+ FieldFileCmd_(nullptr),ChargesFileCmd_(nullptr), EquivalentIterationTimeCmd_(0), MaterialTemperatureCmd_(0), MaterialDensityCmd_(0)
  
 { 
   projectDir_ = new G4UIdirectory("/sphere/");
@@ -105,6 +105,11 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   MaterialTemperatureCmd_->SetParameterName("choice",false);
   MaterialTemperatureCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+  MaterialDensityCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/MaterialDensity", this);
+  MaterialDensityCmd_->SetGuidance("Set temperature of material (units of Kelvin).");
+  MaterialDensityCmd_->SetParameterName("choice",false);
+  MaterialDensityCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
   EquivalentIterationTimeCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/IterationTime", this);
   EquivalentIterationTimeCmd_->SetGuidance("Set equivalent iteration time in lunar equivalent photoemission flux (units of seconds).");
   EquivalentIterationTimeCmd_->SetParameterName("choice",false);
@@ -125,10 +130,15 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   FieldOctreeDepthCmd_->SetParameterName("choice",false);
   FieldOctreeDepthCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  FieldFile_ = new G4UIcmdWithAString("/sphere/field/file",this);
-  FieldFile_->SetGuidance("Field Map Save File");
-  FieldFile_->SetParameterName("choice",false);
-  FieldFile_->AvailableForStates(G4State_PreInit,G4State_Idle);
+  FieldFileCmd_ = new G4UIcmdWithAString("/sphere/field/file",this);
+  FieldFileCmd_->SetGuidance("Field Map Save File");
+  FieldFileCmd_->SetParameterName("choice",false);
+  FieldFileCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+  ChargesFileCmd_ = new G4UIcmdWithAString("/sphere/charges/file",this);
+  ChargesFileCmd_->SetGuidance("Name of file to save list of charges for leakage.");
+  ChargesFileCmd_->SetParameterName("choice",false);
+  ChargesFileCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
 }
 
@@ -147,10 +157,12 @@ DetectorMessenger::~DetectorMessenger()
   delete WorldZCmd_;
   delete FieldMinimumStepCmd_;
   delete FieldGradThresholdCmd_;
-  delete FieldFile_;
+  delete FieldFileCmd_;
   delete FieldOctreeDepthCmd_;
   delete MaterialTemperatureCmd_;
   delete EquivalentIterationTimeCmd_;
+  delete ChargesFileCmd_;
+  delete MaterialDensityCmd_;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -170,6 +182,12 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 
   if( command == CADFileCmd_ )
   { detector_->SetCADFile(newValue);}
+
+  if( command == ChargesFileCmd_ )
+  { detector_->SetChargesFile(newValue);}
+
+  if( command == MaterialDensityCmd_ )
+  { detector_->SetMaterialDensity(MaterialDensityCmd_->GetNewDoubleValue(newValue));}
 
   if( command == EpsilonCmd_ )
   { detector_->SetEpsilon(EpsilonCmd_->GetNewDoubleValue(newValue));}
@@ -201,7 +219,7 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   if( command == EquivalentIterationTimeCmd_ )
   { detector_->SetEquivalentIterationTime(EquivalentIterationTimeCmd_->GetNewDoubleValue(newValue));}
 
-  if( command == FieldFile_ )
+  if( command == FieldFileCmd_ )
   { detector_->SetFieldFile(newValue);}
 
 

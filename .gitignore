@@ -1,4 +1,4 @@
-root/
-build-sphere-charging/
 build*
+root/
 figures/*
+analysis/grain-geometries-CAD/*
