@@ -630,28 +630,68 @@ AdaptiveSumRadialFieldMap::Node* AdaptiveSumRadialFieldMap::findLeafNode(const G
     return nullptr;
 }
 
+// --- REPLACE your current refineMeshByGradient WITH THIS ---
+
 void AdaptiveSumRadialFieldMap::refineMeshByGradient(Node* node, int depth) {
     if (!node) return;
-    // --- FIX: Proper atomic update for max_depth_reached_ ---
+
+    // Atomically update max depth
     int current_max = max_depth_reached_.load(std::memory_order_relaxed);
     while (depth > current_max) {
         if (max_depth_reached_.compare_exchange_weak(current_max, depth, std::memory_order_relaxed)) break;
     }
+
     if (node->is_leaf) {
-        double size = (node->max.x() - node->min.x()); if (depth < max_depth_ && size > minStepSize_ && hasHighFieldGradient(node->center, node->precomputed_field, size * 0.2)) {
-            gradient_refinements_++; node->is_leaf = false; leaf_nodes_--;
-            for (int i = 0; i < 8; ++i) { G4ThreeVector c_min, c_max; calculateChildBounds(node->min, node->max, node->center, i, c_min, c_max); auto child = std::make_unique<Node>(); child->min = c_min; child->max = c_max; child->center = (c_min + c_max) * 0.5; child->is_leaf = true; child->precomputed_field = computeFieldFromCharges(child->center); total_nodes_++; leaf_nodes_++; node->children[i] = std::move(child); }
-            for (int i = 0; i < 8; ++i) { if(node->children[i]) { 
-                #pragma omp task
-                 refineMeshByGradient(node->children[i].get(), depth + 1); } }
-            // #pragma omp taskwait // Removed taskwait as per your original code
+        double size = (node->max.x() - node->min.x());
+        // Check if refinement is needed
+        if (depth < max_depth_ && size > minStepSize_ && hasHighFieldGradient(node->center, node->precomputed_field, size * 0.2)) {
+
+            gradient_refinements_++;
+            node->is_leaf = false;
+            leaf_nodes_--; // This leaf is no longer a leaf
+
+            // Create 8 new children
+            for (int i = 0; i < 8; ++i) {
+                G4ThreeVector c_min, c_max;
+                calculateChildBounds(node->min, node->max, node->center, i, c_min, c_max);
+                auto child = std::make_unique<Node>();
+                child->min = c_min;
+                child->max = c_max;
+                child->center = (c_min + c_max) * 0.5;
+                child->is_leaf = true; // The new children are leaves
+                child->precomputed_field = computeFieldFromCharges(child->center);
+                total_nodes_++;
+                leaf_nodes_++; // Add new leaf
+                node->children[i] = std::move(child);
+            }
+
+            // Create new tasks to refine the children
+            for (int i = 0; i < 8; ++i) {
+                if(node->children[i]) {
+                    #pragma omp task
+                    refineMeshByGradient(node->children[i].get(), depth + 1);
+                }
+            }
+            // --- THIS IS THE FIX ---
+            // Wait for all child tasks to complete *before* this function returns
+            #pragma omp taskwait
         }
-    } else { for (int i = 0; i < 8; ++i) { if(node->children[i]) { 
-        #pragma omp task
-             refineMeshByGradient(node->children[i].get(), depth + 1); } }
-        // #pragma omp taskwait // Removed taskwait as per your original code
-   }
+        // else: This leaf does not need refinement, so just return.
+    } else {
+        // This is an internal node, create tasks for its children
+        for (int i = 0; i < 8; ++i) {
+            if(node->children[i]) {
+                #pragma omp task
+                refineMeshByGradient(node->children[i].get(), depth + 1);
+            }
+        }
+        // --- THIS IS THE FIX ---
+        // Wait for all child tasks to complete
+        #pragma omp taskwait
+    }
 }
+
+
 bool AdaptiveSumRadialFieldMap::hasHighFieldGradient(const G4ThreeVector& center, const G4ThreeVector& center_field [[maybe_unused]], double sample_distance) const {
     if (fPositions.empty()) return false; double actual_distance = std::min(std::max(sample_distance, 0.1 * nm), 1.0 * um); // Adjusted range slightly
     const std::vector<G4ThreeVector> sample_points = { center + G4ThreeVector(actual_distance, 0, 0), center - G4ThreeVector(actual_distance, 0, 0), center + G4ThreeVector(0, actual_distance, 0), center - G4ThreeVector(0, actual_distance, 0), center + G4ThreeVector(0, 0, actual_distance), center - G4ThreeVector(0, 0, actual_distance) }; std::vector<double> field_magnitudes(6);
