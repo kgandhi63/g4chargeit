@@ -76,6 +76,7 @@ class DetectorMessenger: public G4UImessenger
     G4UIcmdWithAString*         FieldFileCmd_;
     G4UIcmdWithAString*         ChargesFileCmd_;
     G4UIcmdWithADouble*         FieldOctreeDepthCmd_;
+    G4UIcmdWithADouble*         InitialDepthCmd_;
     G4UIcmdWithADoubleAndUnit*  MaterialTemperatureCmd_;
     G4UIcmdWithADoubleAndUnit*  EquivalentIterationTimeCmd_;
     G4UIcmdWithADoubleAndUnit*  MaterialDensityCmd_;

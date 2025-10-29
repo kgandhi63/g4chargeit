@@ -93,7 +93,8 @@
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
 , PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMinimumStep_(0),sphereSolid_(0), equivalentIterationTime_(0.02),density_(2.1),
-fieldGradThreshold_(0), CADFile_(""), RootInput_(""), Scale_(1), filename_(""), octreeDepth_(8), materialTemperature_(450), charges_filename_("")
+fieldGradThreshold_(0), CADFile_(""), RootInput_(""), Scale_(1), filename_(""), octreeDepth_(8), materialTemperature_(450), charges_filename_(""), 
+initial_depth_(6)
 
 {
   // create commands for interactive definition of the detector 
@@ -411,6 +412,7 @@ void DetectorConstruction::ConstructSDandField() {
         filename_,
         min, max,
         octreeDepth_,
+        initial_depth_,
         AdaptiveSumRadialFieldMap::StorageType::Double
     );
 
@@ -549,5 +551,11 @@ void DetectorConstruction::SetMaterialTemperature(G4double value)
 void DetectorConstruction::SetEquivalentIterationTime(G4double value)
 {
   equivalentIterationTime_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
+
+void DetectorConstruction::SetInitialDepth(G4double value)
+{
+  initial_depth_ = value;
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }

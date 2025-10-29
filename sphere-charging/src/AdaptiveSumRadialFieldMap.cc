@@ -100,10 +100,11 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     const G4ThreeVector& min_bounds, // Renamed from 'min'
     const G4ThreeVector& max_bounds, // Renamed from 'max'
     int max_depth_param,        // Renamed from 'max_depth'
+    int initial_depth,        
     StorageType storage)
     : max_depth_(max_depth_param), minStepSize_(minStep),
       worldMin_(min_bounds), worldMax_(max_bounds), fieldGradThreshold_(gradThreshold), fStorage(storage),
-      fPositions(positions), fCharges(charges), fStateFilename(state_filename) // Use references directly
+      fPositions(positions), fCharges(charges), fStateFilename(state_filename), initialDepth_(initial_depth) // Use references directly
 {
 
     LoadPersistentState(fStateFilename, fPositions, fCharges);
@@ -481,10 +482,64 @@ G4ThreeVector AdaptiveSumRadialFieldMap::computeFieldWithApproximation(const G4T
 G4ThreeVector AdaptiveSumRadialFieldMap::computeFieldFromCharges(const G4ThreeVector& point) const { if (!charge_root_) return G4ThreeVector(0,0,0); G4ThreeVector min_box, max_box; calculateBoundingBox(min_box, max_box); return computeFieldWithApproximation(point, charge_root_.get(), min_box, max_box); }
 
 // --- FIELD MAP OCTREE LOGIC (Unaltered from your input) ---
+
 std::unique_ptr<AdaptiveSumRadialFieldMap::Node> AdaptiveSumRadialFieldMap::buildFromScratch() {
-    G4ThreeVector min_box, max_box; calculateBoundingBox(min_box, max_box); auto root_node = std::make_unique<Node>(); root_node->min = min_box; root_node->max = max_box; root_node->center = (min_box + max_box) * 0.5; root_node->is_leaf = true;
-    total_nodes_.store(1); leaf_nodes_.store(1); max_depth_reached_.store(0); all_leaves_.push_back(root_node.get()); return root_node;
+    
+    G4cout << "   Building coarse grid to depth " << initialDepth_ << "..." << G4endl;
+
+    G4ThreeVector min_box, max_box;
+    calculateBoundingBox(min_box, max_box);
+    auto root_node = std::make_unique<Node>();
+    root_node->min = min_box;
+    root_node->max = max_box;
+    root_node->center = (min_box + max_box) * 0.5;
+
+    total_nodes_.store(1); // Start with 1 (the root)
+    max_depth_reached_.store(0);
+    
+    // Call the new helper to build the uniform grid
+    buildUniformGrid(root_node.get(), 0);
+
+    // After building, collect all the leaves of this coarse grid
+    all_leaves_.clear();
+    collectFinalLeaves(root_node.get());
+    leaf_nodes_.store(static_cast<int>(all_leaves_.size()));
+    
+    G4cout << "   Coarse grid built with " << leaf_nodes_.load() << " leaf nodes." << G4endl;
+
+    return root_node;
 }
+
+// --- ADD THIS NEW HELPER FUNCTION ---
+
+void AdaptiveSumRadialFieldMap::buildUniformGrid(Node* node, int depth)
+{
+    // Base Case: We've reached the target initial depth. Mark as leaf and stop.
+    if (depth == initialDepth_) {
+        node->is_leaf = true;
+        return;
+    }
+
+    // Recursive Case: Not deep enough. Subdivide.
+    node->is_leaf = false;
+    for (int i = 0; i < 8; ++i) {
+        G4ThreeVector child_min, child_max;
+        calculateChildBounds(node->min, node->max, node->center, i, child_min, child_max);
+
+        auto child = std::make_unique<Node>();
+        child->min = child_min;
+        child->max = child_max;
+        child->center = (child_min + child_max) * 0.5;
+
+        total_nodes_++; // Atomically increment total node count
+
+        // Recursively call for the next depth
+        buildUniformGrid(child.get(), depth + 1);
+
+        node->children[i] = std::move(child);
+    }
+}
+
 std::unique_ptr<AdaptiveSumRadialFieldMap::Node> AdaptiveSumRadialFieldMap::createOctreeFromScratch(const G4ThreeVector& min_bounds, const G4ThreeVector& max_bounds, int depth) {
     auto node = std::make_unique<Node>(); node->min = min_bounds; node->max = max_bounds; node->center = (min_bounds + max_bounds) * 0.5; node->is_leaf = true; total_nodes_++;
     // --- FIX: Proper atomic update for max_depth_reached_ ---

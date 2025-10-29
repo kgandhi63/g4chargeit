@@ -72,6 +72,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetFieldMinimumStep (G4double);
     void SetFieldGradThreshold (G4double);
     void SetOctreeMaxDepth (G4double);
+    void SetInitialDepth (G4double);
     void SetMaterialTemperature (G4double);
     void SetEquivalentIterationTime (G4double);
     void SetMaterialDensity(G4double);
@@ -97,6 +98,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     std::vector<G4ThreeVector> fProtonPositions;
     DetectorMessenger* detectorMessenger_;
     G4double octreeDepth_;
+    G4double initial_depth_;
     G4double equivalentIterationTime_;
     G4double density_;
 

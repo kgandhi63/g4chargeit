@@ -37,6 +37,7 @@ public:
         const G4ThreeVector& min_bounds_default = G4ThreeVector(-1*m, -1*m, -1*m),
         const G4ThreeVector& max_bounds_default = G4ThreeVector( 1*m,  1*m,  1*m),
         int max_depth_default = 10,
+        int initial_depth_default = 5,
         StorageType storage = StorageType::Double
     );
 
@@ -78,6 +79,7 @@ private:
     G4double fieldGradThreshold_;
     StorageType fStorage;
     G4double barnes_hut_theta_;
+    int initialDepth_;
 
     // References to the master particle data
     std::vector<G4ThreeVector>& fPositions;
@@ -118,6 +120,7 @@ private:
     void insertCharge(ChargeNode* node, int particle_index, const G4ThreeVector& min_bounds, const G4ThreeVector& max_bounds);
     G4ThreeVector computeFieldWithApproximation(const G4ThreeVector& point, const ChargeNode* node, const G4ThreeVector& node_min, const G4ThreeVector& node_max) const;
     G4ThreeVector computeFieldFromCharges(const G4ThreeVector& point) const;
+    void buildUniformGrid(Node* node, int depth);
 
     // Charge Dissipation
     void ApplyChargeDissipation(G4double dt, G4double temp_K);

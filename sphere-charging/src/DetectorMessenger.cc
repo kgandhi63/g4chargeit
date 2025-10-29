@@ -49,7 +49,8 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
  detector_(Det), rootManager_(G4RootAnalysisManager::Instance()), 
  projectDir_(0), fileNameCmd_(0), PBCCmd_(0), EpsilonCmd_(0), WorldXCmd_(0),WorldYCmd_(0), WorldZCmd_(0), 
  FieldMinimumStepCmd_(0), FieldGradThresholdCmd_(0), RootInputCmd_(nullptr), CADFileCmd_(nullptr), ScaleCmd_(0), 
- FieldFileCmd_(nullptr),ChargesFileCmd_(nullptr), EquivalentIterationTimeCmd_(0), MaterialTemperatureCmd_(0), MaterialDensityCmd_(0)
+ FieldFileCmd_(nullptr),ChargesFileCmd_(nullptr), EquivalentIterationTimeCmd_(0), MaterialTemperatureCmd_(0), MaterialDensityCmd_(0),
+ InitialDepthCmd_(0)
  
 { 
   projectDir_ = new G4UIdirectory("/sphere/");
@@ -130,6 +131,12 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   FieldOctreeDepthCmd_->SetParameterName("choice",false);
   FieldOctreeDepthCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+  InitialDepthCmd_ = new G4UIcmdWithADouble("/sphere/field/InitialDepth", this);
+  InitialDepthCmd_->SetGuidance("Set maximum depth for Initial Course Grid");
+  InitialDepthCmd_->SetParameterName("choice",false);
+  InitialDepthCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
+
   FieldFileCmd_ = new G4UIcmdWithAString("/sphere/field/file",this);
   FieldFileCmd_->SetGuidance("Field Map Save File");
   FieldFileCmd_->SetParameterName("choice",false);
@@ -162,6 +169,7 @@ DetectorMessenger::~DetectorMessenger()
   delete MaterialTemperatureCmd_;
   delete EquivalentIterationTimeCmd_;
   delete ChargesFileCmd_;
+  delete InitialDepthCmd_;
   delete MaterialDensityCmd_;
 }
 
@@ -212,6 +220,9 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 
   if( command == FieldOctreeDepthCmd_ )
   { detector_->SetOctreeMaxDepth(FieldOctreeDepthCmd_->GetNewDoubleValue(newValue));}
+
+  if( command == InitialDepthCmd_ )
+  { detector_->SetOctreeMaxDepth(InitialDepthCmd_->GetNewDoubleValue(newValue));}
 
   if( command == MaterialTemperatureCmd_ )
   { detector_->SetMaterialTemperature(MaterialTemperatureCmd_->GetNewDoubleValue(newValue));}
