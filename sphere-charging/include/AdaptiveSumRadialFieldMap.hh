@@ -121,7 +121,7 @@ private:
     G4ThreeVector computeFieldWithApproximation(const G4ThreeVector& point, const ChargeNode* node, const G4ThreeVector& node_min, const G4ThreeVector& node_max) const;
     G4ThreeVector computeFieldFromCharges(const G4ThreeVector& point) const;
     void buildUniformGrid(Node* node, int depth);
-
+    Node* findLeafNode(const G4ThreeVector& point, Node* node) const; // <-- Add this
     // Charge Dissipation
     void ApplyChargeDissipation(G4double dt, G4double temp_K);
     double calculateConductivity(double temp_K) const;

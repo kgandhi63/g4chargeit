@@ -326,64 +326,120 @@ void AdaptiveSumRadialFieldMap::SaveFinalParticleState(const std::string& filena
     }
 }
 
-void AdaptiveSumRadialFieldMap::ApplyChargeDissipation(G4double dt_internal, G4double temp_K) { // Rename dt for clarity
 
-    // Calculate conductivity (result should be in SI: S/m)
+void AdaptiveSumRadialFieldMap::ApplyChargeDissipation(G4double dt_internal, G4double temp_K) {
+
+    G4cout << "   Building particle-to-leaf map for dissipation..." << G4endl;
+
+    // This map will store: Leaf Node -> {list of positive indices, list of negative indices}
+    struct NodeChargeInfo {
+        std::vector<int> pos_indices;
+        std::vector<int> neg_indices;
+    };
+    // We use std::map to sort particles into bins based on their leaf node pointer.
+    std::map<Node*, NodeChargeInfo> leaf_particle_map;
+
+    // --- Pass 1: Efficiently sort all particles into leaf nodes ---
+    // This is O(N * log L) - much faster than O(N * L)
+    for (size_t i = 0; i < fPositions.size(); ++i) {
+        // Skip particles with effectively zero charge
+        if (std::abs(fCharges[i]) < 1e-21 * CLHEP::eplus) continue;
+
+        // Use the octree to find the particle's leaf node
+        Node* leaf = findLeafNode(fPositions[i], root_.get());
+
+        if (!leaf) {
+            // Particle is outside the map or findLeafNode failed. Log it if necessary.
+            // #pragma omp critical (error_log)
+            // {
+            //     G4cerr << "Warning: Particle " << i << " at " << fPositions[i]
+            //            << " could not be assigned to a leaf node during dissipation." << G4endl;
+            // }
+            continue;
+        }
+
+        // Add the particle's index to the correct list for that leaf
+        if (fCharges[i] > 0) {
+            leaf_particle_map[leaf].pos_indices.push_back(static_cast<int>(i));
+        } else {
+            leaf_particle_map[leaf].neg_indices.push_back(static_cast<int>(i));
+        }
+    }
+
+    G4cout << "   Applying dissipation to " << leaf_particle_map.size() << " active leaves..." << G4endl;
+
+    // --- Setup for dissipation (same as your original code) ---
     double conductivity_SI = calculateConductivity(temp_K);
-
-    // Explicit SI value for epsilon0 (F/m)
-    const double epsilon0_SI_Value = 8.8541878128e-12; // Numerical value in F/m
-
-    // Calculate the rate constant (ensure it's a dimensionless number representing 1/s)
-    double rate_constant_Value = conductivity_SI / epsilon0_SI_Value; // (S/m) / (F/m) = (A/V/m) / (C/V/m) = (C/s/V/m) * (V*m/C) = 1/s
+    // Use the predefined constant from G4PhysicalConstants directly for safety
+    const double epsilon0_SI_Value = CLHEP::epsilon0 / (farad/meter); // Get SI value
+    double rate_constant_Value = 0.0;
+    if (epsilon0_SI_Value > 1e-18) { // Avoid division by zero
+       rate_constant_Value = conductivity_SI / epsilon0_SI_Value;
+    } else {
+        G4cerr << "Warning: Epsilon0 value is too small, dissipation rate set to 0." << G4endl;
+    }
 
     G4double total_dissipated_charge = 0.0;
 
+    // --- Pass 2: Apply dissipation only to leaves that have charge ---
+
+    // Convert map to a vector to iterate in parallel safely
+    // (Iterating std::map directly is not thread-safe)
+    std::vector<std::pair<Node*, NodeChargeInfo>> leaf_vector(leaf_particle_map.begin(), leaf_particle_map.end());
+
     #pragma omp parallel for schedule(dynamic) reduction(+:total_dissipated_charge)
-    for (const auto& leaf : all_leaves_) {
-        if (!leaf) continue;
+    for (size_t i = 0; i < leaf_vector.size(); ++i) {
+        const auto& pair = leaf_vector[i];
+        // Skip if the Node pointer is somehow null (safety check)
+        // const Node* leaf_node = pair.first; // You might use leaf_node->center etc. if needed
+        // if (!leaf_node) continue;
 
-        double Q_node_net_Internal = 0.0; // Units: e+ (internal charge unit)
-        std::vector<int> positive_particle_indices;
-        std::vector<int> negative_particle_indices;
+        const std::vector<int>& positive_particle_indices = pair.second.pos_indices;
+        const std::vector<int>& negative_particle_indices = pair.second.neg_indices;
 
-        for (size_t i = 0; i < fPositions.size(); ++i) {
-            if (pointInside(leaf->min, leaf->max, fPositions[i])) {
-                Q_node_net_Internal += fCharges[i]; // Accumulate charge in internal units (e+)
-                if (fCharges[i] > 1e-21 * CLHEP::eplus) { positive_particle_indices.push_back(static_cast<int>(i)); }
-                else if (fCharges[i] < -1e-21 * CLHEP::eplus) { negative_particle_indices.push_back(static_cast<int>(i)); }
-            }
+        // Calculate net charge in this node
+        // (We can read fCharges[] without locks because it's not being written to *yet* in this loop iteration)
+        double Q_node_net_Internal = 0.0;
+        for (int idx : positive_particle_indices) {
+             if (idx >= 0 && static_cast<size_t>(idx) < fCharges.size()) Q_node_net_Internal += fCharges[idx];
+        }
+        for (int idx : negative_particle_indices) {
+             if (idx >= 0 && static_cast<size_t>(idx) < fCharges.size()) Q_node_net_Internal += fCharges[idx];
         }
 
+
+        // Skip if net charge is effectively zero
         if (std::abs(Q_node_net_Internal) < 1e-21 * CLHEP::eplus) continue;
 
-        // --- Strip units explicitly before calculation ---
-        double Q_node_net_Value = Q_node_net_Internal / CLHEP::eplus; // Dimensionless number of elementary charges
-        double dt_Value = dt_internal; // Dimensionless number of seconds
+        // --- Dissipation calculation (same as your original code, check units) ---
+        // Ensure dt_internal is passed correctly and has units of time (e.g., seconds)
+        double Q_node_net_Value = Q_node_net_Internal / CLHEP::eplus; // Should be elementary charges
+        double dt_Value = dt_internal / CLHEP::second; // Make sure dt_internal has time unit!
 
+        // If rate_constant_Value is 1/s, and dt_Value is s, result is dimensionless count
         double delta_Q_node_Value = -rate_constant_Value * Q_node_net_Value * dt_Value;
+        // Re-apply the unit
+        double delta_Q_node = delta_Q_node_Value * CLHEP::eplus; // Result in elementary charge units
 
-        // --- Re-apply the unit at the end ---
-        double delta_Q_node = delta_Q_node_Value * CLHEP::eplus; // Result now has units of e+
-        //---------------------------------------------------------
+        double charge_change_magnitude = std::abs(delta_Q_node);
 
-        double charge_change_magnitude = std::abs(delta_Q_node); // Still in e+ units
+        if (charge_change_magnitude > 1e-25 * CLHEP::coulomb) { // Use a small threshold
+            total_dissipated_charge += charge_change_magnitude; // Accumulate in e+ units
 
-        if (charge_change_magnitude > 0) {
-            total_dissipated_charge += charge_change_magnitude; // Accumulate magnitude in e+
-
+            // distributeChargeChange is already thread-safe (uses #omp atomic)
             if (delta_Q_node < 0 && !positive_particle_indices.empty()) {
                 distributeChargeChange(positive_particle_indices, -charge_change_magnitude);
             } else if (delta_Q_node > 0 && !negative_particle_indices.empty()) {
                 distributeChargeChange(negative_particle_indices, charge_change_magnitude);
             }
         }
-    } // End of parallel loop
+    } // End parallel loop
 
     G4cout << "   --> Charge dissipation applied (neutralizing)." << G4endl;
     G4cout << "   >>> Total charge dissipated/neutralized this step: "
            << total_dissipated_charge / CLHEP::eplus << " e <<<" << G4endl;
 }
+
 
 // --- calculateConductivity remains the same as your input ---
 double AdaptiveSumRadialFieldMap::calculateConductivity(double temp_K) const {
@@ -430,14 +486,6 @@ void AdaptiveSumRadialFieldMap::distributeChargeChange(const std::vector<int>& p
      }
 }
 
-// --- OLD removeChargeFromRegion function IS NO LONGER DEFINED ---
-// void AdaptiveSumRadialFieldMap::removeChargeFromRegion(...) { /* DELETED */ }
-
-// =========================================================================
-// === ALL OTHER FUNCTIONS BELOW ARE UNCHANGED FROM YOUR ORIGINAL INPUT ===
-// =========================================================================
-
-// --- BARNES-HUT IMPLEMENTATION (Unaltered from your input) ---
 void AdaptiveSumRadialFieldMap::buildChargeOctree() {
     charge_root_.reset(); // Important when rebuilding
     if (fPositions.empty()) return;
@@ -473,6 +521,9 @@ void AdaptiveSumRadialFieldMap::insertCharge(ChargeNode* node, int particle_inde
         }
     } else { G4ThreeVector center = (min_bounds + max_bounds) * 0.5; int child_idx = 0; if (fPositions[particle_index].x() >= center.x()) child_idx |= 1; if (fPositions[particle_index].y() >= center.y()) child_idx |= 2; if (fPositions[particle_index].z() >= center.z()) child_idx |= 4; G4ThreeVector c_min, c_max; calculateChildBounds(min_bounds, max_bounds, center, child_idx, c_min, c_max); if (!node->children[child_idx]) node->children[child_idx] = std::make_unique<ChargeNode>(); insertCharge(node->children[child_idx].get(), particle_index, c_min, c_max); }
 }
+
+
+
 G4ThreeVector AdaptiveSumRadialFieldMap::computeFieldWithApproximation(const G4ThreeVector& point, const ChargeNode* node, const G4ThreeVector& node_min, const G4ThreeVector& node_max) const {
     if (!node || std::abs(node->total_charge) < 1e-25 * CLHEP::coulomb) return G4ThreeVector(0,0,0); G4ThreeVector displacement = point - node->center_of_mass; G4double d2 = displacement.mag2(); const G4double softening_factor_sq = (1.0*nm)*(1.0*nm); if (d2 < softening_factor_sq) d2 = softening_factor_sq;
     if (node->is_leaf) { if (node->particle_index != -1) { G4double inv_d3 = 1.0 / (std::sqrt(d2) * d2); G4double scale = node->total_charge * k_electric * inv_d3; return displacement * scale; } else return G4ThreeVector(0,0,0); }
@@ -505,7 +556,7 @@ std::unique_ptr<AdaptiveSumRadialFieldMap::Node> AdaptiveSumRadialFieldMap::buil
     collectFinalLeaves(root_node.get());
     leaf_nodes_.store(static_cast<int>(all_leaves_.size()));
     
-    G4cout << "   Coarse grid built with " << leaf_nodes_.load() << " leaf nodes." << G4endl;
+    G4cout << " Coarse grid built with " << leaf_nodes_.load() << " leaf nodes." << G4endl;
 
     return root_node;
 }
@@ -550,6 +601,35 @@ std::unique_ptr<AdaptiveSumRadialFieldMap::Node> AdaptiveSumRadialFieldMap::crea
     }
     leaf_nodes_++; return node;
 }
+
+
+AdaptiveSumRadialFieldMap::Node* AdaptiveSumRadialFieldMap::findLeafNode(const G4ThreeVector& point, Node* node) const
+{
+    if (!node) return nullptr;
+    if (node->is_leaf) return node; // Found the leaf
+
+    G4ThreeVector center = node->center;
+    int child_idx = 0;
+    if (point.x() >= center.x()) child_idx |= 1;
+    if (point.y() >= center.y()) child_idx |= 2;
+    if (point.z() >= center.z()) child_idx |= 4;
+
+    if (node->children[child_idx]) {
+        // Recurse into the correct child
+        return findLeafNode(point, node->children[child_idx].get());
+    }
+
+    // Point is in an internal node but the child doesn't exist
+    // This might indicate a logic error elsewhere if the point is within bounds.
+    // Returning nullptr is safer than crashing.
+    #pragma omp critical (error_log)
+    { // Add braces for proper critical section scope
+        G4cerr << "Warning: findLeafNode reached internal node with missing child for point "
+               << point << " within node bounds [" << node->min << ", " << node->max << "]" << G4endl;
+    }
+    return nullptr;
+}
+
 void AdaptiveSumRadialFieldMap::refineMeshByGradient(Node* node, int depth) {
     if (!node) return;
     // --- FIX: Proper atomic update for max_depth_reached_ ---
