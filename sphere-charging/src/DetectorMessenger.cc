@@ -121,8 +121,8 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   FieldMinimumStepCmd_->SetParameterName("choice",false);
   FieldMinimumStepCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  FieldGradThresholdCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/field/GradThreshold", this);
-  FieldGradThresholdCmd_->SetGuidance("Set minimum step size for adapative field map.");
+  FieldGradThresholdCmd_ = new G4UIcmdWithADouble("/sphere/field/PercentGradThreshold", this);
+  FieldGradThresholdCmd_->SetGuidance("Set percentage of maximum field for the gradient threshold in adapative field map.");
   FieldGradThresholdCmd_->SetParameterName("choice",false);
   FieldGradThresholdCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 

@@ -162,21 +162,19 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     }
 
     // --------------------------------------------------------------------------
-    if (!field_magnitudes.empty()) {
-        FieldStats stats = calculateFieldStats(field_magnitudes);
-        
-        G4cout << "   >>> Mean of Field Magnitude: " << G4BestUnit(stats.mean,"Electric field") << " <<<" << G4endl;
-        G4cout << "   >>> Median of Field Magnitude: " << G4BestUnit(stats.median,"Electric field") << " <<<" << G4endl;
-        G4cout << "   >>> Std of Field Magnitude: " << G4BestUnit(stats.std_dev,"Electric field") << " <<<" << G4endl;
-        G4cout << "   >>> IQR of Field Magnitude: " << G4BestUnit(stats.iqr,"Electric field") << " <<<" << G4endl;
-        G4cout << "   >>> Min of Field Magnitude: " << G4BestUnit(stats.min,"Electric field") << " <<<" << G4endl;
-        G4cout << "   >>> Max of Field Magnitude: " << G4BestUnit(stats.max,"Electric field") << " <<<" << G4endl;
+    FieldStats stats = calculateFieldStats(field_magnitudes);
+    
+    G4cout << "   >>> Mean of Field Magnitude: " << G4BestUnit(stats.mean,"Electric field") << " <<<" << G4endl;
+    G4cout << "   >>> Median of Field Magnitude: " << G4BestUnit(stats.median,"Electric field") << " <<<" << G4endl;
+    G4cout << "   >>> Std of Field Magnitude: " << G4BestUnit(stats.std_dev,"Electric field") << " <<<" << G4endl;
+    G4cout << "   >>> IQR of Field Magnitude: " << G4BestUnit(stats.iqr,"Electric field") << " <<<" << G4endl;
+    G4cout << "   >>> Min of Field Magnitude: " << G4BestUnit(stats.min,"Electric field") << " <<<" << G4endl;
+    G4cout << "   >>> Max of Field Magnitude: " << G4BestUnit(stats.max,"Electric field") << " <<<" << G4endl;
 
-        // reset the gradient threshold
-        fieldGradThreshold_ = stats.max*0.6;
-        G4cout << "   --> Field Gradient Threshold (V/m): " << G4BestUnit(fieldGradThreshold_,"Electric field") << G4endl;
-
-    }
+    // reset the gradient threshold
+    fieldGradThreshold_ = stats.max*gradThreshold;
+    G4cout << "   --> Field Gradient Threshold (V/m): " << G4BestUnit(fieldGradThreshold_,"Electric field") << G4endl;
+    
     // --------------------------------------------------------------------------
 
     G4cout << "Refining field map based on field gradients..." << G4endl; // Log clarification
