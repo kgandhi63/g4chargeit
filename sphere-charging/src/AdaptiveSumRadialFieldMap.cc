@@ -139,17 +139,25 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
 
     // --- NEW SECTION: Calculate and Print Field Statistics for Initial Leaves ---
     std::vector<double> field_magnitudes;
-    field_magnitudes.reserve(all_leaves_.size());
+    size_t num_leaves = all_leaves_.size(); 
+    
+    // 1. Resize the vector to the exact size needed
+    field_magnitudes.resize(num_leaves); 
 
-    G4cout << "Computing field values at initial leaf node (" << all_leaves_.size() << ")..." << G4endl;
+    G4cout << "Computing field values at initial leaf node (" << num_leaves << ")..." << G4endl;
+    
     #pragma omp parallel for schedule(dynamic)
-    for (size_t i = 0; i < all_leaves_.size(); ++i) { // Use index loop
+    // 2. Assign to the *pre-allocated* index 'i'
+    for (size_t i = 0; i < num_leaves; ++i) { 
         Node* leaf = all_leaves_[i];
         if(leaf) {
             leaf->precomputed_field = computeFieldFromCharges(leaf->center); // Use NEW BH tree
 
-            // Get the magnitude of the G4ThreeVector field
-            field_magnitudes.push_back(leaf->precomputed_field.mag());
+            // Thread-safe assignment to an existing memory location
+            field_magnitudes[i] = leaf->precomputed_field.mag(); 
+        } else {
+             // Handle null leaf if necessary (e.g., set to zero)
+             field_magnitudes[i] = 0.0;
         }
     }
 
@@ -157,16 +165,21 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     if (!field_magnitudes.empty()) {
         FieldStats stats = calculateFieldStats(field_magnitudes);
         
-        //G4cout << std::fixed << std::setprecision(3);
         G4cout << "   >>> Mean of Field Magnitude: " << G4BestUnit(stats.mean,"Electric field") << " <<<" << G4endl;
         G4cout << "   >>> Median of Field Magnitude: " << G4BestUnit(stats.median,"Electric field") << " <<<" << G4endl;
+        G4cout << "   >>> Std of Field Magnitude: " << G4BestUnit(stats.std_dev,"Electric field") << " <<<" << G4endl;
+        G4cout << "   >>> IQR of Field Magnitude: " << G4BestUnit(stats.iqr,"Electric field") << " <<<" << G4endl;
         G4cout << "   >>> Min of Field Magnitude: " << G4BestUnit(stats.min,"Electric field") << " <<<" << G4endl;
         G4cout << "   >>> Max of Field Magnitude: " << G4BestUnit(stats.max,"Electric field") << " <<<" << G4endl;
-        //G4cout << std::defaultfloat << std::setprecision(6);
+
+        // reset the gradient threshold
+        fieldGradThreshold_ = stats.max*0.6;
+        G4cout << "   --> Field Gradient Threshold (V/m): " << G4BestUnit(fieldGradThreshold_,"Electric field") << G4endl;
+
     }
     // --------------------------------------------------------------------------
 
-    G4cout << "   --> Refining field map based on field gradients..." << G4endl; // Log clarification
+    G4cout << "Refining field map based on field gradients..." << G4endl; // Log clarification
     #pragma omp parallel
     {
         #pragma omp single

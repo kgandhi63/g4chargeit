@@ -392,7 +392,6 @@ void DetectorConstruction::ConstructSDandField() {
 
     // --- Print the requested values here ---
     G4cout << "   Octree Depth: " << octreeDepth_ << G4endl;
-    G4cout << "   Field Gradient Threshold (V/m): " << G4BestUnit(fieldGradThreshold_,"Electric field") << G4endl;
     G4cout << "   Minimum Step: " << G4BestUnit(fieldMinimumStep_,"Length") << G4endl;
     // --------------------------------------
 
