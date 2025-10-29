@@ -2,4 +2,3 @@ build*
 root/
 figures/*
 analysis/grain-geometries-CAD/*
-sphere-charging/geometry/isolated_grains_interpolated.stl
