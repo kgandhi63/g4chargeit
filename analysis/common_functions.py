@@ -88,147 +88,255 @@ def read_uniform_fieldmap(filename: str) -> pd.DataFrame:
         
         return df
 
+# @njit(fastmath=True, cache=True)
+# def scale_fields_numba(field_data):
+#     """
+#     Scale Ex, Ey, Ez components (columns 3 to 5) by 1e9 in place.
+#     """
+#     for i in range(field_data.shape[0]):
+#         for j in range(3, 6):
+#             field_data[i, j] *= 1e9
+#     return field_data
+
+# # Fast norm function with Numba
+# @njit(parallel=True)
+# def compute_E_mag(Ex, Ey, Ez):
+#     n = Ex.shape[0]
+#     result = np.empty(n)
+#     for i in prange(n):
+#         result[i] = np.sqrt(Ex[i]**2 + Ey[i]**2 + Ez[i]**2)
+#     return result
+
+# import numpy as np
+# import os
+# import struct # Used for reading specific C++ types like uint64_t
+
+# # Assuming the scale_fields_numba function is defined elsewhere
+# # from your environment (e.g., in a numba-compatible module).
+
+# def read_adaptive_fieldmap(filename, scaling=True):
+#     """
+#     Reads the adaptive field map binary file created by the modified C++ code.
+    
+#     The structure expected is:
+#     1. Header: world_bounds (6*float64)
+#     2. Parameters: max_d (uint32), min_s (float64), storage_type (uint32), 
+#                    total_node_count (uint64), final_leaf_count (uint64)
+#     3. Field Nodes: total_node_count * (center(3*float32), field(3*float32), size(float32), is_leaf(uint8))
+#     4. Statistics: grad_ref (uint32), max_depth_r (uint32)
+#     """
+    
+#     # Define C++ data types for Python
+#     C_FLOAT = np.dtype(np.float32).itemsize  # 4 bytes
+#     C_DOUBLE = np.dtype(np.float64).itemsize # 8 bytes
+#     C_UINT32 = np.dtype(np.uint32).itemsize   # 4 bytes
+#     C_UINT64 = np.dtype(np.uint64).itemsize   # 8 bytes
+#     C_UINT8 = np.dtype(np.uint8).itemsize     # 1 byte
+
+#     # The size of a single node block in bytes: 
+#     # 3*float32 (pos) + 3*float32 (field) + 1*float32 (size) + 1*uint8 (is_leaf)
+#     NODE_SIZE_BYTES = 3 * C_FLOAT + 3 * C_FLOAT + 1 * C_FLOAT + 1 * C_UINT8 # 25 bytes
+
+#     with open(filename, 'rb') as f:
+        
+#         # 1. Read world_bounds (6 * float64)
+#         world_bounds = np.frombuffer(f.read(6 * C_DOUBLE), dtype=np.float64)
+        
+#         # 2. Read Octree Parameters
+        
+#         # max_d (uint32)
+#         max_d = np.frombuffer(f.read(C_UINT32), dtype=np.uint32)[0]
+        
+#         # min_s (float64)
+#         min_s = np.frombuffer(f.read(C_DOUBLE), dtype=np.float64)[0]
+        
+#         # storage_type (uint32)
+#         storage_type = np.frombuffer(f.read(C_UINT32), dtype=np.uint32)[0]
+        
+#         # total_node_count (uint64)
+#         total_node_count = struct.unpack('<Q', f.read(C_UINT64))[0] 
+        
+#         # final_leaf_count (uint64)
+#         final_leaf_count = struct.unpack('<Q', f.read(C_UINT64))[0] 
+        
+#         # 3. Read ALL Field Nodes Data
+        
+#         total_field_data_bytes = total_node_count * NODE_SIZE_BYTES
+#         node_raw_data = f.read(total_field_data_bytes)
+        
+#         node_data = []
+#         is_leaf_flags = []
+        
+#         for i in range(total_node_count):
+#             start = i * NODE_SIZE_BYTES
+#             end = (i + 1) * NODE_SIZE_BYTES
+#             block = node_raw_data[start:end]
+            
+#             # Unpack 7 floats and 1 uint8_t
+#             unpacked_data = struct.unpack('<7f B', block) 
+            
+#             # Separate the 7 floats (pos, field, size) from the last element (is_leaf)
+#             pos_field_size = unpacked_data[:7]
+#             is_leaf = unpacked_data[7]
+            
+#             node_data.append(pos_field_size)
+#             is_leaf_flags.append(is_leaf)
+
+#         # Convert to numpy arrays
+#         # field_data columns: 0,1,2 (center) | 3,4,5 (field E) | 6 (size)
+#         field_data = np.array(node_data, dtype=np.float32)
+#         is_leaf_flags = np.array(is_leaf_flags, dtype=np.uint8)
+        
+#         # --- ROBUST SCALING LOGIC (Fix: Force copy before scaling) ---
+#         if scaling:
+#             # 1. Extract the field vector columns (3, 4, 5) and force a copy.
+#             field_vectors_copy = field_data[:, 3:6].copy() 
+            
+#             # 2. Apply scaling function to the copy.
+#             scaled_vectors = scale_fields_numba(field_vectors_copy)
+            
+#             # 3. Assign the scaled result back to the specific columns.
+#             field_data[:, 3:6] = scaled_vectors 
+        
+        
+#         # 4. Read Final Statistics
+        
+#         # grad_ref (uint32)
+#         grad_ref = np.frombuffer(f.read(C_UINT32), dtype=np.uint32)[0]
+        
+#         # max_depth_r (uint32)
+#         max_depth_r = np.frombuffer(f.read(C_UINT32), dtype=np.uint32)[0]
+
+#     # --- Construct Metadata and Output ---
+#     metadata = {
+#         'world_bounds': world_bounds,
+#         'mesh_parameters': {
+#             'max_depth': max_d,
+#             'min_step_internal': min_s, 
+#             'total_nodes': total_node_count,
+#             'final_leaf_nodes': final_leaf_count,
+#             'storage_flag': storage_type,
+#         },
+#         'statistics': {
+#             'gradient_refinements': grad_ref,
+#             'max_depth_reached': max_depth_r,
+#         },
+#         'is_leaf_flags': is_leaf_flags
+#     }
+    
+#     # field_data contains (center_x, center_y, center_z, E_x, E_y, E_z, size)
+#     return field_data, metadata
+
+import numpy as np
+import os
+import struct
+from numba import njit, prange
+
+# Numba functions are fine, but ensure they are imported/defined.
 @njit(fastmath=True, cache=True)
 def scale_fields_numba(field_data):
     """
     Scale Ex, Ey, Ez components (columns 3 to 5) by 1e9 in place.
     """
-    for i in range(field_data.shape[0]):
-        for j in range(3, 6):
-            field_data[i, j] *= 1e9
+    # Use array slicing for Numba compatibility and efficiency
+    field_data *= 1e9
     return field_data
 
 # Fast norm function with Numba
 @njit(parallel=True)
 def compute_E_mag(Ex, Ey, Ez):
     n = Ex.shape[0]
-    result = np.empty(n)
+    result = np.empty(n, dtype=Ex.dtype) # Use the input dtype
     for i in prange(n):
         result[i] = np.sqrt(Ex[i]**2 + Ey[i]**2 + Ez[i]**2)
     return result
 
-import numpy as np
-import os
-import struct # Used for reading specific C++ types like uint64_t
+# --- Optimized Reader Function ---
 
-# Assuming the scale_fields_numba function is defined elsewhere
-# from your environment (e.g., in a numba-compatible module).
-
-def read_adaptive_fieldmap(filename, scaling=True):
+def read_adaptive_fieldmap(filename):
     """
-    Reads the adaptive field map binary file created by the modified C++ code.
-    
-    The structure expected is:
-    1. Header: world_bounds (6*float64)
-    2. Parameters: max_d (uint32), min_s (float64), storage_type (uint32), 
-                   total_node_count (uint64), final_leaf_count (uint64)
-    3. Field Nodes: total_node_count * (center(3*float32), field(3*float32), size(float32), is_leaf(uint8))
-    4. Statistics: grad_ref (uint32), max_depth_r (uint32)
+    Reads the adaptive field map binary file using a highly optimized
+    NumPy approach to process the node data in a single step.
     """
     
     # Define C++ data types for Python
-    C_FLOAT = np.dtype(np.float32).itemsize  # 4 bytes
-    C_DOUBLE = np.dtype(np.float64).itemsize # 8 bytes
-    C_UINT32 = np.dtype(np.uint32).itemsize   # 4 bytes
-    C_UINT64 = np.dtype(np.uint64).itemsize   # 8 bytes
-    C_UINT8 = np.dtype(np.uint8).itemsize     # 1 byte
+    C_DOUBLE = 8 # 8 bytes
+    C_UINT32 = 4 # 4 bytes
+    C_UINT64 = 8 # 8 bytes
 
-    # The size of a single node block in bytes: 
-    # 3*float32 (pos) + 3*float32 (field) + 1*float32 (size) + 1*uint8 (is_leaf)
-    NODE_SIZE_BYTES = 3 * C_FLOAT + 3 * C_FLOAT + 1 * C_FLOAT + 1 * C_UINT8 # 25 bytes
-
+    # Define the *Dtype* for a single node block (7 floats + 1 byte)
+    # The 'b' field is for the uint8_t (is_leaf) flag.
+    # The 'padding' is necessary because C++ structs often align to 4 or 8 bytes.
+    # A single node is 25 bytes. We must assume NO PADDING in the C++ file writing,
+    # or that the C++ code wrote the fields sequentially without internal padding.
+    # Assuming sequential write for this optimization:
+    NODE_DTYPE = np.dtype([
+        ('pos', '<f4', 3),     # 3*float32 (center_x, y, z)
+        ('field', '<f4', 3),   # 3*float32 (E_x, y, z)
+        ('size', '<f4', 1),    # 1*float32 (size)
+        ('is_leaf', '<u1', 1)  # 1*uint8 (is_leaf)
+    ])
+    
     with open(filename, 'rb') as f:
         
         # 1. Read world_bounds (6 * float64)
-        world_bounds = np.frombuffer(f.read(6 * C_DOUBLE), dtype=np.float64)
+        world_bounds = np.fromfile(f, dtype=np.float64, count=6)
         
         # 2. Read Octree Parameters
         
         # max_d (uint32)
-        max_d = np.frombuffer(f.read(C_UINT32), dtype=np.uint32)[0]
+        max_d = np.fromfile(f, dtype=np.uint32, count=1)[0]
         
         # min_s (float64)
-        min_s = np.frombuffer(f.read(C_DOUBLE), dtype=np.float64)[0]
+        min_s = np.fromfile(f, dtype=np.float64, count=1)[0]
         
         # storage_type (uint32)
-        storage_type = np.frombuffer(f.read(C_UINT32), dtype=np.uint32)[0]
+        storage_type = np.fromfile(f, dtype=np.uint32, count=1)[0]
         
-        # total_node_count (uint64)
-        total_node_count = struct.unpack('<Q', f.read(C_UINT64))[0] 
+        # total_node_count (uint64) - use fromfile, it's faster than struct
+        total_node_count = np.fromfile(f, dtype=np.uint64, count=1)[0]
         
         # final_leaf_count (uint64)
-        final_leaf_count = struct.unpack('<Q', f.read(C_UINT64))[0] 
+        final_leaf_count = np.fromfile(f, dtype=np.uint64, count=1)[0] 
         
-        # 3. Read ALL Field Nodes Data
+        # 3. Read ALL Field Nodes Data (THE BOTTLENECK FIX)
         
-        total_field_data_bytes = total_node_count * NODE_SIZE_BYTES
-        node_raw_data = f.read(total_field_data_bytes)
-        
-        node_data = []
-        is_leaf_flags = []
-        
-        for i in range(total_node_count):
-            start = i * NODE_SIZE_BYTES
-            end = (i + 1) * NODE_SIZE_BYTES
-            block = node_raw_data[start:end]
-            
-            # Unpack 7 floats and 1 uint8_t
-            unpacked_data = struct.unpack('<7f B', block) 
-            
-            # Separate the 7 floats (pos, field, size) from the last element (is_leaf)
-            pos_field_size = unpacked_data[:7]
-            is_leaf = unpacked_data[7]
-            
-            node_data.append(pos_field_size)
-            is_leaf_flags.append(is_leaf)
+        # Read the *entire* block of nodes in one go using the custom dtype
+        node_raw_array = np.fromfile(f, dtype=NODE_DTYPE, count=total_node_count)
 
-        # Convert to numpy arrays
-        # field_data columns: 0,1,2 (center) | 3,4,5 (field E) | 6 (size)
-        field_data = np.array(node_data, dtype=np.float32)
-        is_leaf_flags = np.array(is_leaf_flags, dtype=np.uint8)
-        
-        # --- ROBUST SCALING LOGIC (Fix: Force copy before scaling) ---
-        if scaling:
-            # 1. Extract the field vector columns (3, 4, 5) and force a copy.
-            field_vectors_copy = field_data[:, 3:6].copy() 
-            
-            # 2. Apply scaling function to the copy.
-            scaled_vectors = scale_fields_numba(field_vectors_copy)
-            
-            # 3. Assign the scaled result back to the specific columns.
-            field_data[:, 3:6] = scaled_vectors 
-        
+        # Separate the structured data into flat arrays
+        # Use np.hstack to combine the position, field, and size columns
+        field_data = np.hstack([
+            node_raw_array['pos'],
+            node_raw_array['field'],
+            #node_raw_array['size'].reshape(-1, 1) # Must reshape single-element field
+        ])
         
         # 4. Read Final Statistics
         
         # grad_ref (uint32)
-        grad_ref = np.frombuffer(f.read(C_UINT32), dtype=np.uint32)[0]
+        grad_ref = np.fromfile(f, dtype=np.uint32, count=1)[0]
         
         # max_depth_r (uint32)
-        max_depth_r = np.frombuffer(f.read(C_UINT32), dtype=np.uint32)[0]
+        max_depth_r = np.fromfile(f, dtype=np.uint32, count=1)[0]
 
     # --- Construct Metadata and Output ---
+    # (Metadata logic remains the same)
     metadata = {
-        'world_bounds': world_bounds,
         'mesh_parameters': {
             'max_depth': max_d,
             'min_step_internal': min_s, 
             'total_nodes': total_node_count,
-            'final_leaf_nodes': final_leaf_count,
-            'storage_flag': storage_type,
+            'final_leaf_nodes': final_leaf_count
         },
         'statistics': {
             'gradient_refinements': grad_ref,
             'max_depth_reached': max_depth_r,
-        },
-        'is_leaf_flags': is_leaf_flags
+        }
     }
     
     # field_data contains (center_x, center_y, center_z, E_x, E_y, E_z, size)
-    return {
-        'field_data': field_data, 
-        'metadata': metadata
-    }
+    return field_data, metadata
 
 # Efficient, memory-aware loader
 def read_data_format_efficient(filenames, scaling=True):
@@ -238,13 +346,14 @@ def read_data_format_efficient(filenames, scaling=True):
         iteration = int(fileIN.split("/")[-1].split("-")[0])
 
         # Minimal fieldmap reader - replace with your efficient implementation
-        data, _ = read_adaptive_fieldmap(fileIN,scaling=scaling)  # assume this returns a pandas dataframe
+        data, _ = read_adaptive_fieldmap(fileIN)  # assume this returns a pandas dataframe
 
         # Slice columns directly from NumPy array
         pos = data[:, :3].astype(np.float32, copy=False)    # x, y, z
-        Ex  = data[:, 3].astype(np.float32, copy=False)
-        Ey  = data[:, 4].astype(np.float32, copy=False)
-        Ez  = data[:, 5].astype(np.float32, copy=False)
+        if scaling:
+            Ex  = scale_fields_numba(data[:, 3].astype(np.float32, copy=False))
+            Ey  = scale_fields_numba(data[:, 4].astype(np.float32, copy=False))
+            Ez  = scale_fields_numba(data[:, 5].astype(np.float32, copy=False))
 
         # Compute E-field magnitude
         E_mag = compute_E_mag(Ex, Ey, Ez)

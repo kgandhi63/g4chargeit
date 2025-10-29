@@ -26,6 +26,7 @@ temperature = 600 # temperature for dissipation model, units: kelvin
 config_list = ["onlysolarwind", "onlyphotoemission"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
 minStepList = [0.1, 0.1] # minimum step for Octree mesh for each case (units of um)
 density = 2.20 # density of SiO2, units: g/cm3
+initialOctreeNum = 6
 
 # define the size of the world
 CAD_dimensions = (600, 600, 373.2) # in units of microns
@@ -117,8 +118,9 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
     f.write(f'/sphere/MaterialTemperature {temperature} K\n')
     f.write(f'/sphere/MaterialDensity {density} g/cm3\n')
     f.write(f'/sphere/IterationTime {iterationTime} s\n')
+    f.write(f'/sphere/field/InitialDepth {initialOctreeNum}')
     f.write(f'/sphere/field/MinimumStep {minStep} um\n') # step size for field map solver
-    f.write(f'/sphere/field/GradThreshold 5e3 V/m\n') # step size for field map solver
+    f.write(f'/sphere/field/GradThreshold 6e3 V/m\n') # step size for field map solver
     f.write(f'/sphere/field/OctreeDepth 9\n') # step size for field map solver
     f.write(f'/sphere/field/file fieldmaps/{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}-fieldmap.txt \n')
     f.write(f'/sphere/charges/file charges-{increment_filename.split("_")[2]}.txt\n')

@@ -23,7 +23,7 @@ seedIN = [10008859, 10005380] # set a random seed (useful for debugging)
 # values from Wang 2016 manuscript
 electron_energy = 120 # units: eV
 photon_wavelength_center = 1239.8/172 # units: eV
-photon_wavelength_width = 1239.8/14/2.3548 # units: eV, convert FWHM to sigma
+photon_wavelength_width = abs((1239.8/(172+14/2) - 1239.8/(172-14/2))/2.3548) # units: eV, convert FWHM to sigma
 UVflux, eflux = np.array([1.38e20, 9.84e19]) #units: particles/m2/s
 
 # list of configurations and parameters for each configuration
@@ -32,7 +32,7 @@ minStepList = [0.1, 0.1] # minimum step for Octree mesh for each case (units of 
 eventnumbersList = [1000000, 500000]
 
 # define the size of the world
-CAD_dimensions = (600, 600, 373.2) # in units of microns
+CAD_dimensions = (107.00044, 120.77438, 100.29045) # in units of microns
 particle_position = 15 # place all particles microns above the geometry
 bufferXY = 0 # in units of microns
 worldX = CAD_dimensions[0] + 2*bufferXY # in units of microns -- account for angle of beam
@@ -121,7 +121,7 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
     f.write(f'/sphere/MaterialDensity {density} g/cm3\n')
     f.write(f'/sphere/IterationTime {iterationTime} s\n')
     f.write(f'/sphere/field/MinimumStep {minStep} um\n') # step size for field map solver
-    f.write(f'/sphere/field/GradThreshold 1e-2 V/m\n') # step size for field map solver
+    f.write(f'/sphere/field/GradThreshold 1e3 V/m\n') # step size for field map solver
     f.write(f'/sphere/field/OctreeDepth 8\n') # step size for field map solver
     f.write(f'/sphere/field/file fieldmaps/{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}-fieldmap.txt \n')
     f.write(f'/sphere/charges/file charges-{increment_filename.split("_")[2]}.txt\n')
@@ -129,7 +129,7 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
     if input_files:
         f.write('/sphere/rootinput/file ' + ' '.join(input_files) + '\n')
     f.write(f'/sphere/rootoutput/file root/{increment_filename}.root\n')
-    f.write('/sphere/cadinput/file stacked_spheres_frompython_cropped.stl\n')
+    f.write('/sphere/cadinput/file isolated_grains_interpolated.stl\n')
     #f.write('/sphere/cadinput/scale 0.001\n')
     f.write('/sphere/epsilon 4\n') 
     f.write('/sphere/PBC true\n')
@@ -154,7 +154,7 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
         f.write('/gps/particle gamma\n')
         f.write("/gps/ene/type Gauss\n")
         f.write(f'/gps/ene/mono {photon_wavelength_center} eV\n')
-        f.write(f'/gps/ene/sigma {photon_wavelength_center} eV\n')
+        f.write(f'/gps/ene/sigma {photon_wavelength_width} eV\n')
         f.write("/gps/pos/type Plane\n")
         f.write("/gps/pos/shape Square\n")
         f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')
@@ -308,10 +308,10 @@ for optionIN,minStepIN,select_num in zip(configList, minStepList, eventnumbersLi
                 break  # STOP and wait for valid ROOT file
 
             # Calculate iteration time
-            if optionIN == "onlyphotoemission":
-                iterationTime = (particlesforIteration["gamma"] / planeArea) / PEflux
-            elif optionIN == "onlysolarwind":
-                iterationTime = (particlesforIteration["proton"] / planeArea) / SWions
+            if optionIN == "onlyUV":
+                iterationTime = (particlesforIteration["gamma"] / planeArea) / UVflux
+            elif optionIN == "onlyelectrons":
+                iterationTime = (particlesforIteration["e-"] / planeArea) / eflux
             else:
                 iterationTime = 0
 

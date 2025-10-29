@@ -567,20 +567,20 @@ void AdaptiveSumRadialFieldMap::ExportFieldMapToFile(const std::string& filename
     }
 
     // Bounds
-    double world_bounds[6] = { worldMin_.x(), worldMin_.y(), worldMin_.z(), worldMax_.x(), worldMax_.y(), worldMax_.z() };
-    outfile.write(reinterpret_cast<const char*>(world_bounds), sizeof(world_bounds));
+    // double world_bounds[6] = { worldMin_.x(), worldMin_.y(), worldMin_.z(), worldMax_.x(), worldMax_.y(), worldMax_.z() };
+    // outfile.write(reinterpret_cast<const char*>(world_bounds), sizeof(world_bounds));
 
     // Octree Parameters
     uint32_t max_d = static_cast<uint32_t>(max_depth_);
     double min_s = minStepSize_;
-    uint32_t storage_type = static_cast<uint32_t>(fStorage);
+    //uint32_t storage_type = static_cast<uint32_t>(fStorage);
     // These two are the counts you are interested in
     uint64_t total_node_count = static_cast<uint64_t>(total_nodes_.load());
     uint64_t final_leaf_count = static_cast<uint64_t>(leaf_nodes_.load()); 
 
     outfile.write(reinterpret_cast<const char*>(&max_d), sizeof(max_d));
     outfile.write(reinterpret_cast<const char*>(&min_s), sizeof(min_s));
-    outfile.write(reinterpret_cast<const char*>(&storage_type), sizeof(storage_type));
+    //outfile.write(reinterpret_cast<const char*>(&storage_type), sizeof(storage_type));
     outfile.write(reinterpret_cast<const char*>(&total_node_count), sizeof(total_node_count));
     outfile.write(reinterpret_cast<const char*>(&final_leaf_count), sizeof(final_leaf_count)); 
 
@@ -602,6 +602,7 @@ void AdaptiveSumRadialFieldMap::writeFieldPointsToFileRecursive(std::ofstream& o
     if (!node) return;
 
     // --- Write Node Data ---
+
     // Pos/Center
     float pos[3] = { static_cast<float>(node->center.x()), static_cast<float>(node->center.y()), static_cast<float>(node->center.z()) };
     outfile.write(reinterpret_cast<const char*>(pos), sizeof(pos));
@@ -610,13 +611,13 @@ void AdaptiveSumRadialFieldMap::writeFieldPointsToFileRecursive(std::ofstream& o
     float field[3] = { static_cast<float>(node->precomputed_field.x()), static_cast<float>(node->precomputed_field.y()), static_cast<float>(node->precomputed_field.z()) };
     outfile.write(reinterpret_cast<const char*>(field), sizeof(field));
     
-    // Size and Type Flag
-    float size = static_cast<float>(node->max.x() - node->min.x());
-    outfile.write(reinterpret_cast<const char*>(&size), sizeof(size));
+    // // Size and Type Flag
+    // float size = static_cast<float>(node->max.x() - node->min.x());
+    // outfile.write(reinterpret_cast<const char*>(&size), sizeof(size));
     
-    // Write a flag to indicate if it's a leaf (1) or an internal node (0)
-    uint8_t is_leaf_flag = node->is_leaf ? 1 : 0;
-    outfile.write(reinterpret_cast<const char*>(&is_leaf_flag), sizeof(is_leaf_flag));
+    // // Write a flag to indicate if it's a leaf (1) or an internal node (0)
+    // uint8_t is_leaf_flag = node->is_leaf ? 1 : 0;
+    // outfile.write(reinterpret_cast<const char*>(&is_leaf_flag), sizeof(is_leaf_flag));
     
     // --- Recurse on Children ---
     if (!node->is_leaf) {
