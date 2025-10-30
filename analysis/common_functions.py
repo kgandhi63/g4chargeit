@@ -273,70 +273,47 @@ def read_adaptive_fieldmap(filename):
     NODE_DTYPE = np.dtype([
         ('pos', '<f4', 3),     # 3*float32 (center_x, y, z)
         ('field', '<f4', 3),   # 3*float32 (E_x, y, z)
-        ('size', '<f4', 1),    # 1*float32 (size)
-        ('is_leaf', '<u1', 1)  # 1*uint8 (is_leaf)
     ])
     
     with open(filename, 'rb') as f:
         
-        # 1. Read world_bounds (6 * float64)
-        world_bounds = np.fromfile(f, dtype=np.float64, count=6)
-        
-        # 2. Read Octree Parameters
-        
-        # max_d (uint32)
+        # Read Octree Parameters
+
+        # max_d (uint32_t)
         max_d = np.fromfile(f, dtype=np.uint32, count=1)[0]
         
-        # min_s (float64)
+        # min_s (double/float64) - Assuming G4double is 8 bytes
         min_s = np.fromfile(f, dtype=np.float64, count=1)[0]
         
-        # storage_type (uint32)
-        storage_type = np.fromfile(f, dtype=np.uint32, count=1)[0]
-        
-        # total_node_count (uint64) - use fromfile, it's faster than struct
+        # total_node_count (uint64_t)
         total_node_count = np.fromfile(f, dtype=np.uint64, count=1)[0]
         
-        # final_leaf_count (uint64)
+        # final_leaf_count (uint64_t)
         final_leaf_count = np.fromfile(f, dtype=np.uint64, count=1)[0] 
         
-        # 3. Read ALL Field Nodes Data (THE BOTTLENECK FIX)
-        
-        # Read the *entire* block of nodes in one go using the custom dtype
+        # --- 2. Read ALL Field Nodes Data ---
+            
+        # Read the *entire* block of (total_node_count * 24 bytes) in one go
         node_raw_array = np.fromfile(f, dtype=NODE_DTYPE, count=total_node_count)
 
-        # Separate the structured data into flat arrays
-        # Use np.hstack to combine the position, field, and size columns
+        # Separate the structured data into a flat (N, 6) array
+        # This creates the final expected data array: (pos_x, y, z, E_x, y, z)
         field_data = np.hstack([
             node_raw_array['pos'],
             node_raw_array['field'],
-            #node_raw_array['size'].reshape(-1, 1) # Must reshape single-element field
-        ])
-        
-        # 4. Read Final Statistics
-        
-        # grad_ref (uint32)
-        grad_ref = np.fromfile(f, dtype=np.uint32, count=1)[0]
-        
-        # max_depth_r (uint32)
-        max_depth_r = np.fromfile(f, dtype=np.uint32, count=1)[0]
+        ]).astype(np.float32) # Ensure the final array is float32
 
-    # --- Construct Metadata and Output ---
-    # (Metadata logic remains the same)
-    metadata = {
-        'mesh_parameters': {
-            'max_depth': max_d,
-            'min_step_internal': min_s, 
-            'total_nodes': total_node_count,
-            'final_leaf_nodes': final_leaf_count
-        },
-        'statistics': {
-            'gradient_refinements': grad_ref,
-            'max_depth_reached': max_depth_r,
+        # --- Construct Metadata and Output ---
+        metadata = {
+            'mesh_parameters': {
+                'max_depth': max_d,
+                'min_step_internal': min_s, 
+                'total_nodes': total_node_count,
+                'final_leaf_nodes': final_leaf_count
+            }
         }
-    }
-    
-    # field_data contains (center_x, center_y, center_z, E_x, E_y, E_z, size)
-    return field_data, metadata
+        
+        return field_data, metadata
 
 # Efficient, memory-aware loader
 def read_data_format_efficient(filenames, scaling=True):
@@ -354,7 +331,11 @@ def read_data_format_efficient(filenames, scaling=True):
             Ex  = scale_fields_numba(data[:, 3].astype(np.float32, copy=False))
             Ey  = scale_fields_numba(data[:, 4].astype(np.float32, copy=False))
             Ez  = scale_fields_numba(data[:, 5].astype(np.float32, copy=False))
-
+        else:
+            Ex  = data[:, 3].astype(np.float32, copy=False)
+            Ey  = data[:, 4].astype(np.float32, copy=False)
+            Ez  = data[:, 5].astype(np.float32, copy=False)
+            
         # Compute E-field magnitude
         E_mag = compute_E_mag(Ex, Ey, Ez)
 

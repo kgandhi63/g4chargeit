@@ -391,7 +391,7 @@ void DetectorConstruction::ConstructSDandField() {
     G4cout << "Starting Adaptive Field Map Precomputation" << G4endl;
 
     // --- Print the requested values here ---
-    G4cout << "   Octree Depth: " << octreeDepth_ << G4endl;
+    G4cout << "   Final Octree Depth: " << octreeDepth_ << G4endl;
     G4cout << "   Minimum Step: " << G4BestUnit(fieldMinimumStep_,"Length") << G4endl;
     // --------------------------------------
 

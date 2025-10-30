@@ -19,14 +19,15 @@ eventnumbers_onlysolarwind = 500000 # adjusted this number to reflect the timest
 eventnumbers_onlyphotoemission = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 iterationNUM = 200 # number of iterations to perform
-temperature = 600 # temperature for dissipation model, units: kelvin
-# be careful here, there is a userlimit for the number of jobs that can be submited (around 500)
+temperature = 425 # temperature for dissipation model, units: kelvin
+density = 2.20 # density of SiO2, units: g/cm3
 
 # list of configurations
 config_list = ["onlysolarwind", "onlyphotoemission"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
-minStepList = [0.1, 0.1] # minimum step for Octree mesh for each case (units of um)
-density = 2.20 # density of SiO2, units: g/cm3
-initialOctreeNum = 6
+minStepList = [0.1, 0.05] # minimum step for Octree mesh for each case (units of um)
+initialOctreeDepth = 5
+gradPercent = 0.8
+finalOctreeDepth = 9
 
 # define the size of the world
 CAD_dimensions = (600, 600, 373.2) # in units of microns
@@ -118,10 +119,10 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
     f.write(f'/sphere/MaterialTemperature {temperature} K\n')
     f.write(f'/sphere/MaterialDensity {density} g/cm3\n')
     f.write(f'/sphere/IterationTime {iterationTime} s\n')
-    f.write(f'/sphere/field/InitialDepth {initialOctreeNum}\n')
+    f.write(f'/sphere/field/InitialDepth {initialOctreeDepth}\n')
     f.write(f'/sphere/field/MinimumStep {minStep} um\n') # step size for field map solver
-    f.write(f'/sphere/field/PercentGradThreshold 0.2\n') # step size for field map solver
-    f.write(f'/sphere/field/OctreeDepth 9\n') # step size for field map solver
+    f.write(f'/sphere/field/PercentGradThreshold {gradPercent}\n') # step size for field map solver
+    f.write(f'/sphere/field/OctreeDepth {finalOctreeDepth}\n') # step size for field map solver
     f.write(f'/sphere/field/file fieldmaps/{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}-fieldmap.txt \n')
     f.write(f'/sphere/charges/file charges-{increment_filename.split("_")[2]}.txt\n')
     f.write('#\n')

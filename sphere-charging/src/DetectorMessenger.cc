@@ -136,7 +136,6 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   InitialDepthCmd_->SetParameterName("choice",false);
   InitialDepthCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-
   FieldFileCmd_ = new G4UIcmdWithAString("/sphere/field/file",this);
   FieldFileCmd_->SetGuidance("Field Map Save File");
   FieldFileCmd_->SetParameterName("choice",false);
@@ -222,7 +221,7 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   { detector_->SetOctreeMaxDepth(FieldOctreeDepthCmd_->GetNewDoubleValue(newValue));}
 
   if( command == InitialDepthCmd_ )
-  { detector_->SetOctreeMaxDepth(InitialDepthCmd_->GetNewDoubleValue(newValue));}
+  { detector_->SetInitialDepth(InitialDepthCmd_->GetNewDoubleValue(newValue));}
 
   if( command == MaterialTemperatureCmd_ )
   { detector_->SetMaterialTemperature(MaterialTemperatureCmd_->GetNewDoubleValue(newValue));}

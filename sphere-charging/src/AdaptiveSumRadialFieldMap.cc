@@ -32,36 +32,58 @@ namespace {
         double std_dev;
         double median;
         double iqr;
+        double q1;
+        double q3;
+        int n_filtered;
     };
 
     // Implements linear interpolation for quantiles
     FieldStats calculateFieldStats(std::vector<double>& data) {
-        FieldStats stats = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-        size_t n = data.size();
-        if (n == 0) return stats;
 
-        // Sort the data to find min, max, median, and quartiles
-        std::sort(data.begin(), data.end());
+        // We use a small epsilon for floating point comparison instead of exactly 0.0
+        const double epsilon = 1e-12; 
+        
+        // 1. Filter the data to get only non-zero magnitudes using modern C++ algorithms
+        std::vector<double> nonzero_data;
+        nonzero_data.reserve(data.size()); // Pre-allocate memory for efficiency
 
-        stats.min = data.front();
-        stats.max = data.back();
+        // Copy elements from 'data' to 'nonzero_data' if the element (x) is greater than epsilon
+        // Requires <algorithm> for copy_if and <iterator> for back_inserter (assumed included)
+        std::copy_if(data.begin(), data.end(), 
+                     std::back_inserter(nonzero_data), 
+                     [&](double x){ return x > epsilon; });
+        
+        // Use the filtered vector for all subsequent calculations
+        size_t n = nonzero_data.size();
+
+        // Initialize all members. Must now include q1, q3, and n_filtered.
+        FieldStats stats = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0}; 
+
+        stats.n_filtered = n; // Store the count of data points used
+
+        // 2. Sort the data to find min, max, median, and quartiles
+        // Sorting the filtered vector is safe and efficient
+        std::sort(nonzero_data.begin(), nonzero_data.end());
+
+        stats.min = nonzero_data.front();
+        stats.max = nonzero_data.back();
 
         // Mean
-        double sum = std::accumulate(data.begin(), data.end(), 0.0);
+        double sum = std::accumulate(nonzero_data.begin(), nonzero_data.end(), 0.0);
         stats.mean = sum / n;
 
         // Standard Deviation (Population Standard Deviation)
         double sq_sum = 0.0;
-        for (double val : data) {
+        for (double val : nonzero_data) {
             sq_sum += (val - stats.mean) * (val - stats.mean);
         }
         stats.std_dev = std::sqrt(sq_sum / n);
 
         // Median (Q2)
         if (n % 2 == 1) {
-            stats.median = data[n / 2];
+            stats.median = nonzero_data[n / 2];
         } else {
-            stats.median = (data[n / 2 - 1] + data[n / 2]) / 2.0;
+            stats.median = (nonzero_data[n / 2 - 1] + nonzero_data[n / 2]) / 2.0;
         }
 
         // Quartiles (Q1 and Q3) - using the common 'R-6' or 'linear interpolation' method
@@ -72,16 +94,18 @@ namespace {
             double index = std::floor(pos);
             double delta = pos - index;
             
-            if (index < 1) return data.front();
-            if (index >= n) return data.back();
+            if (index < 1) return nonzero_data.front();
+            if (index >= n) return nonzero_data.back();
 
             // data[index-1] is the element at the index position (0-based)
-            return data[static_cast<size_t>(index) - 1] * (1.0 - delta) + data[static_cast<size_t>(index)] * delta;
+            return nonzero_data[static_cast<size_t>(index) - 1] * (1.0 - delta) + nonzero_data[static_cast<size_t>(index)] * delta;
         };
 
-        double q1 = find_quantile(0.25);
-        double q3 = find_quantile(0.75);
-        stats.iqr = q3 - q1;
+        // double q1 = find_quantile(0.25);
+        // double q3 = find_quantile(0.75);
+        stats.q1 = find_quantile(0.25);
+        stats.q3 = find_quantile(0.75);
+        stats.iqr = stats.q3 - stats.q1;
 
         return stats;
     }
@@ -172,7 +196,7 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     G4cout << "   >>> Max of Field Magnitude: " << G4BestUnit(stats.max,"Electric field") << " <<<" << G4endl;
 
     // reset the gradient threshold
-    fieldGradThreshold_ = stats.max*gradThreshold;
+    fieldGradThreshold_ = stats.max*gradThreshold; //iqr*1.5+stats.q3;
     G4cout << "   --> Field Gradient Threshold (V/m): " << G4BestUnit(fieldGradThreshold_,"Electric field") << G4endl;
     
     // --------------------------------------------------------------------------
