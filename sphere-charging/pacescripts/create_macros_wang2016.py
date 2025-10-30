@@ -15,21 +15,27 @@ import numpy as np
 
 # define the number of particles for the each iteration
 account, username = "zjiang33", "avira7"
-temperature = 293 # temperature for dissipation model, units: kelvin
 density = 1.9 # value from Wang manuscript, units: g/cm3
-iterationNUM = 100 # number of iterations to perform
+temperature = 293 # temperature for dissipation model, units: kelvin (wang experiments done at room temp)
+iterationNUM = 200 # number of iterations to perform
 seedIN = [10008859, 10005380] # set a random seed (useful for debugging)
 
 # values from Wang 2016 manuscript
 electron_energy = 120 # units: eV
-photon_wavelength_center = 1239.8/172 # units: eV
-photon_wavelength_width = abs((1239.8/(172+14/2) - 1239.8/(172-14/2))/2.3548) # units: eV, convert FWHM to sigma
-UVflux, eflux = np.array([1.38e20, 9.84e19]) #units: particles/m2/s
+photonSource_wavelength = 172 # units: nm
+photonSource_FWHM = 14 # units: nm
+photonSource_center = 1239.8/photonSource_wavelength # units: eV
+photonSource_sigma = abs((1239.8/(photonSource_wavelength+photonSource_FWHM/2) - 1239.8/(photonSource_wavelength-photonSource_FWHM/2))/2.3548) # units: eV, convert FWHM to sigma
+UVflux, eflux = np.array([5.05e-6, 1.5e-6])*6.241509e18 #units: A/m2 -> e/m2/s
 
 # list of configurations and parameters for each configuration
 configList = ["onlyUV", "onlyelectrons"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
-minStepList = [0.1, 0.1] # minimum step for Octree mesh for each case (units of um)
-eventnumbersList = [1000000, 500000]
+minStepList = [0.05, 0.1] # minimum step for Octree mesh for each case (units of um)
+eventnumbersList = [500000, 500000]
+initialOctreeDepth = 6
+gradPercent = 0.3
+finalOctreeDepth = 10
+chargeDissipation = "true"
 
 # define the size of the world
 CAD_dimensions = (107.00044, 120.77438, 100.29045) # in units of microns
@@ -53,7 +59,7 @@ batch_template = """#!/bin/bash
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=24
-#SBATCH --mem-per-cpu=5gb
+#SBATCH --mem-per-cpu=4gb
 #SBATCH --time=05:00:00
 #SBATCH --output=outputlogs/%A_iteration{iter}_{config}
 
@@ -92,12 +98,10 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
     #f.write('/cuts/setLowEdge 5 eV\n')
     #f.write('/run/setCut 5 nm')
     f.write('#\n')
-
     # The variable exists, now check its value or just execute the code
     if 'seedIN' in locals() or 'seedIN' in globals():
         f.write(f'/random/setSeeds {seedIN[0]} {seedIN[1]}\n')
         f.write('/random/setSavingFlag 1\n')
-
     f.write('#\n')
     f.write('/process/em/fluo true\n')
     f.write('/process/em/auger true\n')
@@ -120,9 +124,11 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
     f.write(f'/sphere/MaterialTemperature {temperature} K\n')
     f.write(f'/sphere/MaterialDensity {density} g/cm3\n')
     f.write(f'/sphere/IterationTime {iterationTime} s\n')
+    f.write(f'/sphere/ApplyChargeDissipation {chargeDissipation}\n')
+    f.write(f'/sphere/field/InitialDepth {initialOctreeDepth}\n')
     f.write(f'/sphere/field/MinimumStep {minStep} um\n') # step size for field map solver
-    f.write(f'/sphere/field/GradThreshold 1e3 V/m\n') # step size for field map solver
-    f.write(f'/sphere/field/OctreeDepth 8\n') # step size for field map solver
+    f.write(f'/sphere/field/PercentGradThreshold {gradPercent}\n') # step size for field map solver
+    f.write(f'/sphere/field/OctreeDepth {finalOctreeDepth}\n') # step size for field map solver
     f.write(f'/sphere/field/file fieldmaps/{increment_filename.split("_")[0]}-{increment_filename.split("_")[2]}-fieldmap.txt \n')
     f.write(f'/sphere/charges/file charges-{increment_filename.split("_")[2]}.txt\n')
     f.write('#\n')
@@ -153,8 +159,8 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
     elif "onlyUV" in increment_filename:
         f.write('/gps/particle gamma\n')
         f.write("/gps/ene/type Gauss\n")
-        f.write(f'/gps/ene/mono {photon_wavelength_center} eV\n')
-        f.write(f'/gps/ene/sigma {photon_wavelength_width} eV\n')
+        f.write(f'/gps/ene/mono {photonSource_center} eV\n')
+        f.write(f'/gps/ene/sigma {photonSource_sigma} eV\n')
         f.write("/gps/pos/type Plane\n")
         f.write("/gps/pos/shape Square\n")
         f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')

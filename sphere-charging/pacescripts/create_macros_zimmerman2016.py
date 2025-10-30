@@ -21,6 +21,7 @@ eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep
 iterationNUM = 200 # number of iterations to perform
 temperature = 425 # temperature for dissipation model, units: kelvin
 density = 2.20 # density of SiO2, units: g/cm3
+seedIN = [10008859, 10005380]
 
 # list of configurations
 config_list = ["onlysolarwind", "onlyphotoemission"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
@@ -55,7 +56,7 @@ batch_template = """#!/bin/bash
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=24
-#SBATCH --mem-per-cpu=6gb
+#SBATCH --mem-per-cpu=4gb
 #SBATCH --time=05:00:00
 #SBATCH --output=outputlogs/%A_iteration{iter}_{config}
 
@@ -63,8 +64,6 @@ echo "Starting iteration{iter} for {config} configuration"
 {run_line}
 date
 """
-
-seedIN = [10008859, 10005380]
 
 #############################################################
 ###################### MACRO CODE ###########################
@@ -96,8 +95,10 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
     #f.write('/cuts/setLowEdge 5 eV\n')
     #f.write('/run/setCut 5 nm')
     f.write('#\n')
-    f.write(f'/random/setSeeds {seedIN[0]} {seedIN[1]}\n')
-    f.write('/random/setSavingFlag 1\n')
+    # The variable exists, now check its value or just execute the code
+    if 'seedIN' in locals() or 'seedIN' in globals():
+        f.write(f'/random/setSeeds {seedIN[0]} {seedIN[1]}\n')
+        f.write('/random/setSavingFlag 1\n')
     f.write('#\n')
     f.write('/process/em/fluo true\n')
     f.write('/process/em/auger true\n')
