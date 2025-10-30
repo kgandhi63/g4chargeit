@@ -323,7 +323,7 @@ def read_data_format_efficient(filenames, scaling=True):
         iteration = int(fileIN.split("/")[-1].split("-")[0])
 
         # Minimal fieldmap reader - replace with your efficient implementation
-        data, _ = read_adaptive_fieldmap(fileIN)  # assume this returns a pandas dataframe
+        data, metadata = read_adaptive_fieldmap(fileIN)  # assume this returns a pandas dataframe
 
         # Slice columns directly from NumPy array
         pos = data[:, :3].astype(np.float32, copy=False)    # x, y, z
@@ -343,60 +343,69 @@ def read_data_format_efficient(filenames, scaling=True):
         fields_all[iteration] = {
             "pos": pos,
             "E": np.stack((Ex, Ey, Ez), axis=1),  # shape (N, 3)
-            "E_mag": E_mag
+            "E_mag": E_mag, 
+            "gradRefinements": int(metadata['mesh_parameters']['total_nodes'] - metadata['mesh_parameters']['final_leaf_nodes'])
         }
 
     return fields_all
 
-def compute_nearest_field_vector(fields_SW, target=None, start=1, end=None):
+def compute_nearest_field_vector(fields_dict: Dict[int, Dict[str, np.ndarray]], target: np.ndarray = None, start: int = 1) -> Dict[str, np.ndarray]:
     """
     For each field iteration, find the electric field vector (Ex, Ey, Ez)
-    at the grid point closest to the specified target location.
+    and magnitude at the grid point closest to the specified target location.
+    
+    This optimized version uses pre-allocated NumPy arrays to avoid the overhead 
+    of list appending and final array conversion.
 
     Parameters:
-        fields_SW (dict): Dictionary mapping iteration number to field data. 
-                          Each field must have keys 'pos' (Nx3) and 'E' (Nx3).
+        fields_dict (dict): Dictionary mapping iteration number to field data. 
+                            Each field must have keys 'pos' (Nx3), 'E' (Nx3), and 'E_mag' (N,).
         target (array-like): 3D point to compare distances to. If None, defaults to [-0.1, 0, 0.122].
         start (int): First iteration number to consider.
-        end (int or None): Last iteration number to consider. If None, uses max key in fields_SW.
-        compute_magnitude (bool): Whether to return E-field magnitudes.
 
     Returns:
-        pd.DataFrame: Columns = ["iter", "Ex", "Ey", "Ez"] (+ optional "|E|")
+        Dict[str, np.ndarray]: Dictionary with keys 'iter', 'E', and 'E_mag', containing 
+                               pre-allocated NumPy arrays.
     """
 
     if target is None:
-        target = np.array([-0.1, 0, 0.122])  # Default based on original code
+        # Default based on the original problem's common target
+        target = np.array([-0.1, 0, 0.122])  
     else:
         target = np.asarray(target)
 
-    if end is None:
-        end = max(fields_SW)
+    # Filter keys and ensure they are sorted
+    iterations = sorted([k for k in fields_dict.keys() if k >= start]) 
+    N = len(iterations) # Determine the required size for pre-allocation
 
-    # Pre-allocate results
-    result_array = np.empty((len(fields_SW.keys()), 5), dtype=np.float64)
+    # --- Pre-allocate arrays for optimized assignment ---
+    iter_array = np.empty(N, dtype=int)
+    E_array = np.empty((N, 3), dtype=np.float64) # N rows, 3 columns (Ex, Ey, Ez)
+    E_mag_array = np.empty(N, dtype=np.float64)
 
-    for i, iteration in enumerate(fields_SW.keys()):
-        field = fields_SW[iteration]
+    for i, iteration in enumerate(iterations):
+        field = fields_dict[iteration]
         positions = field["pos"]
         efield = field["E"]
         emag = field["E_mag"]
 
-        # Vectorized distance computation
+        # Vectorized distance computation (distance between positions and target)
         distances = np.linalg.norm(positions - target, axis=1)
 
         # Index of closest point
         idx = np.argmin(distances)
 
-        # Extract E-field components
-        result_array[i, 0] = iteration
-        result_array[i, 1:-1] = efield[idx] # 3 components
-        result_array[i, 4] = emag[idx]
+        # Store results directly into the pre-allocated array indices
+        iter_array[i] = iteration
+        E_array[i] = efield[idx]
+        E_mag_array[i] = emag[idx]
 
-    # Create DataFrame
-    df = pd.DataFrame(result_array, columns=["iter", "Ex", "Ey", "Ez", "E_mag"])
-
-    return df
+    # Return the pre-allocated arrays
+    return {
+        "iter": iter_array, 
+        "E": E_array, 
+        "E_mag": E_mag_array
+    }
 
 
 def plot_electron_positions(df,world_dimensions = (-0.05, 0.05), n_bins=100, iteration="iteration0", stacked_spheres=None):

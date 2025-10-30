@@ -25,8 +25,8 @@ density = 2.20 # density of SiO2, units: g/cm3
 # list of configurations
 config_list = ["onlysolarwind", "onlyphotoemission"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
 minStepList = [0.1, 0.05] # minimum step for Octree mesh for each case (units of um)
-initialOctreeDepth = 5
-gradPercent = 0.8
+initialOctreeDepth = 6
+gradPercent = 0.7
 finalOctreeDepth = 9
 
 # define the size of the world

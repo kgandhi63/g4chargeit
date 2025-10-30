@@ -148,18 +148,23 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     all_leaves_.clear(); // Start with empty list
     root_ = buildFromScratch(); // Populates all_leaves_ with initial leaves
 
-    // --- Apply charge dissipation based on INITIAL mesh structure ---
-    G4cout << "Applying one-time charge dissipation ('tax')..." << G4endl;
-    ApplyChargeDissipation(time_step_dt, material_temp_K); // CALLS THE *NEW* DISSIPATION CODE
-    // The master charge list (fCharges) has now been MODIFIED.
+    bool dissipateCharge = false;
+    if (dissipateCharge) { 
 
-    // --- Continue with the rest of your original constructor sequence ---
-    G4cout << "Rebuilding charge octree with dissipated charge..." << G4endl;
-    buildChargeOctree(); // Rebuild BH tree with NEW fCharges
+        // --- Apply charge dissipation based on INITIAL mesh structure ---
+        G4cout << "Applying one-time charge dissipation ('tax')..." << G4endl;
+        ApplyChargeDissipation(time_step_dt, material_temp_K); // CALLS THE *NEW* DISSIPATION CODE
+        // The master charge list (fCharges) has now been MODIFIED.
 
-    G4cout << "Rebuilding field octree structure with dissipated charge..." << G4endl; // Log clarification
-    all_leaves_.clear(); // Clear again before rebuilding map structure
-    root_ = buildFromScratch(); // Rebuild map structure
+        // --- Continue with the rest of your original constructor sequence ---
+        G4cout << "Rebuilding charge octree with dissipated charge..." << G4endl;
+        buildChargeOctree(); // Rebuild BH tree with NEW fCharges
+
+        G4cout << "Rebuilding field octree structure with dissipated charge..." << G4endl; // Log clarification
+        all_leaves_.clear(); // Clear again before rebuilding map structure
+        root_ = buildFromScratch(); // Rebuild map structure
+
+    } 
 
     // --- NEW SECTION: Calculate and Print Field Statistics for Initial Leaves ---
     std::vector<double> field_magnitudes;
