@@ -92,9 +92,9 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction():G4VUserDetectorConstruction()
-, PBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMinimumStep_(0),sphereSolid_(0), equivalentIterationTime_(0.02),density_(2.1),
+, boolPBC_(false), worldX_(0), worldY_(0), worldZ_(0), Epsilon_(0), fieldMinimumStep_(0),sphereSolid_(0), equivalentIterationTime_(0.02),density_(2.1),
 fieldGradThreshold_(0), CADFile_(""), RootInput_(""), Scale_(1), filename_(""), octreeDepth_(8), materialTemperature_(450), charges_filename_(""), 
-initial_depth_(6)
+initial_depth_(6), boolDissipationModel_(true)
 
 {
   // create commands for interactive definition of the detector 
@@ -187,7 +187,7 @@ G4VPhysicalVolume* physWorld =
                     0,                     //copy number
                     checkOverlaps);        //overlaps checking
 
-if (PBC_)
+if (boolPBC_)
 {
   G4PeriodicBoundaryBuilder* pbb = new G4PeriodicBoundaryBuilder();
   logicWorld_ = pbb->Construct(logicWorld_);
@@ -412,10 +412,9 @@ void DetectorConstruction::ConstructSDandField() {
         min, max,
         octreeDepth_,
         initial_depth_,
+        boolDissipationModel_,
         AdaptiveSumRadialFieldMap::StorageType::Double
     );
-
-
 
     // End timer
     auto end = std::chrono::high_resolution_clock::now();
@@ -457,7 +456,7 @@ void DetectorConstruction::ConstructSDandField() {
 
 void DetectorConstruction::SetPBC(G4bool value)
 {
-  PBC_ = value;
+  boolPBC_ = value;
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }
 
@@ -556,5 +555,11 @@ void DetectorConstruction::SetEquivalentIterationTime(G4double value)
 void DetectorConstruction::SetInitialDepth(G4double value)
 {
   initial_depth_ = value;
+  G4RunManager::GetRunManager()->ReinitializeGeometry();
+}
+
+void DetectorConstruction::SetChargeDissipationModel(G4bool value)
+{
+  boolDissipationModel_ = value;
   G4RunManager::GetRunManager()->ReinitializeGeometry();
 }

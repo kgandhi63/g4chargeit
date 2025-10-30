@@ -125,10 +125,11 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     const G4ThreeVector& min_bounds, // Renamed from 'min'
     const G4ThreeVector& max_bounds, // Renamed from 'max'
     int max_depth_param,        // Renamed from 'max_depth'
-    int initial_depth,        
+    int initial_depth,
+    bool dissipateCharge,       
     StorageType storage)
     : max_depth_(max_depth_param), minStepSize_(minStep),
-      worldMin_(min_bounds), worldMax_(max_bounds), fieldGradThreshold_(gradThreshold), fStorage(storage),
+      worldMin_(min_bounds), worldMax_(max_bounds), fieldGradThreshold_(gradThreshold), fStorage(storage),dissipateCharge_(dissipateCharge),
       fPositions(positions), fCharges(charges), fStateFilename(state_filename), initialDepth_(initial_depth) // Use references directly
 {
 
@@ -148,8 +149,7 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     all_leaves_.clear(); // Start with empty list
     root_ = buildFromScratch(); // Populates all_leaves_ with initial leaves
 
-    bool dissipateCharge = false;
-    if (dissipateCharge) { 
+    if (dissipateCharge_) { 
 
         // --- Apply charge dissipation based on INITIAL mesh structure ---
         G4cout << "Applying one-time charge dissipation ('tax')..." << G4endl;

@@ -76,10 +76,11 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     void SetMaterialTemperature (G4double);
     void SetEquivalentIterationTime (G4double);
     void SetMaterialDensity(G4double);
+    void SetChargeDissipationModel(G4bool);
                        
   private:
     G4VPhysicalVolume* ConstructVolumes();  
-    G4bool PBC_;
+    G4bool boolPBC_;
     G4double worldX_;
     G4double worldY_;
     G4double worldZ_;
@@ -101,6 +102,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4double initial_depth_;
     G4double equivalentIterationTime_;
     G4double density_;
+    G4bool boolDissipationModel_;
 
     // CAD geometry
     G4VSolid* sphereSolid_;  // ← Make sure this exists

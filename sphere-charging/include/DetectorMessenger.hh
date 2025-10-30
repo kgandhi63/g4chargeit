@@ -64,6 +64,7 @@ class DetectorMessenger: public G4UImessenger
     G4UIdirectory*              projectDir_;
     G4UIcmdWithAString*         fileNameCmd_;
     G4UIcmdWithABool*           PBCCmd_;
+    G4UIcmdWithABool*           ChargeDissipationModelCmd_;
     G4UIcmdWithADouble*         EpsilonCmd_;
     G4UIcmdWithAString*         RootInputCmd_;
     G4UIcmdWithAString*         CADFileCmd_;
@@ -80,8 +81,6 @@ class DetectorMessenger: public G4UImessenger
     G4UIcmdWithADoubleAndUnit*  MaterialTemperatureCmd_;
     G4UIcmdWithADoubleAndUnit*  EquivalentIterationTimeCmd_;
     G4UIcmdWithADoubleAndUnit*  MaterialDensityCmd_;
-
-
 
 };
 

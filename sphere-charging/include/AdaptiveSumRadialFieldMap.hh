@@ -38,6 +38,7 @@ public:
         const G4ThreeVector& max_bounds_default = G4ThreeVector( 1*m,  1*m,  1*m),
         int max_depth_default = 10,
         int initial_depth_default = 5,
+        bool dissipateCharge_default = true,
         StorageType storage = StorageType::Double
     );
 
@@ -80,6 +81,7 @@ private:
     StorageType fStorage;
     G4double barnes_hut_theta_;
     int initialDepth_;
+    bool dissipateCharge_;
 
     // References to the master particle data
     std::vector<G4ThreeVector>& fPositions;

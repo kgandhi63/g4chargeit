@@ -116,6 +116,11 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
   EquivalentIterationTimeCmd_->SetParameterName("choice",false);
   EquivalentIterationTimeCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
+  ChargeDissipationModelCmd_ = new G4UIcmdWithABool("/sphere/ApplyChargeDissipation",this);
+  ChargeDissipationModelCmd_->SetGuidance("Turn on or off the charge dissipation model.");
+  ChargeDissipationModelCmd_->SetParameterName("choice",false);
+  ChargeDissipationModelCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
+
   FieldMinimumStepCmd_ = new G4UIcmdWithADoubleAndUnit("/sphere/field/MinimumStep", this);
   FieldMinimumStepCmd_->SetGuidance("Set minimum step size for adapative field map.");
   FieldMinimumStepCmd_->SetParameterName("choice",false);
@@ -170,6 +175,7 @@ DetectorMessenger::~DetectorMessenger()
   delete ChargesFileCmd_;
   delete InitialDepthCmd_;
   delete MaterialDensityCmd_;
+  delete ChargeDissipationModelCmd_;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -183,6 +189,9 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 
   if( command == PBCCmd_ )
   { detector_->SetPBC(PBCCmd_->GetNewBoolValue(newValue));}
+
+  if( command == ChargeDissipationModelCmd_ )
+  { detector_->SetChargeDissipationModel(ChargeDissipationModelCmd_->GetNewBoolValue(newValue));}
 
   if( command == RootInputCmd_ )
   { detector_->SetRootInput(newValue);}
