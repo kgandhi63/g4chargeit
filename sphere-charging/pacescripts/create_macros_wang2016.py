@@ -20,20 +20,20 @@ temperature = 293 # temperature for dissipation model, units: kelvin (wang exper
 iterationNUM = 200 # number of iterations to perform
 seedIN = [10008859, 10005380] # set a random seed (useful for debugging)
 
-# values from Wang 2016 manuscript
+# values from Wang 2016 manuscript (only called in the "onlyelectrons" and "onlyUV" cases)
 electron_energy = 120 # units: eV
 photonSource_wavelength = 172 # units: nm
 photonSource_FWHM = 14 # units: nm
 photonSource_center = 1239.8/photonSource_wavelength # units: eV
 photonSource_sigma = abs((1239.8/(photonSource_wavelength+photonSource_FWHM/2) - 1239.8/(photonSource_wavelength-photonSource_FWHM/2))/2.3548) # units: eV, convert FWHM to sigma
-UVflux, eflux = np.array([5.05e-6, 1.5e-6])*6.241509e18 #units: A/m2 -> e/m2/s
 
 # list of configurations and parameters for each configuration
-configList = ["onlyUV", "onlyelectrons"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
-minStepList = [0.05, 0.1] # minimum step for Octree mesh for each case (units of um)
+configList = ["onlyphotoemission", "onlyelectrons"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
+UVflux, eflux = np.array([5.05e-6, 2*3e-7])*6.241509e18 #units: A/m2 -> e/m2/s
+minStepList = [0.005, 0.1] # minimum step for Octree mesh for each case (units of um)
 eventnumbersList = [500000, 500000]
-initialOctreeDepth = 6
-gradPercent = 0.3
+initialOctreeDepth = 4
+gradPercent = 0.2
 finalOctreeDepth = 10
 chargeDissipation = "true"
 
@@ -153,7 +153,7 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
         f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')
         f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2} um\n')
         f.write(f"/gps/pos/centre 0 0 {Z_position} um\n")
-        f.write("/gps/ang/type cos\n")
+        f.write("/gps/ang/type iso\n")
         f.write('#\n') 
     # include only the photons   
     elif "onlyUV" in increment_filename:
@@ -167,6 +167,50 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
         f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2} um\n')
         f.write(f"/gps/pos/centre 0 0 {Z_position} um\n")
         f.write(f'/gps/direction 0 0 -1 \n') # incident 0 deg, but uniform (?)
+    elif "onlysolarwind" in increment_filename:
+        f.write('/gps/particle proton\n')
+        f.write('/gps/ene/type Mono\n')
+        f.write('/gps/energy 1 keV\n') 
+        f.write('/gps/pos/type Plane\n')
+        f.write('/gps/pos/shape Square\n')
+        f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')
+        f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2} um\n')
+        f.write(f'/gps/pos/centre {XY_offset} 0 {Z_position} um\n')
+        f.write(f'/gps/direction -{rotation} 0 -{rotation} \n')
+        f.write('#\n')
+        f.write('/gps/source/add 1\n')
+        f.write("/gps/particle e-\n")
+        f.write("/gps/source/intensity 2\n")
+        f.write("/gps/ene/type Arb\n")
+        f.write("/gps/hist/type arb\n")
+        f.write("/gps/ene/diffspec true\n")
+        f.write("/gps/hist/file electron_distribution.txt\n")
+        f.write("/gps/hist/inter Lin\n")
+        f.write("/gps/pos/type Plane\n")
+        f.write("/gps/pos/shape Square\n")
+        f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')
+        f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2} um\n')
+        f.write(f"/gps/pos/centre 0 0 {Z_position} um\n")
+        f.write("/gps/ang/type iso\n")
+        f.write('#\n') 
+    # include only the photons   
+    elif "onlyphotoemission" in increment_filename:
+        f.write('/gps/particle gamma\n')
+        f.write('/gps/pos/type Plane\n')
+        f.write('/gps/pos/shape Square\n')
+        f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')
+        f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2} um\n')
+        f.write(f'/gps/pos/centre {XY_offset} 0 {Z_position} um\n')
+        f.write(f'/gps/direction -{rotation} 0 -{rotation} \n')
+        f.write("/gps/ene/type Arb\n")
+        f.write("/gps/hist/type arb\n")
+        f.write("/gps/ene/diffspec true\n")
+        f.write("/gps/hist/file photon_distribution.txt\n")
+        f.write("/gps/hist/inter Lin\n")
+        # f.write('/gps/ene/type Mono\n')
+        # f.write('/gps/energy 10 eV\n')
+        #f.write('/gps/direction 0 0 -1\n')
+    # all particles (photons and SW ions and electrons)
     # all particles (both UV and direct electrons)
     # elif "allparticles" in increment_filename:
     #     f.write('/gps/particle proton\n')
@@ -241,21 +285,7 @@ def get_particle_counts_by_type(root_file, directory_path=None):
         counts = {}
         unique_particles = df["Particle_Type"].unique()
         for particleIN in unique_particles:
-
-            if particleIN == "gamma":
-                # get dataframe of the last e- event within the sensitive detector
-                last_e_event = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] > 0.0)].drop_duplicates(subset="Event_Number", keep="last")
-                # get new dataframe of all e- that left the world
-                world_e_energy=last_e_event[(last_e_event["Volume_Name_Post"]=="physical_cyclic") | (last_e_event["Volume_Name_Pre"]=="physical_cyclic")]
-                # get all the initial gamma energy that leads to an e- escaping
-                matching_event_numbers = np.intersect1d(df["Event_Number"], world_e_energy["Event_Number"])
-
-                #  get all the initial gamma energy that leds to the creation of e-
-                matching_event_numbers = np.intersect1d(df["Event_Number"], last_e_event["Event_Number"])
-                gamma_initial_leading_e_creation = df[df["Event_Number"].isin(matching_event_numbers)].drop_duplicates(subset="Event_Number", keep="first")
-                counts[particleIN] = gamma_initial_leading_e_creation.shape[0]
-            else:
-                counts[particleIN] = df[(df["Particle_Type"] == particleIN)& (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="first").shape[0]
+            counts[particleIN] = df[(df["Particle_Type"] == particleIN)& (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="first").shape[0]
         
         return counts
 
