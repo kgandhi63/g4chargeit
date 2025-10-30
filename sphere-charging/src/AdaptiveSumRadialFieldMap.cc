@@ -111,6 +111,15 @@ namespace {
     }
 } // end namespace
 
+namespace {
+    // This is the helper struct needed for the "binning" in ApplyChargeDissipation
+    struct NodeChargeInfo {
+        std::vector<int> pos_indices;
+        std::vector<int> neg_indices;
+    };
+}
+
+
 
 // --- CONSTRUCTOR (Unaltered Sequence from your input) ---
 AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
@@ -148,23 +157,6 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     G4cout << "Building initial field octree..." << G4endl;
     all_leaves_.clear(); // Start with empty list
     root_ = buildFromScratch(); // Populates all_leaves_ with initial leaves
-
-    if (dissipateCharge_) { 
-
-        // --- Apply charge dissipation based on INITIAL mesh structure ---
-        G4cout << "Applying one-time charge dissipation ('tax')..." << G4endl;
-        ApplyChargeDissipation(time_step_dt, material_temp_K); // CALLS THE *NEW* DISSIPATION CODE
-        // The master charge list (fCharges) has now been MODIFIED.
-
-        // --- Continue with the rest of your original constructor sequence ---
-        G4cout << "Rebuilding charge octree with dissipated charge..." << G4endl;
-        buildChargeOctree(); // Rebuild BH tree with NEW fCharges
-
-        G4cout << "Rebuilding field octree structure with dissipated charge..." << G4endl; // Log clarification
-        all_leaves_.clear(); // Clear again before rebuilding map structure
-        root_ = buildFromScratch(); // Rebuild map structure
-
-    } 
 
     // --- NEW SECTION: Calculate and Print Field Statistics for Initial Leaves ---
     std::vector<double> field_magnitudes;
@@ -212,6 +204,14 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
         #pragma omp single
         refineMeshByGradient(root_.get(), 0); // Refines based on fields from dissipated charges
     }
+
+    if (dissipateCharge_) { 
+
+        // --- Apply charge dissipation based on INITIAL mesh structure ---
+        G4cout << "Applying one-time charge dissipation ('tax')..." << G4endl;
+        ApplyChargeDissipation(time_step_dt, material_temp_K); // CALLS THE *NEW* DISSIPATION CODE
+        // The master charge list (fCharges) has now been MODIFIED.
+    } 
 
     // --- Collect FINAL leaves AFTER refinement (needed for export) ---
     all_leaves_.clear();
@@ -319,62 +319,159 @@ void AdaptiveSumRadialFieldMap::SaveFinalParticleState(const std::string& filena
 }
 
 
-void AdaptiveSumRadialFieldMap::ApplyChargeDissipation(G4double dt_internal, G4double temp_K) { // Rename dt for clarity
- 
-    // Calculate conductivity (result should be in SI: S/m)
-    double conductivity_SI = calculateConductivity(temp_K);
- 
-    // Explicit SI value for epsilon0 (F/m)
-    const double epsilon0_SI_Value = 8.8541878128e-12; // Numerical value in F/m
- 
-    // Calculate the rate constant (ensure it's a dimensionless number representing 1/s)
-    double rate_constant_Value = conductivity_SI / epsilon0_SI_Value; // (S/m) / (F/m) = (A/V/m) / (C/V/m) = (C/s/V/m) * (V*m/C) = 1/s
- 
-    G4double total_dissipated_charge = 0.0;
- 
-    #pragma omp parallel for schedule(dynamic) reduction(+:total_dissipated_charge)
-    for (const auto& leaf : all_leaves_) {
-        if (!leaf) continue;
- 
-        double Q_node_net_Internal = 0.0; // Units: e+ (internal charge unit)
-        std::vector<int> positive_particle_indices;
-        std::vector<int> negative_particle_indices;
- 
+void AdaptiveSumRadialFieldMap::ApplyChargeDissipation(G4double dt_internal, G4double temp_K) {
+
+    G4cout << "    Building particle-to-leaf map (parallel map-reduce)..." << G4endl;
+
+    // --- STEP 1: Parallel "Map" Phase ---
+    // We loop over all N particles in parallel. Each particle finds its own
+    // leaf bin (O(log L)) and adds itself to a *thread-private* map.
+    // This is the O(N log L) part, now fully parallelized.
+
+    // This vector will hold one "private" map for each thread.
+    int num_threads = 1;
+    #pragma omp parallel
+    {
+        #pragma omp single
+        num_threads = omp_get_num_threads();
+    }
+    std::vector<std::map<Node*, NodeChargeInfo>> private_maps(num_threads);
+
+    #pragma omp parallel
+    {
+        // Get this thread's ID (from 0 to num_threads-1)
+        int thread_id = omp_get_thread_num();
+        
+        // Get the pre-allocated map for this specific thread
+        auto& thread_local_map = private_maps[thread_id]; 
+
+        // Split the main particle loop (N) across all threads
+        #pragma omp for schedule(dynamic, 1000)
         for (size_t i = 0; i < fPositions.size(); ++i) {
-            if (pointInside(leaf->min, leaf->max, fPositions[i])) {
-                Q_node_net_Internal += fCharges[i]; // Accumulate charge in internal units (e+)
-                if (fCharges[i] > 1e-21 * CLHEP::eplus) { positive_particle_indices.push_back(static_cast<int>(i)); }
-                else if (fCharges[i] < -1e-21 * CLHEP::eplus) { negative_particle_indices.push_back(static_cast<int>(i)); }
+            
+            // Skip particles with effectively zero charge
+            if (std::abs(fCharges[i]) < 1e-21 * CLHEP::eplus) continue;
+
+            // Use the octree to find the particle's leaf node (the fast log L part)
+            Node* leaf = findLeafNode(fPositions[i], root_.get()); 
+            
+            if (!leaf) continue; // Particle is outside the map, skip it.
+
+            // Add the particle's index to this thread's private map
+            if (fCharges[i] > 0) {
+                thread_local_map[leaf].pos_indices.push_back(static_cast<int>(i));
+            } else {
+                thread_local_map[leaf].neg_indices.push_back(static_cast<int>(i));
             }
         }
- 
+    } // --- End of parallel "Map" region ---
+
+
+    // --- STEP 2: Serial "Reduce" Phase ---
+    // We are now back on the main thread.
+    // Merge all the small private maps into one single global map.
+    // This is serial, but it's very fast.
+    
+    G4cout << "    Merging " << private_maps.size() << " thread-local maps..." << G4endl;
+    std::map<Node*, NodeChargeInfo> global_leaf_map; 
+
+    for (const auto& local_map : private_maps) { // Loop over each thread's map
+        for (const auto& pair : local_map) {     // Loop over each leaf in that map
+            Node* leaf = pair.first;
+            const NodeChargeInfo& info = pair.second;
+
+            // Append the lists of indices from the private map to the global map
+            global_leaf_map[leaf].pos_indices.insert(
+                global_leaf_map[leaf].pos_indices.end(),
+                info.pos_indices.begin(), info.pos_indices.end()
+            );
+            global_leaf_map[leaf].neg_indices.insert(
+                global_leaf_map[leaf].neg_indices.end(),
+                info.neg_indices.begin(), info.neg_indices.end()
+            );
+        }
+    }
+    
+    private_maps.clear(); // Free the memory from the temporary maps
+
+    // 'global_leaf_map' now contains ONLY the leaves that
+    // actually have particles in them, and their complete particle lists.
+
+    // --- STEP 3: Parallel "Apply" Phase ---
+    // Now we loop over the much smaller 'global_leaf_map' (K leaves)
+    // and apply the physics, using the logic from your function.
+    
+    G4cout << "    Applying dissipation to " << global_leaf_map.size() << " active leaves..." << G4endl;
+
+    // --- Setup for dissipation (from your code) ---
+    double conductivity_SI = calculateConductivity(temp_K);
+    const double epsilon0_SI_Value = CLHEP::epsilon0 / (farad/meter); // Get SI value
+    double rate_constant_Value = 0.0;
+    if (epsilon0_SI_Value > 1e-18) { // Avoid division by zero
+        rate_constant_Value = conductivity_SI / epsilon0_SI_Value;
+    } else {
+        G4cerr << "Warning: Epsilon0 value is too small, dissipation rate set to 0." << G4endl;
+    }
+
+    G4double total_dissipated_charge = 0.0;
+
+    // Convert map to a vector to iterate in parallel safely
+    std::vector<std::pair<Node*, NodeChargeInfo>> leaf_vector(global_leaf_map.begin(), global_leaf_map.end());
+
+    #pragma omp parallel for schedule(dynamic) reduction(+:total_dissipated_charge)
+    for (size_t i = 0; i < leaf_vector.size(); ++i) {
+        
+        const auto& pair = leaf_vector[i];
+        // const Node* leaf_node = pair.first; // We don't need the leaf geometry anymore
+        
+        // Get the particle lists for this leaf (these are already built!)
+        const std::vector<int>& positive_particle_indices = pair.second.pos_indices;
+        const std::vector<int>& negative_particle_indices = pair.second.neg_indices;
+
+        // --- This replaces your O(N) inner loop ---
+        // We just loop over the small lists we already built
+        double Q_node_net_Internal = 0.0;
+        for (int idx : positive_particle_indices) {
+             if (idx >= 0 && static_cast<size_t>(idx) < fCharges.size()) Q_node_net_Internal += fCharges[idx];
+        }
+        for (int idx : negative_particle_indices) {
+             if (idx >= 0 && static_cast<size_t>(idx) < fCharges.size()) Q_node_net_Internal += fCharges[idx];
+        }
+        // --- End of replacement logic ---
+
         if (std::abs(Q_node_net_Internal) < 1e-21 * CLHEP::eplus) continue;
- 
-        // --- Strip units explicitly before calculation ---
+
+        // --- Strip units explicitly before calculation (from your code) ---
         double Q_node_net_Value = Q_node_net_Internal / CLHEP::eplus; // Dimensionless number of elementary charges
-        double dt_Value = dt_internal; // Dimensionless number of seconds
- 
+        
+        // --- FIX: Ensure dt_internal is converted to seconds value ---
+        // Your previous code had `double dt_Value = dt_internal;`
+        // This assumes dt_internal was already a simple 'double'.
+        // This version from your *original* (correct) code is safer:
+        double dt_Value = dt_internal / CLHEP::second; // Make sure dt_internal has time unit!
+        
         double delta_Q_node_Value = -rate_constant_Value * Q_node_net_Value * dt_Value;
- 
+
         // --- Re-apply the unit at the end ---
         double delta_Q_node = delta_Q_node_Value * CLHEP::eplus; // Result now has units of e+
-        //---------------------------------------------------------
- 
+        
         double charge_change_magnitude = std::abs(delta_Q_node); // Still in e+ units
- 
-        if (charge_change_magnitude > 0) {
+
+        if (charge_change_magnitude > 1e-25 * CLHEP::coulomb) { // Use a small threshold
             total_dissipated_charge += charge_change_magnitude; // Accumulate magnitude in e+
- 
+
+            // distributeChargeChange is already thread-safe (uses #omp atomic)
             if (delta_Q_node < 0 && !positive_particle_indices.empty()) {
                 distributeChargeChange(positive_particle_indices, -charge_change_magnitude);
             } else if (delta_Q_node > 0 && !negative_particle_indices.empty()) {
                 distributeChargeChange(negative_particle_indices, charge_change_magnitude);
             }
         }
-    } // End of parallel loop
- 
-    G4cout << "   --> Charge dissipation applied (neutralizing)." << G4endl;
-    G4cout << "   >>> Total charge dissipated/neutralized this step: " << total_dissipated_charge / CLHEP::eplus << " e <<<" << G4endl;
+    } // End of parallel "Apply" loop
+
+    G4cout << "    --> Charge dissipation applied (neutralizing)." << G4endl;
+    G4cout << "    >>> Total charge dissipated/neutralized this step: "
+           << total_dissipated_charge / CLHEP::eplus << " e <<<" << G4endl;
 }
 
 // --- calculateConductivity remains the same as your input ---
