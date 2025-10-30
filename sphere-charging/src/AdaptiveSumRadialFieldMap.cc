@@ -457,7 +457,9 @@ void AdaptiveSumRadialFieldMap::ApplyChargeDissipation(G4double dt_internal, G4d
         
         double charge_change_magnitude = std::abs(delta_Q_node); // Still in e+ units
 
-        if (charge_change_magnitude > 1e-25 * CLHEP::coulomb) { // Use a small threshold
+        //G4cerr << "charge change mag " << charge_change_magnitude << G4endl;
+
+        if (charge_change_magnitude > 1e-14 * CLHEP::eplus) { // Use a small threshold
             total_dissipated_charge += charge_change_magnitude; // Accumulate magnitude in e+
 
             // distributeChargeChange is already thread-safe (uses #omp atomic)

@@ -27,8 +27,8 @@ seedIN = [10008859, 10005380]
 config_list = ["onlysolarwind", "onlyphotoemission"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
 minStepList = [0.1, 0.05] # minimum step for Octree mesh for each case (units of um)
 initialOctreeDepth = 6
-gradPercent = 0.7
-finalOctreeDepth = 9
+gradPercent = 0.5
+finalOctreeDepth = 11
 chargeDissipation = "true"
 
 # define the size of the world
@@ -342,7 +342,7 @@ for optionIN,minStepIN in zip(config_list, minStepList):
             increment_filename = f"{i:03d}_iteration{i}_{optionIN}_num{select_num}"
             macro_path = f"macros/{increment_filename}.mac"
             with open(macro_path, 'w') as f:
-                write_macro(f, increment_filename, select_num, iterationTime,
+                write_macro(f, increment_filename, select_num, iterationTime*(i+1),
                             input_files=[f"{output_files[-1][0]}"], minStep=minStepIN)
             output_files.append((increment_filename + ".root", select_num, i, optionIN))
 
@@ -368,7 +368,7 @@ for optionIN,minStepIN in zip(config_list, minStepList):
             increment_filename = f"{i:03d}_iteration{i}_{optionIN}_num{select_num}"
             macro_path = f"macros/{increment_filename}.mac"
             with open(macro_path, 'w') as f:
-                write_macro(f, increment_filename, select_num, iterationTime,
+                write_macro(f, increment_filename, select_num, iterationTime*(i+1),
                             input_files=[f"{output_files[-1][0]}"], minStep=minStepIN)
             output_files.append((increment_filename + ".root", select_num, i, optionIN))
 
