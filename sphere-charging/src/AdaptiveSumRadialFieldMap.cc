@@ -726,19 +726,19 @@ void AdaptiveSumRadialFieldMap::refineMeshByGradient(Node* node, int depth) {
     }
 }
 
-
 bool AdaptiveSumRadialFieldMap::hasHighFieldGradient(const G4ThreeVector& center, 
                                                      const G4ThreeVector& center_field [[maybe_unused]], 
                                                      double sample_distance) const 
 {
     if (fPositions.empty()) return false; 
 
-    // Clamp the sample distance (same as before)
+    // The sample_distance is now size * 0.51, so actual_distance is just
+    // outside the current leaf's half-width.
     double actual_distance = std::min(std::max(sample_distance, 0.1 * nm), 1.0 * um); 
     if (actual_distance == 0) return false;
 
     // --- OPTIMIZATION START ---
-    // Instead of re-calculating, we will find the neighbor's pre-computed field.
+    // We find the neighbor's pre-computed field.
     // This is 1000s of times faster than calling computeFieldFromCharges.
 
     std::vector<double> field_magnitudes(6);
@@ -749,38 +749,36 @@ bool AdaptiveSumRadialFieldMap::hasHighFieldGradient(const G4ThreeVector& center
         if (!pointInside(worldMin_, worldMax_, point)) return 0.0;
         
         // findLeafNode is very fast (O(log L))
+        // It will find the *neighboring leaf* that contains this sample point.
         Node* leaf = findLeafNode(point, root_.get()); 
         
         if (leaf) {
-            // This is a simple, fast memory read
+            // This reads the precomputed field from the NEIGHBOR
             return leaf->precomputed_field.mag(); 
         }
-        return 0.0; // Point is in a null-space (shouldn't happen)
+        return 0.0; // Point is in a null-space
     };
 
-    // --- REMOVED THE NESTED PARALLEL LOOP ---
-    // This is now serial, but the work inside is so small (O(log L))
-    // that it's thousands of times faster than the old parallel loop.
-    field_magnitudes[0] = getFieldMagAtPoint(center + G4ThreeVector(actual_distance, 0, 0));
-    field_magnitudes[1] = getFieldMagAtPoint(center - G4ThreeVector(actual_distance, 0, 0));
-    field_magnitudes[2] = getFieldMagAtPoint(center + G4ThreeVector(0, actual_distance, 0));
-    field_magnitudes[3] = getFieldMagAtPoint(center - G4ThreeVector(0, actual_distance, 0));
-    field_magnitudes[4] = getFieldMagAtPoint(center + G4ThreeVector(0, 0, actual_distance));
-    field_magnitudes[5] = getFieldMagAtPoint(center - G4ThreeVector(0, 0, actual_distance));
+    // This serial loop is now comparing neighbor fields
+    field_magnitudes[0] = getFieldMagAtPoint(center + G4ThreeVector(actual_distance, 0, 0)); // +X Neighbor
+    field_magnitudes[1] = getFieldMagAtPoint(center - G4ThreeVector(actual_distance, 0, 0)); // -X Neighbor
+    field_magnitudes[2] = getFieldMagAtPoint(center + G4ThreeVector(0, actual_distance, 0)); // +Y Neighbor
+    field_magnitudes[3] = getFieldMagAtPoint(center - G4ThreeVector(0, actual_distance, 0)); // -Y Neighbor
+    field_magnitudes[4] = getFieldMagAtPoint(center + G4ThreeVector(0, 0, actual_distance)); // +Z Neighbor
+    field_magnitudes[5] = getFieldMagAtPoint(center - G4ThreeVector(0, 0, actual_distance)); // -Z Neighbor
     
     // --- OPTIMIZATION END ---
 
-    // Calculate gradient (same as before)
+    // Calculate gradient (same as before, but now it's a "macro" gradient)
     double inv_2d = 1.0 / (2.0 * actual_distance); 
     double gx = (field_magnitudes[0] - field_magnitudes[1]) * inv_2d; 
     double gy = (field_magnitudes[2] - field_magnitudes[3]) * inv_2d; 
     double gz = (field_magnitudes[4] - field_magnitudes[5]) * inv_2d; 
     double grad_sq = gx*gx + gy*gy + gz*gz;
 
-    // Use the gradient threshold
+    // Now we are comparing a "macro" gradient to a "macro" threshold.
     return grad_sq > (fieldGradThreshold_ * fieldGradThreshold_);
 }
-
 void AdaptiveSumRadialFieldMap::collectFinalLeaves(Node* node) { if (!node) return; if (node->is_leaf) { all_leaves_.push_back(node); } else { for (int i = 0; i < 8; ++i) { if(node->children[i]) collectFinalLeaves(node->children[i].get()); } } }
 
 // --- FIELD EVALUATION (Unaltered from your input) ---
