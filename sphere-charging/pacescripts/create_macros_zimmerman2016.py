@@ -15,24 +15,24 @@ import numpy as np
 
 # define the number of particles for the each iteration
 account, username = "zjiang33", "avira7"
-eventnumbers_onlysolarwind = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-eventnumbers_onlyphotoemission = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlysolarwind = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlyphotoemission = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 iterationNUM = 200 # number of iterations to perform
-temperature = 900 # temperature for dissipation model, units: kelvin
+temperature = 425 # temperature for dissipation model, units: kelvin
 density = 2.20 # density of SiO2, units: g/cm3
-seedIN = [10008859, 10005380]
+#seedIN = [10008859, 10005380] # for debugging purposes
 
 # list of configurations
 config_list = ["onlysolarwind", "onlyphotoemission"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
 minStepList = [0.1, 0.05] # minimum step for Octree mesh for each case (units of um)
-initialOctreeDepth = 6
-gradPercent = 0.3
-finalOctreeDepth = 10
-chargeDissipation = "true"
+initialOctreeDepth = 8
+gradPercent = 0.8
+finalOctreeDepth = 13
+chargeDissipation = "false"
 
 # define the size of the world
-CAD_dimensions = (600, 600, 373.2) # in units of microns
+CAD_dimensions = (300, 300, 373.2) # in units of microns
 particle_position = 15 # place all particles microns above the geometry
 bufferXY = 0 # in units of microns
 worldX = CAD_dimensions[0] + 2*bufferXY # in units of microns -- account for angle of beam

@@ -31,11 +31,11 @@ photonSource_sigma = abs((1239.8/(photonSource_wavelength+photonSource_FWHM/2) -
 configList = ["onlyphotoemission", "onlyelectrons"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
 UVflux, eflux = np.array([5.05e-6, 2*3e-7])*6.241509e18 #units: A/m2 -> e/m2/s
 minStepList = [0.005, 0.1] # minimum step for Octree mesh for each case (units of um)
-eventnumbersList = [500000, 500000]
-initialOctreeDepth = 4
-gradPercent = 0.2
-finalOctreeDepth = 10
-chargeDissipation = "true"
+eventnumbersList = [100000, 100000]
+initialOctreeDepth = 8
+gradPercent = 0.8
+finalOctreeDepth = 11
+chargeDissipation = "false"
 
 # define the size of the world
 CAD_dimensions = (107.00044, 120.77438, 100.29045) # in units of microns

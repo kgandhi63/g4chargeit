@@ -18,6 +18,7 @@
 #include <fstream>
 #include <iomanip> // For setting precision
 #include <numeric> // For std::accumulate
+#include <chrono>  // Make sure this is included
 
 // Define physical constants locally if needed, but they should come from G4PhysicalConstants
 static const double epsilon0_SI = 8.8541878128e-12 * farad / meter; // F/m
@@ -151,21 +152,27 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     max_depth_reached_.store(0); // Use atomic for max_depth_reached_
     barnes_hut_theta_ = 0.5; // Set default Barnes-Hut theta
 
+    // Start timer
+    auto start_build1 = std::chrono::high_resolution_clock::now();
+
     G4cout << "Building initial charge octree..." << G4endl;
     buildChargeOctree(); // Based on original charges
 
-    G4cout << "Building initial field octree..." << G4endl;
+    auto end_build1 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end_build1 - start_build1;
+    double duration_in_minutes = duration.count() / 60.0;
+    G4cout << "Building initial field octree..." << "(time: " << duration_in_minutes << " min)" << G4endl;
     all_leaves_.clear(); // Start with empty list
     root_ = buildFromScratch(); // Populates all_leaves_ with initial leaves
 
     // --- NEW SECTION: Calculate and Print Field Statistics for Initial Leaves ---
     std::vector<double> field_magnitudes;
     size_t num_leaves = all_leaves_.size(); 
-    
+
+    G4cout << "Computing field values at initial leaf node..." << G4endl;
+
     // 1. Resize the vector to the exact size needed
     field_magnitudes.resize(num_leaves); 
-
-    G4cout << "Computing field values at initial leaf node (" << num_leaves << ")..." << G4endl;
     
     #pragma omp parallel for schedule(dynamic)
     // 2. Assign to the *pre-allocated* index 'i'
@@ -198,7 +205,10 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     
     // --------------------------------------------------------------------------
 
-    G4cout << "Refining field map based on field gradients..." << G4endl; // Log clarification
+    auto end_computations = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration2 = end_computations - end_build1;
+    double duration_in_minutes2 = duration2.count() / 60.0;
+    G4cout << "Refining field map based on field gradients..." << "(time: " << duration_in_minutes2 << " min)" << G4endl;
     #pragma omp parallel
     {
         #pragma omp single
@@ -211,6 +221,11 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
         G4cout << "Applying one-time charge dissipation ('tax')..." << G4endl;
         ApplyChargeDissipation(time_step_dt, material_temp_K); // CALLS THE *NEW* DISSIPATION CODE
         // The master charge list (fCharges) has now been MODIFIED.
+
+        auto end_charge = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> duration3 = end_charge - end_computations;
+        double duration_in_minutes3 = duration3.count() / 60.0;
+        G4cout << "(time: " << duration_in_minutes3 << " min)" << G4endl;
     } 
 
     // --- Collect FINAL leaves AFTER refinement (needed for export) ---
@@ -726,58 +741,16 @@ void AdaptiveSumRadialFieldMap::refineMeshByGradient(Node* node, int depth) {
     }
 }
 
-bool AdaptiveSumRadialFieldMap::hasHighFieldGradient(const G4ThreeVector& center, 
-                                                     const G4ThreeVector& center_field [[maybe_unused]], 
-                                                     double sample_distance) const 
-{
-    if (fPositions.empty()) return false; 
 
-    // The sample_distance is now size * 0.51, so actual_distance is just
-    // outside the current leaf's half-width.
-    double actual_distance = std::min(std::max(sample_distance, 0.1 * nm), 1.0 * um); 
-    if (actual_distance == 0) return false;
-
-    // --- OPTIMIZATION START ---
-    // We find the neighbor's pre-computed field.
-    // This is 1000s of times faster than calling computeFieldFromCharges.
-
-    std::vector<double> field_magnitudes(6);
-    
-    // Helper lambda to get the field magnitude at a sample point by
-    // finding the leaf that contains it and reading its precomputed value.
-    auto getFieldMagAtPoint = [&](const G4ThreeVector& point) -> double {
-        if (!pointInside(worldMin_, worldMax_, point)) return 0.0;
-        
-        // findLeafNode is very fast (O(log L))
-        // It will find the *neighboring leaf* that contains this sample point.
-        Node* leaf = findLeafNode(point, root_.get()); 
-        
-        if (leaf) {
-            // This reads the precomputed field from the NEIGHBOR
-            return leaf->precomputed_field.mag(); 
-        }
-        return 0.0; // Point is in a null-space
-    };
-
-    // This serial loop is now comparing neighbor fields
-    field_magnitudes[0] = getFieldMagAtPoint(center + G4ThreeVector(actual_distance, 0, 0)); // +X Neighbor
-    field_magnitudes[1] = getFieldMagAtPoint(center - G4ThreeVector(actual_distance, 0, 0)); // -X Neighbor
-    field_magnitudes[2] = getFieldMagAtPoint(center + G4ThreeVector(0, actual_distance, 0)); // +Y Neighbor
-    field_magnitudes[3] = getFieldMagAtPoint(center - G4ThreeVector(0, actual_distance, 0)); // -Y Neighbor
-    field_magnitudes[4] = getFieldMagAtPoint(center + G4ThreeVector(0, 0, actual_distance)); // +Z Neighbor
-    field_magnitudes[5] = getFieldMagAtPoint(center - G4ThreeVector(0, 0, actual_distance)); // -Z Neighbor
-    
-    // --- OPTIMIZATION END ---
-
-    // Calculate gradient (same as before, but now it's a "macro" gradient)
-    double inv_2d = 1.0 / (2.0 * actual_distance); 
-    double gx = (field_magnitudes[0] - field_magnitudes[1]) * inv_2d; 
-    double gy = (field_magnitudes[2] - field_magnitudes[3]) * inv_2d; 
-    double gz = (field_magnitudes[4] - field_magnitudes[5]) * inv_2d; 
-    double grad_sq = gx*gx + gy*gy + gz*gz;
-
-    // Now we are comparing a "macro" gradient to a "macro" threshold.
-    return grad_sq > (fieldGradThreshold_ * fieldGradThreshold_);
+bool AdaptiveSumRadialFieldMap::hasHighFieldGradient(const G4ThreeVector& center, const G4ThreeVector& center_field [[maybe_unused]], double sample_distance) const {
+    if (fPositions.empty()) return false; double actual_distance = std::min(std::max(sample_distance, 0.1 * nm), 1.0 * um); // Adjusted range slightly
+    const std::vector<G4ThreeVector> sample_points = { center + G4ThreeVector(actual_distance, 0, 0), center - G4ThreeVector(actual_distance, 0, 0), center + G4ThreeVector(0, actual_distance, 0), center - G4ThreeVector(0, actual_distance, 0), center + G4ThreeVector(0, 0, actual_distance), center - G4ThreeVector(0, 0, actual_distance) }; std::vector<double> field_magnitudes(6);
+    #pragma omp parallel for // Keep parallel for from original
+    for (int i = 0; i < 6; ++i) { field_magnitudes[i] = computeFieldFromCharges(sample_points[i]).mag(); }
+    if (actual_distance == 0) return false; double inv_2d = 1.0/(2.0*actual_distance); double gx=(field_magnitudes[0]-field_magnitudes[1])*inv_2d; double gy=(field_magnitudes[2]-field_magnitudes[3])*inv_2d; double gz=(field_magnitudes[4]-field_magnitudes[5])*inv_2d; double grad_sq = gx*gx+gy*gy+gz*gz;
+    // --- FIX: Correct comparison assuming threshold is V/m^2 ---
+    // The division by (1e6/m) seemed incorrect dimensionally.
+    return grad_sq > (fieldGradThreshold_*fieldGradThreshold_);
 }
 void AdaptiveSumRadialFieldMap::collectFinalLeaves(Node* node) { if (!node) return; if (node->is_leaf) { all_leaves_.push_back(node); } else { for (int i = 0; i < 8; ++i) { if(node->children[i]) collectFinalLeaves(node->children[i].get()); } } }
 
@@ -868,8 +841,8 @@ void AdaptiveSumRadialFieldMap::writeFieldPointsToFileRecursive(std::ofstream& o
     // outfile.write(reinterpret_cast<const char*>(&size), sizeof(size));
     
     // // Write a flag to indicate if it's a leaf (1) or an internal node (0)
-    // uint8_t is_leaf_flag = node->is_leaf ? 1 : 0;
-    // outfile.write(reinterpret_cast<const char*>(&is_leaf_flag), sizeof(is_leaf_flag));
+    //uint8_t is_leaf_flag = node->is_leaf ? 1 : 0;
+    //outfile.write(reinterpret_cast<const char*>(&is_leaf_flag), sizeof(is_leaf_flag));
     
     // --- Recurse on Children ---
     if (!node->is_leaf) {
