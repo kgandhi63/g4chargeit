@@ -19,7 +19,7 @@ eventnumbers_onlysolarwind = 100000 # adjusted this number to reflect the timest
 eventnumbers_onlyphotoemission = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 iterationNUM = 200 # number of iterations to perform
-temperature = 425 # temperature for dissipation model, units: kelvin
+temperature = 600 # temperature for dissipation model, units: kelvin
 density = 2.20 # density of SiO2, units: g/cm3
 #seedIN = [10008859, 10005380] # for debugging purposes
 
@@ -28,8 +28,8 @@ config_list = ["onlysolarwind", "onlyphotoemission"]#["onlysolarwind", "onlyphot
 minStepList = [0.1, 0.05] # minimum step for Octree mesh for each case (units of um)
 initialOctreeDepth = 8
 gradPercent = 0.8
-finalOctreeDepth = 13
-chargeDissipation = "false"
+finalOctreeDepth = 12
+chargeDissipation = "true"
 
 # define the size of the world
 CAD_dimensions = (300, 300, 373.2) # in units of microns
@@ -56,7 +56,7 @@ batch_template = """#!/bin/bash
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=24
-#SBATCH --mem-per-cpu=4gb
+#SBATCH --mem-per-cpu=8gb
 #SBATCH --time=05:00:00
 #SBATCH --output=outputlogs/%A_iteration{iter}_{config}
 

@@ -215,7 +215,7 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
         refineMeshByGradient(root_.get(), 0); // Refines based on fields from dissipated charges
     }
 
-    if (dissipateCharge_) { 
+        if (dissipateCharge_) { 
 
         // --- Apply charge dissipation based on INITIAL mesh structure ---
         G4cout << "Applying one-time charge dissipation ('tax')..." << G4endl;
@@ -223,7 +223,7 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
         // The master charge list (fCharges) has now been MODIFIED.
 
         auto end_charge = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> duration3 = end_charge - end_computations;
+        std::chrono::duration<double> duration3 = end_charge - end_build1;
         double duration_in_minutes3 = duration3.count() / 60.0;
         G4cout << "(time: " << duration_in_minutes3 << " min)" << G4endl;
     } 
@@ -333,6 +333,64 @@ void AdaptiveSumRadialFieldMap::SaveFinalParticleState(const std::string& filena
     }
 }
 
+// void AdaptiveSumRadialFieldMap::ApplyChargeDissipation(G4double dt_internal, G4double temp_K) {
+ 
+//     G4cout << "--- Applying INDIVIDUAL Charge Dissipation (Exponential Decay) ---" << G4endl;
+ 
+//     // --- 1. Setup for dissipation (same as before) ---
+//     double conductivity_SI = calculateConductivity(temp_K);
+//     const double epsilon0_SI_Value = CLHEP::epsilon0 / (farad/meter); // Get SI value
+//     double rate_constant_Value = 0.0;
+//     if (epsilon0_SI_Value > 1e-18) { // Avoid division by zero
+//         rate_constant_Value = conductivity_SI / epsilon0_SI_Value;
+//     } else {
+//         G4cerr << "Warning: Epsilon0 value is too small, dissipation rate set to 0." << G4endl;
+//         return; // No point in continuing
+//     }
+//     // Get the time step as a plain double (in seconds)
+//     double dt_Value = dt_internal; /// CLHEP::second;
+//     // Calculate the unitless decay factor. This is the (k * dt) part.
+//     // The change will be: delta_q = - (decay_factor) * q
+//     double decay_factor = rate_constant_Value * dt_Value;
+//     // This is to track the charge that is "lost"
+//     G4double total_charge_change_magnitude = 0.0;
+//     G4cout << "    Applying dissipation factor to " << fCharges.size() << " particles in parallel..." << G4endl;
+ 
+//     // --- 2. Parallel "Apply" Phase ---
+//     // This loop applies the dissipation to EVERY particle individually.
+//     #pragma omp parallel for schedule(dynamic, 1000) reduction(+:total_charge_change_magnitude)
+//     for (size_t i = 0; i < fCharges.size(); ++i) {
+//         // Read the charge once
+//         G4double current_charge = fCharges[i];
+//         // Skip particles that are already neutral
+//         if (std::abs(current_charge) < 1e-21 * CLHEP::eplus) continue;
+ 
+//         // Calculate the change for this specific particle
+//         // delta_q = - (rate * dt) * q
+//         G4double delta_Q_node = -decay_factor * current_charge;
+//         // Keep track of the total magnitude of charge being dissipated
+//         total_charge_change_magnitude += std::abs(delta_Q_node);
+ 
+//         // Apply the change. We use an atomic update for thread safety.
+//         #pragma omp atomic update
+//         fCharges[i] += delta_Q_node;
+//         // --- Clamping to zero ---
+//         // After the update, check if the charge crossed zero, and clamp it.
+//         G4double updated_charge;
+//         #pragma omp atomic read
+//         updated_charge = fCharges[i];
+//         // If the original charge was positive and the update made it negative, set to 0.
+//         // If the original charge was negative and the update made it positive, set to 0.
+//         if ((current_charge > 0 && updated_charge < 0) || (current_charge < 0 && updated_charge > 0)) {
+//             #pragma omp atomic write
+//             fCharges[i] = 0.0;
+//         }
+//     } // --- End of parallel loop ---
+ 
+//     G4cout << "    --> Individual charge dissipation applied." << G4endl;
+//     G4cout << "    >>> Total charge magnitude dissipated this step: "
+//     << total_charge_change_magnitude / CLHEP::eplus << " e <<<" << G4endl;
+// }
 
 void AdaptiveSumRadialFieldMap::ApplyChargeDissipation(G4double dt_internal, G4double temp_K) {
 
@@ -463,7 +521,7 @@ void AdaptiveSumRadialFieldMap::ApplyChargeDissipation(G4double dt_internal, G4d
         // Your previous code had `double dt_Value = dt_internal;`
         // This assumes dt_internal was already a simple 'double'.
         // This version from your *original* (correct) code is safer:
-        double dt_Value = dt_internal / CLHEP::second; // Make sure dt_internal has time unit!
+        double dt_Value = dt_internal; // / CLHEP::second; // Make sure dt_internal has time unit!
         
         double delta_Q_node_Value = -rate_constant_Value * Q_node_net_Value * dt_Value;
 

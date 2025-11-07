@@ -2,3 +2,4 @@ build*
 root/
 figures/*
 analysis/grain-geometries-CAD/*
+*.h5

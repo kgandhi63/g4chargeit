@@ -18,6 +18,25 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from numba import njit, prange
 import numpy as np
 import glob
+import h5py, re
+
+def load_h5_to_dict(filename):
+    data_dict = {}
+
+    with h5py.File(filename, "r") as f:
+        # Sort keys numerically by the integer after "iter_"
+        sorted_keys = sorted(f.keys(), key=lambda x: int(re.findall(r'\d+', x)[0]))
+
+        for iter_key in sorted_keys:
+            grp = f[iter_key]
+            data_dict[iter_key] = {
+                "pos": grp["pos"][:],
+                "E": grp["E"][:],
+                "E_mag": grp["E_mag"][:],
+                "gradRefinements": grp.attrs["gradRefinements"]
+            }
+
+    return data_dict
 
 def read_rootfile(file,directory_path=None):
     #file = '00_iteration0_num5000.root' #'13_iteration5_from_num1000000.root'
@@ -604,50 +623,68 @@ def plot_surface_potential_fornegativepositive_charge(electrons, protons, convex
 
     return convex_combined, face_potentials, colors_rgba
 
-def plot_surface_potential_allparticle_case(gammas, photoelectrons, protons, electrons, convex_combined, vmin=-0.01, vmax=0.01):
-    # --- Combine negative charges: electrons + photoelectrons ---
-    neg_particles = pd.concat([electrons, photoelectrons], ignore_index=True)
-    neg_points = np.array(neg_particles["Pre_Step_Position_mm"].tolist())
-    _, distance_neg, face_id_neg = convex_combined.nearest.on_surface(neg_points)
+def plot_electric_pressure_from_charge_density(electrons, protons, convex_combined, vmin=0, vmax=1e-3):
+ 
+    # --- 1. Initialize Charge and Area Arrays ---
+    num_faces = len(convex_combined.faces)
+    face_charges = np.zeros(num_faces)
+    face_areas_m2 = convex_combined.area_faces * 1e-6
+    # Add a small epsilon to prevent division by zero for any zero-area faces
+    face_areas_m2 += 1e-20
 
-    # Compute potential for negative charges
-    q_neg = -1.602e-19  # Coulombs
-    potentials_neg = 1 / (4 * np.pi * epsilon_0) * q_neg / (np.abs(distance_neg - 0.1) * 0.001 + 1e-12) * 1000  # mV
-
-    # --- Combine positive charges: protons + gammas ---
-    pos_particles = pd.concat([protons, gammas], ignore_index=True)
-    pos_points = np.array(pos_particles["Pre_Step_Position_mm"].tolist())
-    _, distance_pos, face_id_pos = convex_combined.nearest.on_surface(pos_points)
-
-    # Compute potential for positive charges
-    q_pos = +1.602e-19  # Coulombs
-    potentials_pos = 1 / (4 * np.pi * epsilon_0) * q_pos / (np.abs(distance_pos - 0.1) * 0.001 + 1e-12) * 1000  # mV
-
-    # --- Aggregate potentials per face (negative) ---
-    unique_faces_neg, inverse_indices_neg = np.unique(face_id_neg, return_inverse=True)
-    potentials_sum_neg = np.zeros(len(unique_faces_neg))
-    np.add.at(potentials_sum_neg, inverse_indices_neg, potentials_neg)
-
-    # --- Aggregate potentials per face (positive) ---
-    unique_faces_pos, inverse_indices_pos = np.unique(face_id_pos, return_inverse=True)
-    potentials_sum_pos = np.zeros(len(unique_faces_pos))
-    np.add.at(potentials_sum_pos, inverse_indices_pos, potentials_pos)
-
-    # --- Combine into face potentials array ---
-    face_potentials = np.zeros(len(convex_combined.faces))
-    face_potentials[unique_faces_neg] += potentials_sum_neg
-    face_potentials[unique_faces_pos] += potentials_sum_pos
-
-    # --- Visualization ---
-    colors_rgba = np.zeros((len(face_potentials), 4), dtype=np.uint8)
-    cmap = plt.cm.seismic
+    q_proton = +1.602e-19
+    q_electron = -1.602e-19
+ 
+    # --- 2. Get Particle Positions ---
+    # We get positions in mm, as the trimesh object is in mm
+    e_pos = np.array(electrons["Post_Step_Position_mm"].tolist())
+    p_pos = np.array(protons["Post_Step_Position_mm"].tolist())
+ 
+    # --- 3. Bin Electrons and Protons to Faces to get Q_face ---
+    # Bin electrons
+    if len(e_pos) > 0:
+        # Find the closest face ID for each electron
+        _, _, face_id_e = convex_combined.nearest.on_surface(e_pos)
+        # Find unique faces and how many electrons hit each one
+        unique_faces_e, counts_e = np.unique(face_id_e, return_counts=True)
+        # Add the total charge from these electrons to the face_charges array
+        # Q_face = N_electrons * q_electron
+        face_charges[unique_faces_e] += (counts_e * q_electron)
+ 
+    # Bin protons
+    if len(p_pos) > 0:
+        # Find the closest face ID for each proton
+        _, _, face_id_p = convex_combined.nearest.on_surface(p_pos)
+        # Find unique faces and how many protons hit each one
+        unique_faces_p, counts_p = np.unique(face_id_p, return_counts=True)
+        # Add the total charge from these protons to the face_charges array
+        # Q_face = N_protons * q_proton
+        face_charges[unique_faces_p] += (counts_p * q_proton)
+ 
+    # --- 4. Calculate Surface Charge Density (sigma) ---
+    # sigma = Q_face / A_face (in C/m^2)
+    sigma_per_face = face_charges / face_areas_m2
+    # --- 5. Calculate Electric Pressure (P) ---
+    # P = sigma^2 / (2 * epsilon_0) (in Pascals, N/m^2)
+    face_pressures = (sigma_per_face**2) / (2.0 * epsilon_0)
+ 
+    # --- 6. Apply Colormap ---
+    colors_rgba = np.zeros((num_faces, 4), dtype=np.uint8)
+    # Pressure is always positive (it's squared), so use a sequential colormap
+    # like 'hot', 'viridis', or 'plasma' instead of 'seismic'.
+    cmap = plt.cm.hot
     norm_func = Normalize(vmin=vmin, vmax=vmax)
-    colors_rgb = cmap(norm_func(face_potentials))[:, :3]
+    colors_rgb = cmap(norm_func(face_pressures))[:, :3]
+ 
+    # Assign RGB to all faces
     colors_rgba[:, :3] = (colors_rgb * 255).astype(np.uint8)
-
+    # Set alpha to opaque so faces are visible
+    colors_rgba[:, 3] = 255
+ 
+    # Apply colors to mesh
     convex_combined.visual.face_colors = colors_rgba
-
-    return convex_combined, face_potentials
+ 
+    return convex_combined, face_pressures, colors_rgba
 
 
 def plot_surface_potential_one_particle_type(electrons, convex_combined, vmin=-0.01,vmax=0.01, q = -1.602e-19 ):
@@ -696,7 +733,7 @@ def plot_surface_potential_one_particle_type(electrons, convex_combined, vmin=-0
 
     return convex_combined, face_potentials
 
-def calculate_stats(df, config="photoemission"):
+def calculate_stats(df, config="photoemission", volume_name="SiO2"):
 
     # --- Photoemission Case ---
 
@@ -708,7 +745,7 @@ def calculate_stats(df, config="photoemission"):
     world_e_energy=last_e_event[(last_e_event["Volume_Name_Post"]=="physical_cyclic") | (last_e_event["Volume_Name_Pre"]=="physical_cyclic")]
 
     # get all the electrons stopped in the material 
-    electrons_stopped = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] > 0.0) & (df["Kinetic_Energy_Post_MeV"] ==0.0) & (df["Volume_Name_Post"]=="G4_SILICON_DIOXIDE")]
+    electrons_stopped = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] > 0.0) & (df["Kinetic_Energy_Post_MeV"] ==0.0) & (df["Volume_Name_Post"]==volume_name)]
 
     # get all the initial gamma energy that leads to an e- escaping
     matching_event_numbers = np.intersect1d(df["Event_Number"], world_e_energy["Event_Number"])
@@ -725,14 +762,14 @@ def calculate_stats(df, config="photoemission"):
     protons_incident = df[(df["Particle_Type"] == "proton") & (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="first")
 
     last_protons = df[(df["Particle_Type"] == "proton")].drop_duplicates(subset="Event_Number", keep="last")
-    protons_inside = last_protons[(last_protons["Volume_Name_Post"] == "G4_SILICON_DIOXIDE")]
+    protons_inside = last_protons[(last_protons["Volume_Name_Post"] == volume_name)]
 
     protons_capture_fraction = len(protons_inside) / len(protons_incident) if len(protons_incident) > 0 else 0
 
     electrons_incident = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="first")
 
     last_electrons = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] == 0.0)].drop_duplicates(subset="Event_Number", keep="last")
-    electrons_inside = last_electrons[(last_electrons["Volume_Name_Post"] == "G4_SILICON_DIOXIDE")]
+    electrons_inside = last_electrons[(last_electrons["Volume_Name_Post"] == volume_name)]
 
     electrons_capture_fraction = len(electrons_inside) / len(electrons_incident) if len(electrons_incident) > 0 else 0
 

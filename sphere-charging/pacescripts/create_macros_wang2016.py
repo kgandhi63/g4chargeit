@@ -31,10 +31,11 @@ photonSource_sigma = abs((1239.8/(photonSource_wavelength+photonSource_FWHM/2) -
 configList = ["onlyphotoemission", "onlyelectrons"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
 UVflux, eflux = np.array([5.05e-6, 2*3e-7])*6.241509e18 #units: A/m2 -> e/m2/s
 minStepList = [0.005, 0.1] # minimum step for Octree mesh for each case (units of um)
-eventnumbersList = [100000, 100000]
+#eventnumbersList = [100000, 100000]
+eventnumbersList = [50000, 50000]
 initialOctreeDepth = 8
-gradPercent = 0.8
-finalOctreeDepth = 11
+gradPercent = 0.7
+finalOctreeDepth = 10
 chargeDissipation = "false"
 
 # define the size of the world
@@ -344,7 +345,7 @@ for optionIN,minStepIN,select_num in zip(configList, minStepList, eventnumbersLi
                 break  # STOP and wait for valid ROOT file
 
             # Calculate iteration time
-            if optionIN == "onlyUV":
+            if optionIN == "onlyUV" or optionIN == "onlyphotoemission":
                 iterationTime = (particlesforIteration["gamma"] / planeArea) / UVflux
             elif optionIN == "onlyelectrons":
                 iterationTime = (particlesforIteration["e-"] / planeArea) / eflux

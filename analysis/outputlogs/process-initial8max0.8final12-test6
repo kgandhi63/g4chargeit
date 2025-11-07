@@ -1,0 +1,162 @@
+---------------------------------------
+Begin Slurm Prolog: Nov-04-2025 16:26:18
+Job ID:    2105918
+User ID:   avira7
+Account:   gts-zjiang33
+Job name:  process-initial8max0.8final12
+Partition: cpu-large
+QOS:       inferno
+---------------------------------------
+test processing for one folder: initial8max0.8final12
+--- Starting Parallel Processing ---
+Input Folder: ../build-smallerworld-initial8max0.8final12
+Output File: processed-fieldmaps/PE_425K_initial8max0.8final12test6.h5
+Config Tag: onlyphotoemission
+Target Radius: 10 µm centered at [-0.1    0.     0.122]
+------------------------------------
+Spawning 8 workers (half of available cores) for 65 files.
+   [Worker] Starting file: 006-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 014-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 024-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 032-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 039-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 045-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 052-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 061-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 005-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 013-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 021-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 029-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 041-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 050-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 058-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 007-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 015-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 023-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 031-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 040-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 051-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 059-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 001-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 009-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 017-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 028-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 035-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 042-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 046-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 054-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 060-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 008-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 016-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 025-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 033-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 043-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 053-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 062-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 003-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 011-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 019-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 026-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 034-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 037-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 047-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 055-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 063-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 002-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 010-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 018-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 022-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 030-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 036-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 044-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 049-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 057-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 064-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 004-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 012-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 020-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 027-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 038-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 048-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 056-onlyphotoemission-fieldmap.txt
+   [Worker] Starting file: 065-onlyphotoemission-fieldmap.txt
+✅ Saved iter_1: 13359 points (GZIP compressed).
+✅ Saved iter_2: 25147 points (GZIP compressed).
+✅ Saved iter_3: 39883 points (GZIP compressed).
+✅ Saved iter_4: 59587 points (GZIP compressed).
+✅ Saved iter_5: 83376 points (GZIP compressed).
+✅ Saved iter_6: 97703 points (GZIP compressed).
+✅ Saved iter_7: 112402 points (GZIP compressed).
+✅ Saved iter_8: 120328 points (GZIP compressed).
+✅ Saved iter_9: 128326 points (GZIP compressed).
+✅ Saved iter_10: 136668 points (GZIP compressed).
+✅ Saved iter_11: 146208 points (GZIP compressed).
+✅ Saved iter_12: 165858 points (GZIP compressed).
+✅ Saved iter_13: 182656 points (GZIP compressed).
+✅ Saved iter_18: 128247 points (GZIP compressed).
+✅ Saved iter_15: 194075 points (GZIP compressed).
+✅ Saved iter_14: 194672 points (GZIP compressed).
+✅ Saved iter_16: 202781 points (GZIP compressed).
+✅ Saved iter_19: 129794 points (GZIP compressed).
+✅ Saved iter_20: 130443 points (GZIP compressed).
+✅ Saved iter_17: 224716 points (GZIP compressed).
+✅ Saved iter_21: 129323 points (GZIP compressed).
+✅ Saved iter_22: 133664 points (GZIP compressed).
+✅ Saved iter_23: 143537 points (GZIP compressed).
+✅ Saved iter_24: 152161 points (GZIP compressed).
+✅ Saved iter_25: 154259 points (GZIP compressed).
+✅ Saved iter_26: 156087 points (GZIP compressed).
+✅ Saved iter_28: 165275 points (GZIP compressed).
+✅ Saved iter_30: 175632 points (GZIP compressed).
+✅ Saved iter_34: 208920 points (GZIP compressed).
+✅ Saved iter_27: 160691 points (GZIP compressed).
+✅ Saved iter_32: 190896 points (GZIP compressed).
+✅ Saved iter_31: 180823 points (GZIP compressed).
+✅ Saved iter_29: 175820 points (GZIP compressed).
+✅ Saved iter_35: 218977 points (GZIP compressed).
+✅ Saved iter_33: 197130 points (GZIP compressed).
+✅ Saved iter_36: 222480 points (GZIP compressed).
+✅ Saved iter_39: 257654 points (GZIP compressed).
+✅ Saved iter_42: 280903 points (GZIP compressed).
+✅ Saved iter_37: 239831 points (GZIP compressed).
+✅ Saved iter_38: 251166 points (GZIP compressed).
+✅ Saved iter_44: 295766 points (GZIP compressed).
+✅ Saved iter_41: 277002 points (GZIP compressed).
+✅ Saved iter_40: 265955 points (GZIP compressed).
+✅ Saved iter_45: 298907 points (GZIP compressed).
+✅ Saved iter_43: 293591 points (GZIP compressed).
+✅ Saved iter_46: 304100 points (GZIP compressed).
+✅ Saved iter_47: 307995 points (GZIP compressed).
+✅ Saved iter_48: 323953 points (GZIP compressed).
+✅ Saved iter_49: 329380 points (GZIP compressed).
+✅ Saved iter_50: 339939 points (GZIP compressed).
+✅ Saved iter_51: 353664 points (GZIP compressed).
+✅ Saved iter_54: 386771 points (GZIP compressed).
+✅ Saved iter_52: 364873 points (GZIP compressed).
+✅ Saved iter_53: 376086 points (GZIP compressed).
+✅ Saved iter_55: 396496 points (GZIP compressed).
+✅ Saved iter_57: 419274 points (GZIP compressed).
+✅ Saved iter_56: 407639 points (GZIP compressed).
+✅ Saved iter_61: 464615 points (GZIP compressed).
+✅ Saved iter_58: 432375 points (GZIP compressed).
+✅ Saved iter_59: 444921 points (GZIP compressed).
+✅ Saved iter_60: 453154 points (GZIP compressed).
+✅ Saved iter_62: 474110 points (GZIP compressed).
+✅ Saved iter_63: 492288 points (GZIP compressed).
+✅ Saved iter_64: 507643 points (GZIP compressed).
+✅ Saved iter_65: 514206 points (GZIP compressed).
+
+--- ✅ Completed parallel HDF5 write: processed-fieldmaps/PE_425K_initial8max0.8final12test6.h5 ---
+Tue Nov  4 04:58:16 PM EST 2025
+---------------------------------------
+Begin Slurm Epilog: Nov-04-2025 16:58:18
+Job ID:        2105918
+User ID:       avira7
+Account:       gts-zjiang33
+Job name:      process-initial8max0.8final12
+Resources:     cpu=1,mem=264G,node=1
+Rsrc Used:     cput=00:32:00,vmem=0,walltime=00:32:00,mem=128086116K,energy_used=0
+Partition:     cpu-large
+QOS:           inferno
+Nodes:         atl1-1-01-006-16-2
+---------------------------------------
