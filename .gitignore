@@ -2,4 +2,6 @@ build*
 root/
 figures/*
 analysis/grain-geometries-CAD/*
+analysis/outputlogs/*
+analysis/processed-fieldmaps/*.h5
 *.h5

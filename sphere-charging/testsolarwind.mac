@@ -26,13 +26,19 @@
 /process/eLoss/UseICRU90 1
 /process/eLoss/UseAngularGenerator true
 #
-/sphere/worldX 600 um
-/sphere/worldY 600 um
+/sphere/worldX 300 um
+/sphere/worldY 300 um
 /sphere/worldZ 403.2 um
-/sphere/field/MinimumStep 1 um
-/sphere/field/GradThreshold 1e-6 V/m
-/sphere/field/OctreeDepth 8
-/sphere/field/file test-FieldMap.txt
+/sphere/MaterialTemperature 425 K
+/sphere/MaterialDensity 2.2 g/cm3
+/sphere/IterationTime 0 s
+/sphere/ApplyChargeDissipation true
+/sphere/field/InitialDepth 6
+/sphere/field/MinimumStep 0.005 um
+/sphere/field/PercentGradThreshold 0.7
+/sphere/field/OctreeDepth 11
+/sphere/field/file test-fieldmap.txt 
+/sphere/charges/file test-charges.txt
 #
 /sphere/rootoutput/file test-rootOutput.root
 /sphere/cadinput/file stacked_spheres_frompython_cropped.stl
@@ -44,8 +50,8 @@
 /gps/particle proton
 /gps/pos/type Plane
 /gps/pos/shape Square
-/gps/pos/halfx 300.0 um
-/gps/pos/halfy 300.0 um
+/gps/pos/halfx 150.0 um
+/gps/pos/halfy 150.0 um
 /gps/pos/centre 15.0 0 201.6 um
 /gps/direction -0.7071067811865475 0 -0.7071067811865475 
 /gps/ene/type Mono
@@ -61,8 +67,8 @@
 /gps/hist/inter Lin
 /gps/pos/type Plane
 /gps/pos/shape Square
-/gps/pos/halfx 300.0 um
-/gps/pos/halfy 300.0 um
+/gps/pos/halfx 150.0 um
+/gps/pos/halfy 150.0 um
 /gps/pos/centre 0 0 201.6 um
 /gps/ang/type iso
 #

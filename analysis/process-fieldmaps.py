@@ -245,6 +245,7 @@ if __name__ == "__main__":
 
     # Fixed target and radius parameters (moved to main execution setup)
     targetIN = np.array([-0.1, 0, 0.1 - 0.015 + 0.037])
+    #targetIN = np.array([0.1, 0, 0.1 - 0.015 + 0.037])
     tempIN = 425  # units: K
 
     output_file = f"processed-fieldmaps/{noteIN}.h5"

@@ -1,4 +1,4 @@
-# Macro file for testing photons
+# Macro file for 000_iteration0_onlyphotoemission_num50000
 #
 /control/verbose 0
 /run/verbose 0
@@ -7,7 +7,6 @@
 /process/verbose 0
 /process/had/verbose 0
 /process/em/verbose 0
-#/cuts/setLowEdge 70 keV
 #
 /random/setSeeds 10008859 10005380
 /random/setSavingFlag 1
@@ -20,18 +19,18 @@
 /process/em/PhotoeffectBelowKShell true
 #
 /process/em/lowestElectronEnergy 0 eV
-/process/em/lowestMuHadEnergy 10 eV
+/process/em/lowestMuHadEnergy 100 eV
 /process/em/enableSamplingTable 1
 #
 /process/eLoss/CSDARange 1
 /process/eLoss/UseICRU90 1
 /process/eLoss/UseAngularGenerator true
 #
-/sphere/worldX 300 um
-/sphere/worldY 300 um
-/sphere/worldZ 403.2 um
-/sphere/MaterialTemperature 425 K
-/sphere/MaterialDensity 2.2 g/cm3
+/sphere/worldX 107.00044 um
+/sphere/worldY 120.77438 um
+/sphere/worldZ 130.29045000000002 um
+/sphere/MaterialTemperature 293 K
+/sphere/MaterialDensity 1.9 g/cm3
 /sphere/IterationTime 0 s
 /sphere/ApplyChargeDissipation true
 /sphere/field/InitialDepth 6
@@ -41,9 +40,8 @@
 /sphere/field/file test-fieldmap.txt 
 /sphere/charges/file test-charges.txt
 #
-/sphere/rootoutput/file test-rootOutput.root
-/sphere/cadinput/file stacked_spheres_frompython_cropped.stl
-#/sphere/cadinput/scale 0.001
+/sphere/rootoutput/file testOutput.root
+/sphere/cadinput/file isolated_grains_interpolated.stl
 /sphere/epsilon 4
 /sphere/PBC true
 /run/initialize
@@ -51,10 +49,10 @@
 /gps/particle gamma
 /gps/pos/type Plane
 /gps/pos/shape Square
-/gps/pos/halfx 150.0 um
-/gps/pos/halfy 150.0 um
-/gps/pos/centre 15.0 0 201.6 um
-/gps/direction -0.7071067811865475 0 -0.7071067811865475 
+/gps/pos/halfx 53.50022 um
+/gps/pos/halfy 60.38719 um
+/gps/pos/centre 15.000000000000007 0 65.14522500000001 um
+/gps/direction -0.7071067811865476 0 -0.7071067811865476 
 /gps/ene/type Arb
 /gps/hist/type arb
 /gps/ene/diffspec true
@@ -63,5 +61,5 @@
 #
 /control/execute vis.mac
 #
-/run/printProgress 100
-/run/beamOn 100
+/run/printProgress 5000
+#/run/beamOn 100

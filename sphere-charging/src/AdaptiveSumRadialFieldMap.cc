@@ -215,7 +215,7 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
         refineMeshByGradient(root_.get(), 0); // Refines based on fields from dissipated charges
     }
 
-        if (dissipateCharge_) { 
+    if (dissipateCharge_) { 
 
         // --- Apply charge dissipation based on INITIAL mesh structure ---
         G4cout << "Applying one-time charge dissipation ('tax')..." << G4endl;

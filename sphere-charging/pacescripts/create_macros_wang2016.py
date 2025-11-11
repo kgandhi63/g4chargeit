@@ -33,10 +33,10 @@ UVflux, eflux = np.array([5.05e-6, 2*3e-7])*6.241509e18 #units: A/m2 -> e/m2/s
 minStepList = [0.005, 0.1] # minimum step for Octree mesh for each case (units of um)
 #eventnumbersList = [100000, 100000]
 eventnumbersList = [50000, 50000]
-initialOctreeDepth = 8
+initialOctreeDepth = 6
 gradPercent = 0.7
-finalOctreeDepth = 10
-chargeDissipation = "false"
+finalOctreeDepth = 11
+chargeDissipation = "true"
 
 # define the size of the world
 CAD_dimensions = (107.00044, 120.77438, 100.29045) # in units of microns
