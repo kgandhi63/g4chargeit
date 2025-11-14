@@ -30,11 +30,11 @@ photonSource_sigma = abs((1239.8/(photonSource_wavelength+photonSource_FWHM/2) -
 # list of configurations and parameters for each configuration
 configList = ["onlyphotoemission", "onlyelectrons"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
 UVflux, eflux = np.array([5.05e-6, 2*3e-7])*6.241509e18 #units: A/m2 -> e/m2/s
-minStepList = [0.005, 0.1] # minimum step for Octree mesh for each case (units of um)
+minStepList = [0.01, 0.1] # minimum step for Octree mesh for each case (units of um)
 #eventnumbersList = [100000, 100000]
 eventnumbersList = [50000, 50000]
-initialOctreeDepth = 6
-gradPercent = 0.7
+initialOctreeDepth = 8
+gradPercent = 0.8
 finalOctreeDepth = 11
 chargeDissipation = "true"
 

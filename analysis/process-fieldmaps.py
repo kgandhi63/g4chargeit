@@ -169,7 +169,7 @@ def process_folder_parallel(folder_path, output_h5="processed-fieldmaps.h5",
     os.makedirs(os.path.dirname(output_h5), exist_ok=True)
 
     # 1. Concurrency Control: Use input or hardcoded safe default (4)
-    MAX_WORKERS = max(1, (os.cpu_count() or 2)//2)
+    MAX_WORKERS = os.cpu_count() #max(1, (os.cpu_count() or 2)//2)
     GZIP_COMPRESSION_LEVEL = 5
 
     # 📢 LOGGING: Print the worker count

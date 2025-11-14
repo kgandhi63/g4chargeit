@@ -16,7 +16,7 @@ import numpy as np
 # define the number of particles for the each iteration
 account, username = "pf17", "avira7"
 eventnumbers_onlysolarwind = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-eventnumbers_onlyphotoemission = 500000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlyphotoemission = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 iterationNUM = 200 # number of iterations to perform
 temperature = 425 # temperature for dissipation model, units: kelvin
@@ -32,8 +32,9 @@ finalOctreeDepth = 12
 chargeDissipation = "true"
 
 # define the size of the world
-CAD_dimensions = (300, 300, 373.2) # in units of microns
+CAD_dimensions = (400, 300, 373.2) # in units of microns
 particle_position = 15 # place all particles microns above the geometry
+buffer_plane = 20 # in units of microns
 bufferXY = 0 # in units of microns
 worldX = CAD_dimensions[0] + 2*bufferXY # in units of microns -- account for angle of beam
 worldY = CAD_dimensions[1] + 2*bufferXY # in units of microns
@@ -145,8 +146,8 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
         f.write('/gps/energy 1 keV\n') 
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
-        f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2} um\n')
-        f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2} um\n')
+        f.write(f'/gps/pos/halfx {CAD_dimensions[0]/2+buffer_plane} um\n')
+        f.write(f'/gps/pos/halfy {CAD_dimensions[1]/2+buffer_plane} um\n')
         f.write(f'/gps/pos/centre {XY_offset} 0 {Z_position} um\n')
         f.write(f'/gps/direction -{rotation} 0 -{rotation} \n')
         f.write('#\n')
