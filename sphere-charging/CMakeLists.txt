@@ -81,6 +81,7 @@ set(charging_scripts
     macro.mac
     testsolarwind.mac
     testphotons.mac
+    testwangphotons.mac
     vis.mac
   )
 

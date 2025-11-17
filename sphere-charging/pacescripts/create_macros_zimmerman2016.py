@@ -14,21 +14,21 @@ import numpy as np
 #############################################################
 
 # define the number of particles for the each iteration
-account, username = "pf17", "avira7"
+account, username = "zjiang33", "avira7"
 eventnumbers_onlysolarwind = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_onlyphotoemission = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-eventnumbers_allparticles = 10000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_allparticles = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 iterationNUM = 200 # number of iterations to perform
 temperature = 425 # temperature for dissipation model, units: kelvin
 density = 2.20 # density of SiO2, units: g/cm3
 #seedIN = [10008859, 10005380] # for debugging purposes
 
 # list of configurations
-config_list = ["onlysolarwind", "onlyphotoemission"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
-minStepList = [0.1, 0.05] # minimum step for Octree mesh for each case (units of um)
-initialOctreeDepth = 8
+config_list = ["onlysolarwind", "onlyphotoemission", "allparticles"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
+minStepList = [0.1, 0.05, 0.05] # minimum step for Octree mesh for each case (units of um)
+initialOctreeDepth = 8 
 gradPercent = 0.8
-finalOctreeDepth = 12
+finalOctreeDepth = 11 #12
 chargeDissipation = "true"
 
 # define the size of the world
@@ -153,7 +153,7 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
         f.write('#\n')
         f.write('/gps/source/add 1\n')
         f.write("/gps/particle e-\n")
-        f.write("/gps/source/intensity 2\n")
+        f.write("/gps/source/intensity 5\n")
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
         f.write("/gps/ene/diffspec true\n")
@@ -197,7 +197,7 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
         f.write('#\n')
         f.write('/gps/source/add 1\n')
         f.write("/gps/particle e-\n")
-        f.write("/gps/source/intensity 2\n")
+        f.write("/gps/source/intensity 5\n")
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
         f.write("/gps/ene/diffspec true\n")
@@ -211,7 +211,7 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
         f.write("/gps/ang/type iso\n")
         f.write('#\n')
         f.write('/gps/source/add 2\n')
-        f.write('/gps/source/intensity 15 \n') # trial and error to determine this intensity based on desired bulk concentration
+        f.write('/gps/source/intensity 13.3\n') # trial and error to determine this intensity based on desired bulk concentration
         f.write('/gps/particle gamma\n')
         f.write('/gps/pos/type Plane\n')
         f.write('/gps/pos/shape Square\n')
@@ -334,7 +334,9 @@ for optionIN,minStepIN in zip(config_list, minStepList):
             if optionIN == "onlyphotoemission":
                 iterationTime = (particlesforIteration["gamma"] / planeArea) / PEflux
             elif optionIN == "onlysolarwind":
-                iterationTime = (particlesforIteration["proton"] / planeArea) / SWions
+                iterationTime = (particlesforIteration["proton"] / planeArea) / SWions #, (particlesforIteration["e-"] / planeArea) / SWelectrons)
+            elif optionIN == "allparticles":
+                iterationTime = (particlesforIteration["gamma"] / planeArea) / PEflux #, (particlesforIteration["proton"] / planeArea) / SWions, (particlesforIteration["e-"] / planeArea) / SWelectrons)
             else:
                 iterationTime = 0
 

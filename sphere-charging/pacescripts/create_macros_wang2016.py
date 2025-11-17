@@ -16,9 +16,9 @@ import numpy as np
 # define the number of particles for the each iteration
 account, username = "zjiang33", "avira7"
 density = 1.9 # value from Wang manuscript, units: g/cm3
-temperature = 293 # temperature for dissipation model, units: kelvin (wang experiments done at room temp)
+temperature = 425 #293 # temperature for dissipation model, units: kelvin (wang experiments done at room temp)
 iterationNUM = 200 # number of iterations to perform
-seedIN = [10008859, 10005380] # set a random seed (useful for debugging)
+#seedIN = [10008859, 10005380] # set a random seed (useful for debugging)
 
 # values from Wang 2016 manuscript (only called in the "onlyelectrons" and "onlyUV" cases)
 electron_energy = 120 # units: eV
@@ -28,13 +28,19 @@ photonSource_center = 1239.8/photonSource_wavelength # units: eV
 photonSource_sigma = abs((1239.8/(photonSource_wavelength+photonSource_FWHM/2) - 1239.8/(photonSource_wavelength-photonSource_FWHM/2))/2.3548) # units: eV, convert FWHM to sigma
 
 # list of configurations and parameters for each configuration
-configList = ["onlyphotoemission", "onlyelectrons"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
+configList = ["onlyphotoemission", "onlysolarwind"]#["onlysolarwind", "onlyphotoemission", "allparticles"]
+
+# parameters from Wang et al. 2016 (based on their experimental setup)
 UVflux, eflux = np.array([5.05e-6, 2*3e-7])*6.241509e18 #units: A/m2 -> e/m2/s
+
+# parameters from Zimmerman et al. 2016 (based on lunar environment)
+PEflux, SWelectrons, SWions = np.array([4e-6, 1.5e-6, 3e-7])*6.241509e18 #units: A/m2 -> e/m2/s
+
 minStepList = [0.01, 0.1] # minimum step for Octree mesh for each case (units of um)
 #eventnumbersList = [100000, 100000]
 eventnumbersList = [50000, 50000]
 initialOctreeDepth = 8
-gradPercent = 0.8
+gradPercent = 0.7
 finalOctreeDepth = 11
 chargeDissipation = "true"
 
@@ -181,7 +187,7 @@ def write_macro(f, increment_filename, event_num, iterationTime, input_files=Non
         f.write('#\n')
         f.write('/gps/source/add 1\n')
         f.write("/gps/particle e-\n")
-        f.write("/gps/source/intensity 2\n")
+        f.write("/gps/source/intensity 5\n")
         f.write("/gps/ene/type Arb\n")
         f.write("/gps/hist/type arb\n")
         f.write("/gps/ene/diffspec true\n")
@@ -345,8 +351,10 @@ for optionIN,minStepIN,select_num in zip(configList, minStepList, eventnumbersLi
                 break  # STOP and wait for valid ROOT file
 
             # Calculate iteration time
-            if optionIN == "onlyUV" or optionIN == "onlyphotoemission":
-                iterationTime = (particlesforIteration["gamma"] / planeArea) / UVflux
+            if optionIN == "onlyphotoemission": #optionIN == "onlyUV" or 
+                iterationTime = (particlesforIteration["gamma"] / planeArea) / PEflux
+            elif optionIN == "onlysolarwind":
+                iterationTime = (particlesforIteration["proton"] / planeArea) / SWions
             elif optionIN == "onlyelectrons":
                 iterationTime = (particlesforIteration["e-"] / planeArea) / eflux
             else:
@@ -357,7 +365,7 @@ for optionIN,minStepIN,select_num in zip(configList, minStepList, eventnumbersLi
             increment_filename = f"{i:03d}_iteration{i}_{optionIN}_num{select_num}"
             macro_path = f"macros/{increment_filename}.mac"
             with open(macro_path, 'w') as f:
-                write_macro(f, increment_filename, select_num, iterationTime*(i+1),
+                write_macro(f, increment_filename, select_num, iterationTime, #*(i+1),
                             input_files=[f"{output_files[-1][0]}"], minStep=minStepIN)
             output_files.append((increment_filename + ".root", select_num, i, optionIN))
 
@@ -383,7 +391,7 @@ for optionIN,minStepIN,select_num in zip(configList, minStepList, eventnumbersLi
             increment_filename = f"{i:03d}_iteration{i}_{optionIN}_num{select_num}"
             macro_path = f"macros/{increment_filename}.mac"
             with open(macro_path, 'w') as f:
-                write_macro(f, increment_filename, select_num, iterationTime*(i+1),
+                write_macro(f, increment_filename, select_num, iterationTime, #*(i+1),
                             input_files=[f"{output_files[-1][0]}"], minStep=minStepIN)
             output_files.append((increment_filename + ".root", select_num, i, optionIN))
 

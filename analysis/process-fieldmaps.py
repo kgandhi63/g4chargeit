@@ -7,6 +7,7 @@ import struct
 import sys
 from numba import njit, prange 
 import h5py
+import trimesh
 
 # --- Full Function Implementations (Optimized Readers/Calculators) ---
 
@@ -229,12 +230,18 @@ if __name__ == "__main__":
         print("Example: python parallel_fieldmap_processor.py ../build-folder initial_run onlyphotoemission 425 4")
         sys.exit(1)
 
+    # load in geometry to get the center of the geometry 
+    #stacked_spheres_frompython_cropped.stl, isolated_grain_interpolated.stl
+    geometryIN = "stacked_spheres_frompython_cropped.stl"
+    geometry = trimesh.load_mesh(f'../sphere-charging/geometry/{geometryIN}') 
+    print(f"imported {geometryIN}, has a center of {geometry.centroid}")
+
     # 1. Parse arguments
     # python script.py <folder_path> [note] [config_tag] [saving_radius] [max_workers]
     folder_path = sys.argv[1]
     noteIN = sys.argv[2] if len(sys.argv) > 2 else 'single_config'
     configIN = sys.argv[3] if len(sys.argv) > 3 else 'onlyphotoemission' 
-    radiusIN = int(sys.argv[4]) if len(sys.argv) > 4 else 100 # units: µm
+    radiusIN = int(sys.argv[4]) if len(sys.argv) > 4 else 50 # units: µm
     
     # New argument: max_workers
     try:
@@ -244,7 +251,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # Fixed target and radius parameters (moved to main execution setup)
-    targetIN = np.array([-0.1, 0, 0.1 - 0.015 + 0.037])
+    targetIN = np.array([-0.1, 0, 0.1 + 0.037]) + geometry.centroid
     #targetIN = np.array([0.1, 0, 0.1 - 0.015 + 0.037])
     tempIN = 425  # units: K
 
