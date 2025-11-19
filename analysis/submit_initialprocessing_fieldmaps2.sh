@@ -12,5 +12,5 @@ source ~/.bashrc
 conda activate geant4-env
 
 echo "processing results for dissipationRefinedGrid-initial8max0.8final11 (PE case, 40 um sphere)"
-python process-fieldmaps.py "../build-zimmerman-comparison" 'PE_425K_initial8max0.8final12_RefinedGridDissipation_sphere40um_adjustedworld_through37' 'onlyphotoemission' 40
+python process-fieldmaps.py "/storage/scratch1/5/avira7/Grain-Charging-Simulation-Data/build-initial8max0.8final11-nodissipation-adjustedWorld" 'PE_425K_initial8max0.8final11_noDissipation_sphere40um_pos-0.1_through7X' 'onlyphotoemission' 40
 date
