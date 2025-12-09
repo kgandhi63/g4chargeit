@@ -2,105 +2,182 @@ import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
 
-## write the electron distribution ## 
+def maxwellian(v, vth):
+    """
+    Maxwellian distribution function.
+    
+    Parameters:
+    -----------
+    v : array-like
+        Velocity values
+    vth : float
+        Thermal velocity
+    
+    Returns:
+    --------
+    array-like
+        Distribution values at given velocities
+    """
+    return (1 / (vth * np.sqrt(np.pi))) * np.exp(-v**2 / vth**2)
 
-# Maxwellian parameters
-vthe = 10  # Thermal velocity
+def generate_maxwellian_distribution(vmin, vmax, nPoints, vth, scale_factor=1e-6, output_file=None):
+    """
+    Generate a Maxwellian velocity distribution and optionally save to file.
+    
+    Parameters:
+    -----------
+    vmin : float
+        Minimum velocity
+    vmax : float
+        Maximum velocity
+    nPoints : int
+        Number of discretization points
+    vth : float
+        Thermal velocity
+    scale_factor : float, optional
+        Scaling factor for velocities (default: 1e-6 for µm/ns to m/s)
+    output_file : str, optional
+        Output filename. If None, no file is written.
+    
+    Returns:
+    --------
+    tuple
+        (velocities_scaled, weights) arrays
+    """
+    # Discretize velocity range
+    velocities = np.linspace(vmin, vmax, nPoints + 1)
+    
+    # Compute weights and normalize
+    weights_raw = maxwellian(velocities, vth)
+    weights = weights_raw / np.sum(weights_raw)
+    
+    # Scale velocities (e.g., µm/ns → m/s: 1 µm/ns = 10^6 m/s)
+    velocities_scaled = velocities * scale_factor
+    
+    # Write to file if requested
+    if output_file:
+        lines = [f"{v:.6e} {w:.6e}" for v, w in zip(velocities_scaled, weights)]
+        with open(output_file, "w") as f:
+            f.write("\n".join(lines))
+        print(f"Exported {len(lines)} lines to {output_file}")
+    
+    return velocities_scaled, weights
 
-# Maxwellian distribution function
-def f(v):
-    return (1 / (vthe * np.sqrt(np.pi))) * np.exp(-v**2 / vthe**2)
+def interpolate_and_export_spectrum(csv_file, x_col, y_col, vmin, vmax, n_points, 
+                                     x_transform=None, scale_factor=1e-6, output_file=None):
+    """
+    Load spectrum data from CSV, interpolate over a new energy grid, and export.
+    
+    Parameters:
+    -----------
+    csv_file : str
+        Path to CSV file containing spectrum data
+    x_col : str
+        Name of x-axis column (energy/wavelength)
+    y_col : str
+        Name of y-axis column (intensity/flux)
+    vmin : float
+        Minimum energy for interpolation (eV)
+    vmax : float
+        Maximum energy for interpolation (eV)
+    n_points : int
+        Number of interpolation points
+    x_transform : callable, optional
+        Function to transform x-data (e.g., wavelength to energy conversion)
+    scale_factor : float, optional
+        Scaling factor for energies (default: 1e-6 for eV to MeV)
+    output_file : str, optional
+        Output filename. If None, no file is written.
+    
+    Returns:
+    --------
+    tuple
+        (energies_scaled, weights) arrays
+    """
+    # Load data
+    data = pd.read_csv(csv_file)
+    x_data = np.array(data[x_col])
+    y_data = np.array(data[y_col])
+    
+    # Apply transformation if provided (e.g., wavelength to energy)
+    if x_transform:
+        x_data = x_transform(x_data)
+    
+    # Normalize y-data
+    y_data = y_data / np.sum(y_data)
+    
+    # Sort by x-values
+    sorted_indices = np.argsort(x_data)
+    x_data = x_data[sorted_indices]
+    y_data = y_data[sorted_indices]
+    
+    print(f"Data range: {min(x_data):.2f} to {max(x_data):.2f} eV")
+    
+    # Create interpolation grid
+    x_interp = np.linspace(vmin, vmax, n_points)
+    
+    # Interpolate
+    interp_func = interp1d(x_data, y_data, kind='linear', 
+                          bounds_error=False, fill_value='extrapolate')
+    y_interp = interp_func(x_interp)
+    
+    # Scale energies
+    energies_scaled = x_interp * scale_factor
+    
+    # Write to file if requested
+    if output_file:
+        lines = [f"{energy:.6e} {weight:.6e}" 
+                for energy, weight in zip(energies_scaled, y_interp)]
+        with open(output_file, "w") as f:
+            f.write("\n".join(lines))
+        print(f"Exported {len(lines)} lines to {output_file}")
+    
+    return energies_scaled, y_interp
 
-# Range and sampling
-vmin = 0.0
-vmax = 100.0
-nPoints = 80
 
-# Discretize velocity range
-velocities = np.linspace(vmin, vmax, nPoints + 1)
+# =============================================================================
+# Generate Electron Distribution (Maxwellian)
+# =============================================================================
+print("Generating electron distribution...")
+electron_velocities, electron_weights = generate_maxwellian_distribution(
+    vmin=0.0,
+    vmax=100.0,
+    nPoints=80,
+    vth=10.0,  # Thermal velocity
+    scale_factor=1e-6,  # µm/ns to m/s
+    output_file="electronMaxwellian_distribution.txt"
+)
 
-# Compute weights and normalize
-weights_raw = f(velocities)
-weights = weights_raw / np.sum(weights_raw)
+# # =============================================================================
+# # Generate Photon Source Distribution (Feurerbacher 1972)
+# # =============================================================================
+# print("\nGenerating photon source distribution (Feurerbacher 1972)...")
+# photon_energies, photon_weights = interpolate_and_export_spectrum(
+#     csv_file="Fig4-Feurerbacher1972.csv",
+#     x_col="x",
+#     y_col=" y",
+#     vmin=5.0,
+#     vmax=30.0,
+#     n_points=1000,
+#     x_transform=None,  # Data already in eV
+#     scale_factor=1e-6,  # eV to MeV
+#     output_file="photonSource_distribution.txt"
+# )
 
-# Convert velocities to meters/second (from µm/ns → m/s if needed)
-# Example scale: if original velocities are in µm/ns, convert to m/s
-# Since 1 µm/ns = 10^6 m/s
-velocities_m_per_s = velocities * 1e-6
+# =============================================================================
+# Generate Solar Spectrum Distribution (Farrell Solar Minimum)
+# =============================================================================
+print("\nGenerating solar spectrum distribution (Farrell)...")
+solar_energies, solar_weights = interpolate_and_export_spectrum(
+    csv_file="Fig2-FarrellSolarMinimum.csv",
+    x_col="x",
+    y_col=" y",
+    vmin=8.1,
+    vmax=330.0,
+    n_points=1000,
+    x_transform=lambda wavelength_nm: 1240 / wavelength_nm,  # Convert wavelength (nm) to energy (eV)
+    scale_factor=1e-6,  # eV to MeV
+    output_file="photonSolar_distribution.txt"
+)
 
-# Generate lines in scientific notation
-lines = [
-    f"{v:.6e} {w:.6e}"
-    for v, w in zip(velocities_m_per_s, weights)
-]
-
-# Output file
-output_path = "electron_distribution.txt"
-with open(output_path, "w") as f_out:
-    f_out.write("\n".join(lines))
-
-print(f"Exported {len(lines)} lines to {output_path}")
-
-
-## write the photon distribution ## 
-
-# # Maxwellian parameters
-# vth = 1  # Thermal velocity
-# phi = 13.5 #8.14  # Shift (e.g., bandgap energy in eV)
-
-# # Shifted Maxwellian distribution function
-# def f(v):
-#     return (1 / (vth * np.sqrt(np.pi))) * np.exp(-((v - phi)**2) / vth**2)
-
-# # Range and sampling
-# vmin = 10 #0.0
-# vmax = 50.0
-# nPoints = 80
-
-# # Discretize velocity range
-# velocities = np.linspace(vmin, vmax, nPoints + 1)
-
-# # Compute weights and normalize
-# weights_raw = f(velocities)
-# weights = weights_raw / np.sum(weights_raw)
-
-# # Convert velocities to m/s (if needed) — matching the *10^-6 scaling in Mathematica
-# velocities_scaled = velocities * 1e-6
-
-# # Generate GPS-style command lines in scientific notation
-# lines = [
-#     f"{v:.6e} {w:.6e}"
-#     for v, w in zip(velocities_scaled, weights)
-# ]
-
-# read in digitize solar spectrum from literature
-solardata = pd.read_csv("Fig2-FarrellSolarMinimum.csv")
-solar_xdata, solar_ydata = 1240/np.array(solardata["x"]), solardata[" y"]/np.sum(solardata[" y"])
-
-# Sort by solar_xdata
-sorted_indices = np.argsort(solar_xdata)
-solar_xdata = solar_xdata[sorted_indices]
-solar_ydata = solar_ydata[sorted_indices]
-print(min(solar_xdata), max(solar_xdata))
-
-# Define new evenly spaced energy values (e.g., 1 to 5 eV with 0.01 eV steps)
-vmin = 8.1
-vmax = 80 #330.0
-x_interp = np.linspace(vmin, vmax, 1000)
-# Create interpolation function (linear or cubic)
-interp_func = interp1d(solar_xdata, solar_ydata, kind='linear', bounds_error=False, fill_value="extrapolate")
-# Get interpolated y-values
-y_interp = interp_func(x_interp)
-
-# Combine into lines: "energy weight" in scientific notation
-lines = [
-    f"{energy:.6e} {weight:.6e}"
-    for energy, weight in zip(x_interp*1e-6, y_interp)
-]
-
-# Export to file
-output_path = "photon_distribution_until80eV.txt"
-with open(output_path, "w") as f_out:
-    f_out.write("\n".join(lines))
-
-print(f"Exported {len(lines)} lines to {output_path}")
+print("\nAll distributions generated successfully!")

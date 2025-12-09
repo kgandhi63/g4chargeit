@@ -82,6 +82,7 @@ set(charging_scripts
     testsolarwind.mac
     testphotons.mac
     testwangphotons.mac
+    testphotons-irregular.mac
     vis.mac
   )
 

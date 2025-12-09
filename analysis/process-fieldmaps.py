@@ -232,7 +232,8 @@ if __name__ == "__main__":
 
     # load in geometry to get the center of the geometry 
     #stacked_spheres_frompython_cropped.stl, isolated_grain_interpolated.stl
-    geometryIN = "stacked_spheres_frompython_cropped.stl"
+    #geometryIN = "stacked_spheres_frompython_cropped.stl"
+    geometryIN = "isolated_grains_interpolated.stl"
     geometry = trimesh.load_mesh(f'../sphere-charging/geometry/{geometryIN}') 
     print(f"imported {geometryIN}, has a center of {geometry.centroid}")
 

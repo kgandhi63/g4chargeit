@@ -23,66 +23,46 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-/// \file hBNdet.cc
-/// \brief Main program of hBNdet project
-//
-//
+/// \file charging_sphere.cc
+/// \brief Main program 
 //
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
 #include "G4Types.hh"
-
-// #include "G4MPImanager.hh"
-// #include "G4MPIsession.hh"
-
 #include "G4MTRunManager.hh"
 #include "G4RunManager.hh"
 
 #include "G4UImanager.hh"
+#include "G4UIExecutive.hh"
+#include "G4VisExecutive.hh"
 #include "Randomize.hh"
 
 #include "DetectorConstruction.hh"
 #include "PhysicsList.hh"
 #include "ActionInitialization.hh"
 
-#include "G4UIExecutive.hh"
-#include "G4VisExecutive.hh"
-
-#include "G4ParticleHPManager.hh"
-#include "G4EmStandardPhysics_option4.hh"
-
-
 #include "G4PhysListFactory.hh"
 #include "G4VModularPhysicsList.hh"
+#include "G4ParticleHPManager.hh"
 #include "G4PeriodicBoundaryPhysics.hh"
 
-#include "G4StepLimiterPhysics.hh"
-#include "G4ProductionCutsTable.hh"
-
-#include "G4PeriodicBoundaryPhysics.hh"
-#include "G4StepLimiterPhysics.hh"
-#include "G4NuclearStopping.hh"
-#include "G4Proton.hh"
-
-#include "G4EmExtraPhysics.hh"
-
+#include "G4EmStandardPhysics_option4.hh"
 #include "G4EmStandardPhysicsSS.hh"
 #include "G4EmLowEPPhysics.hh"
-
-#include "G4ionIonisation.hh"
-#include "G4HadronElasticPhysicsHP.hh"
+#include "G4EmStandardPhysicsWVI.hh"
+#include "G4EmLowEPPhysics.hh"
+#include "G4EmParameters.hh"
+#include "G4EmLivermorePhysics.hh"
 
 #include "G4ParticleDefinition.hh"
 #include "G4LivermoreComptonModel.hh"
 #include "G4PhysicsListHelper.hh" 
-#include "G4EmStandardPhysicsWVI.hh"
-#include "G4EmLowEPPhysics.hh"
-//#include "G4PeriodicBoundaryPhysics.hh"
+#include "G4StepLimiterPhysics.hh"
+#include "G4ProductionCutsTable.hh"
 
 #include "G4LindhardSorensenIonModel.hh"
-#include "G4GenericIon.hh"
 #include "G4hIonisation.hh"
-#include "G4PhysicsListHelper.hh"
+#include "G4Proton.hh"
 
 #include <omp.h>
 
@@ -100,20 +80,7 @@ int main(int argc,char** argv) {
   // --------------------------------------------------------------------
   // MPI session
   // --------------------------------------------------------------------
-  // At first, G4MPImanager/G4MPIsession should be created.
-  // G4MPImanager* g4MPI = new G4MPImanager(argc, argv);
 
-  // // MPI session (G4MPIsession) instead of G4UIterminal
-  // // Terminal availability depends on your MPI implementation.
-  // G4MPIsession* session = g4MPI->GetMPIsession();
-
-  // // LAM/MPI users can use G4tcsh.
-  // G4String prompt = "[40;01;33m";
-  // prompt += "G4MPI";
-  // prompt += "[40;31m(%s)[40;36m[%/][00;30m:";
-  // session->SetPrompt(prompt);
-
-  // Add at the very beginning of main
   #ifdef _OPENMP
       G4cout << "=== OpenMP Configuration ===" << G4endl;
       G4cout << "OpenMP is enabled. Version: " << _OPENMP << G4endl;
@@ -144,47 +111,41 @@ int main(int argc,char** argv) {
   DetectorConstruction* det= new DetectorConstruction;
   runManager->SetUserInitialization(det);
 
-  // load all physics that we defined
-  //PhysicsList* physList = new PhysicsList;
-
   // doesn't do anything ...
   //G4ProductionCutsTable::GetProductionCutsTable()->SetEnergyRange(10*eV, 10*keV); 
 
   // Use PhysListFactory to get a reference physics list
   G4PhysListFactory factory; 
-   G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT_EMX"); //FTFP_BERT_EMX
-   //physList->RegisterPhysics(new G4StepLimiterPhysics); 
-   //physList->ReplacePhysics(new G4EmStandardPhysicsWVI);
-   //physList->ReplacePhysics(new G4EmLowEPPhysics);
-   physList->ReplacePhysics(new G4EmStandardPhysics_option4);
+   G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT_EMX");
+   // already included in FTFP_BERT_EMX: G4EmExtraPhysics, G4hImpactIonisation, G4IonQMDPhysics
 
-   //G4EmParameters* emParams = G4EmParameters::Instance();
-   //emParams->SetFluo(true);   // Enable fluorescence
-   //emParams->SetAuger(true);  // Enable Auger electrons
-   //emParams->SetPixe(true);   // Enable PIXE
-   //emParams->SetMinEnergy(1*eV); // Minimum kinetic energy for EM tables
+   //physList->RegisterPhysics(new G4StepLimiterPhysics); 
+   physList->ReplacePhysics(new G4EmStandardPhysicsWVI);
+   //physList->ReplacePhysics(new G4EmLowEPPhysics);
+   //physList->ReplacePhysics(new G4EmLivermorePhysics);
+   //physList->ReplacePhysics(new G4EmStandardPhysics_option4);
+
+  G4EmParameters* emParams = G4EmParameters::Instance();
+  emParams->SetFluo(true);   // Enable fluorescence
+  emParams->SetAuger(true);  // Enable Auger electrons
+  emParams->SetPixe(true);   // Enable PIXE
+  //emParams->SetQuantumEntanglement(true); // Enable quantum entanglement
 
   // G4ProcessManager* pmanager = G4Proton::Proton()->GetProcessManager();
-  // G4PhysicsListHelper* ph = G4PhysicsListHelper::GetPhysicsListHelper();
   // G4hIonisation* hIoni = new G4hIonisation();
   // G4VEmModel* mod = new G4LindhardSorensenIonModel();
   // hIoni->SetEmModel(mod);
   // pmanager->AddProcess(hIoni);
 
-  // // already included in FTFP_BERT_EMX: 
-  // // G4EmExtraPhysics, G4hImpactIonisation, G4IonQMDPhysics
-
-// // Add step limiter to all particles
+  // // Add step limiter to all particles
   // auto* stepLimitPhys = new G4StepLimiterPhysics();
   // stepLimitPhys->SetApplyToAll(true); // apply to all particles, not just charged
   // physList->RegisterPhysics(stepLimitPhys);
-
 
   // Add periodic boundary conditions
   G4PeriodicBoundaryPhysics* pbc = new G4PeriodicBoundaryPhysics("PBC", true, true, false); // Turn off pbc in Z direction
   pbc->SetVerboseLevel(0);
   physList->RegisterPhysics(pbc);
-  //G4cout << "Periodic Boundary Conditions activated" << G4endl;
 
   runManager->SetUserInitialization(physList);
   runManager->SetUserInitialization(new ActionInitialization());
@@ -212,26 +173,24 @@ int main(int argc,char** argv) {
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
 
   if (ui)  {
-   /// interactive mode
-   visManager = new G4VisExecutive;
-   visManager->Initialize();
-   ui->SessionStart();
-   delete ui;
+    /// interactive mode
+    visManager = new G4VisExecutive;
+    visManager->Initialize();
+    ui->SessionStart();
+    delete ui;
   }
   else  {
-   /// batch mode
-   G4String command1 = "/control/macroPath macros/";   
-   G4String command2 = "/control/execute ";
-   G4String fileName = argv[1];
-   UImanager->ApplyCommand(command1+fileName);
-   UImanager->ApplyCommand(command2+fileName);
+    /// batch mode
+    G4String command1 = "/control/macroPath macros/";   
+    G4String command2 = "/control/execute ";
+    G4String fileName = argv[1];
+    UImanager->ApplyCommand(command1+fileName);
+    UImanager->ApplyCommand(command2+fileName);
   }
 
-  /// job termination
+  // job termination
   delete visManager;
   delete runManager;
-  //delete g4MPI;
-
 
 }
 

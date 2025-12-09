@@ -16,9 +16,9 @@ import numpy as np
 # define the number of particles for the each iteration
 account, username = "zjiang33", "avira7"
 eventnumbers_onlysolarwind = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-eventnumbers_onlyphotoemission = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
+eventnumbers_onlyphotoemission = 10000000 # adjusted this number to reflect the timestep in Zimmerman manuscript
 eventnumbers_allparticles = 100000 # adjusted this number to reflect the timestep in Zimmerman manuscript
-iterationNUM = 200 # number of iterations to perform
+iterationNUM = 1 # number of iterations to perform
 temperature = 425 # temperature for dissipation model, units: kelvin
 density = 2.20 # density of SiO2, units: g/cm3
 #seedIN = [10008859, 10005380] # for debugging purposes

@@ -38,23 +38,63 @@ def load_h5_to_dict(filename):
 
     return data_dict
 
-def read_rootfile(file,directory_path=None):
-    #file = '00_iteration0_num5000.root' #'13_iteration5_from_num1000000.root'
-    file_path = f"{directory_path}/{file}"
+# def read_rootfile(file,directory_path=None):
+#     #file = '00_iteration0_num5000.root' #'13_iteration5_from_num1000000.root'
+#     file_path = f"{directory_path}/{file}"
+#     tree_name = "Hit Data"
+
+#     with uproot.open(file_path) as file:
+        
+#         tree = file[tree_name]
+#         branch_names = tree.keys()
+#         branch_vars = {}
+#         for name in branch_names:
+#             branch_vars[name] = tree[name].array(library="np")
+
+#     df = pd.DataFrame(branch_vars)
+#     df['Kinetic_Energy_Diff_eV'] = (df['Kinetic_Energy_Pre_MeV'] - df['Kinetic_Energy_Post_MeV'])*1e6 # convert to eV
+
+#     return df 
+
+def read_rootfile(file, directory_path=None, columns=None):
+    """
+    Read a ROOT file and return a pandas DataFrame with only the requested columns.
+    
+    Parameters:
+        file : str
+            ROOT filename.
+        directory_path : str
+            Path to the directory containing the file.
+        columns : list of str, optional
+            List of columns (branches) to read. If None, reads all branches.
+    
+    Returns:
+        pd.DataFrame
+    """
+    file_path = f"{directory_path}/{file}" if directory_path else file
     tree_name = "Hit Data"
 
-    with uproot.open(file_path) as file:
-        
-        tree = file[tree_name]
-        branch_names = tree.keys()
+    with uproot.open(file_path) as root_file:
+        tree = root_file[tree_name]
+
+        # If columns not specified, read all branches
+        if columns is None:
+            columns = tree.keys()
+
         branch_vars = {}
-        for name in branch_names:
-            branch_vars[name] = tree[name].array(library="np")
+        for name in columns:
+            if name in tree.keys():
+                branch_vars[name] = tree[name].array(library="np")
+            else:
+                print(f"Warning: branch '{name}' not found in tree '{tree_name}'")
 
     df = pd.DataFrame(branch_vars)
-    df['Kinetic_Energy_Diff_eV'] = (df['Kinetic_Energy_Pre_MeV'] - df['Kinetic_Energy_Post_MeV'])*1e6 # convert to eV
 
-    return df 
+    # Optionally compute Kinetic_Energy_Diff_eV only if pre/post columns are present
+    if 'Kinetic_Energy_Pre_MeV' in df.columns and 'Kinetic_Energy_Post_MeV' in df.columns:
+        df['Kinetic_Energy_Diff_eV'] = (df['Kinetic_Energy_Pre_MeV'] - df['Kinetic_Energy_Post_MeV']) * 1e6
+
+    return df
 
 def read_uniform_fieldmap(filename: str) -> pd.DataFrame:
     """
