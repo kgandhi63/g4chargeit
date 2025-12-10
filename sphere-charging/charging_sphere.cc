@@ -38,7 +38,6 @@
 #include "Randomize.hh"
 
 #include "DetectorConstruction.hh"
-#include "PhysicsList.hh"
 #include "ActionInitialization.hh"
 
 #include "G4PhysListFactory.hh"
@@ -120,10 +119,10 @@ int main(int argc,char** argv) {
    // already included in FTFP_BERT_EMX: G4EmExtraPhysics, G4hImpactIonisation, G4IonQMDPhysics
 
    //physList->RegisterPhysics(new G4StepLimiterPhysics); 
-   physList->ReplacePhysics(new G4EmStandardPhysicsWVI);
+   //physList->ReplacePhysics(new G4EmStandardPhysicsWVI);
    //physList->ReplacePhysics(new G4EmLowEPPhysics);
    //physList->ReplacePhysics(new G4EmLivermorePhysics);
-   //physList->ReplacePhysics(new G4EmStandardPhysics_option4);
+   physList->ReplacePhysics(new G4EmStandardPhysics_option4);
 
   G4EmParameters* emParams = G4EmParameters::Instance();
   emParams->SetFluo(true);   // Enable fluorescence

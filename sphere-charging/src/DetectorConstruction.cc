@@ -454,8 +454,8 @@ void DetectorConstruction::ConstructSDandField() {
 
   // set sensitive detector to the ENTIRE WORLD
   // only for creating figures of deflection and scattering of particles outside geometry
-  // otherwise uncomment this (makes ROOT files necessarly large)
-  logicWorld_->SetSensitiveDetector(sd);
+  // otherwise uncomment this (makes ROOT files unnecessarily large)
+  // logicWorld_->SetSensitiveDetector(sd);
 }
 
 
