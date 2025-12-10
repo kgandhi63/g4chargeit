@@ -17,32 +17,12 @@ find_package(g4pbc REQUIRED NO_MODULE)
 find_package(ROOT REQUIRED)
 find_package(OpenMP REQUIRED)
 
-# --- MODIFIED: Manually find FFTW3 to work around broken system configs ---
-find_path(FFTW3_INCLUDE_DIR fftw3.h
-  HINTS ENV FFTW_DIR
-  PATH_SUFFIXES include)
-find_library(FFTW3_LIBRARY_CORE NAMES fftw3
-  HINTS ENV FFTW_DIR
-  PATH_SUFFIXES lib lib64)
-find_library(FFTW3_LIBRARY_OMP NAMES fftw3_omp
-  HINTS ENV FFTW_DIR
-  PATH_SUFFIXES lib lib64)
-
-# Group the libraries together
-set(FFTW3_LIBRARIES ${FFTW3_LIBRARY_CORE} ${FFTW3_LIBRARY_OMP})
-
-if(NOT FFTW3_INCLUDE_DIR OR NOT FFTW3_LIBRARIES)
-  message(FATAL_ERROR "Could not find FFTW3. Please load the fftw module and set FFTW_DIR if necessary.")
-endif()
-
-
 #----------------------------------------------------------------------------
 # Setup include directories and compile definitions
 #
 include(${Geant4_USE_FILE})
 include_directories(${g4pbc_INCLUDE_DIRS})
 include_directories(${ROOT_INCLUDE_DIRS})
-include_directories(${FFTW3_INCLUDE_DIR}) # Add FFTW headers from manual find
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 #----------------------------------------------------------------------------
@@ -70,29 +50,23 @@ target_link_libraries(charging_sphere
     ${Geant4_LIBRARIES}
     g4pbc::g4pbc
     ${ROOT_LIBRARIES}
-    ${FFTW3_LIBRARIES}   # Use variable from manual find
     OpenMP::OpenMP_CXX   # Link OpenMP for multithreading
   )
 
-#----------------------------------------------------------------------------
-# Copy scripts and data to the build directory
-#
-set(charging_scripts
-    macro.mac
-    testsolarwind.mac
-    testphotons.mac
-    testwangphotons.mac
-    testphotons-irregular.mac
-    vis.mac
-  )
 
-foreach(_script ${charging_scripts})
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/test-macros)
+
+file(GLOB MACRO_FILES ${CMAKE_SOURCE_DIR}/test-macros/*)
+
+foreach(_script ${MACRO_FILES})
+  get_filename_component(_name ${_script} NAME)
   configure_file(
-    ${PROJECT_SOURCE_DIR}/${_script}
-    ${PROJECT_BINARY_DIR}/${_script}
+    ${_script}
+    ${PROJECT_BINARY_DIR}/test-macros/${_name}
     COPYONLY
-    )
+  )
 endforeach()
+
 
 file(GLOB PACE_SCRIPTS ${CMAKE_SOURCE_DIR}/pacescripts/*)
 file(GLOB DISTRIBUTIONS ${CMAKE_SOURCE_DIR}/distributions/*.txt)

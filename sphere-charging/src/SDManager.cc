@@ -48,8 +48,6 @@ SDManager* SDManager::GetInstance()
 
 SDManager* SDManager::singletonInstance_ = nullptr;
 SensitiveDetector* SDManager::sd_ = nullptr;
-// singletonInstance should be equal to 0, b/c we made it a static member so there is only one for the entire set of classes 
-// set to null, when someone calls GetInstance, it creates an object, then return the object
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......  
 

@@ -123,26 +123,16 @@ G4PhysicalVolumeStore::GetInstance()->Clean();
 G4LogicalVolumeStore::GetInstance()->Clean();
 G4SolidStore::GetInstance()->Clean();
 
-// Add dielectric Constant
 G4MaterialPropertiesTable* dielectric = new G4MaterialPropertiesTable();
 dielectric->AddConstProperty("Epsilon",  Epsilon_, true);
+G4int ncomponents,natoms;
 
-// Set Property to SiO2
-// G4Material* SiO2 = G4NistManager::Instance()->FindOrBuildMaterial("G4_SILICON_DIOXIDE");
-// SiO2->SetMaterialPropertiesTable(dielectric);
-
-// Set Property to SiO2
-G4int ncomponents,natoms; //, abundance;
-
-// mixture of HDPE and h10BN
 G4Material* SiO2 = new G4Material("SiO2", density_, ncomponents=2,
-    kStateSolid, materialTemperature_); //, 293.15*kelvin, 1*atmosphere
+    kStateSolid, materialTemperature_);
 
-// polyethlyene elements
 G4Element* Si = new G4Element("Silion","Si", 14., 28.0855*g/mole);
 G4Element* O = new G4Element("Oxygen", "O", 8., 16.00*g/mole);
 
-// add components
 SiO2->AddElement(Si, natoms=1);
 SiO2->AddElement(O, natoms=2);
 SiO2->SetMaterialPropertiesTable(dielectric);
@@ -154,17 +144,10 @@ G4bool checkOverlaps = false;
 
 // define vacuum 
 G4Material* world_mat = G4NistManager::Instance()->FindOrBuildMaterial("G4_Galactic");
-// G4Material* world_mat = new G4Material("Galactic", 1, 1.01*g/mole, universe_mean_density,
-//                 kStateGas, 400*kelvin, 1.e-7*pascal);
-
-// G4cout << "World Material: " << world_mat->GetName() << G4endl;
-// G4cout << "World Temperature: " << world_mat->GetTemperature() / kelvin << " K" << G4endl;
-// G4cout << "World Pressure: " << world_mat->GetPressure() / pascal << " Pa" << G4endl;
-// G4cout << "World Density: " << world_mat->GetDensity() / (g/cm3) << " g/cm3" << G4endl;
 
 G4Box* solidWorld =    
-  new G4Box("World",                       //its name
-      worldX_/2, worldY_/2, worldZ_/2);     //its size
+  new G4Box("World",                       
+      worldX_/2, worldY_/2, worldZ_/2);     
 
 G4cout << "World size: "
       << "X: " << G4BestUnit(worldX_, "Length") << ", "
@@ -173,20 +156,19 @@ G4cout << "World size: "
 
 
 logicWorld_ =                         
-  new G4LogicalVolume(solidWorld,          //its solid
-                      world_mat,           //its material
-                      "World");            //its name
+  new G4LogicalVolume(solidWorld,          
+                      world_mat,           
+                      "World");           
 
 G4VPhysicalVolume* physWorld = 
-  new G4PVPlacement(0,                     //no rotation
-                    G4ThreeVector(),       //at (0,0,0)
-                    logicWorld_,           //its logical volume
-                    "World",               //its name
-                    0,                     //its mother  volume
-                    false,                 //no boolean operation
-                    0,                     //copy number
-                    checkOverlaps);        //overlaps checking
-
+  new G4PVPlacement(0,                     
+                    G4ThreeVector(),       
+                    logicWorld_,           
+                    "World",               
+                    0,                     
+                    false,                 
+                    0,                     
+                    checkOverlaps);        
 if (boolPBC_)
 {
   G4PeriodicBoundaryBuilder* pbb = new G4PeriodicBoundaryBuilder();
@@ -194,8 +176,7 @@ if (boolPBC_)
   std::cout << "PBC set to logicWorld" << std::endl;
 }
 
-//G4VSolid* sphereSolid_;
- // Load In CAD Files (Check repo for other input files -KG) // Create Input from global variable
+
 if (!CADFile_.empty()) {
 
   std::string folder_name = "geometry";
@@ -206,7 +187,6 @@ if (!CADFile_.empty()) {
 
   auto sphere_mesh = CADMesh::TessellatedMesh::FromSTL(full_path);
   sphere_mesh->SetScale(Scale_);
-  // Get the solid
   sphereSolid_ = sphere_mesh->GetSolid();
 
 }
@@ -242,7 +222,7 @@ if (!RootInput_.empty()) {
                 std::cout << full_path << " successfully loaded!" << std::endl;
             } else {
                 std::cout << "Tree not found in file: " << full_path << std::endl;
-                continue;  // skip to next file
+                continue;  
             }
         } else {
             std::cout << "Failed to open file: " << full_path << std::endl;
@@ -267,7 +247,6 @@ if (!RootInput_.empty()) {
         tree->SetBranchAddress("Kinetic_Energy_Post_MeV", &kinetic_energy_post_mev);
         tree->SetBranchAddress("Particle_Type", &particle_type);
 
-        // Define the specific volume to filter
         const std::string target_volume = "SiO2";
 
         // Sets to track photon stops and unique holes
@@ -304,7 +283,6 @@ if (!RootInput_.empty()) {
                 fProtonPositions.push_back(pos);
             }
 
-            // Hole = first secondary electron (parent_id == 1) in event where photon stopped
             if (ptype == "e-" && parent_id == 1 && photonStops.count(event_number)) {
                 if (holeRecordedEvents.insert(event_number).second) {
                     G4ThreeVector pos((*pre_step_position)[0] * mm,
@@ -329,21 +307,14 @@ if (!RootInput_.empty()) {
 G4LogicalVolume*logicSphere= new G4LogicalVolume(sphereSolid_, SiO2 , SiO2->GetName());  
 
 
-new G4PVPlacement(0,                          	//no rotation
-              G4ThreeVector(0,0,0),     //at (0,0,0)
-              logicSphere,                               //its logical volume
-              SiO2->GetName(),               //its name
-              logicWorld_,                        //its mother volume
-              false,                              //no boolean operation
-              0);                                 //copy number
+new G4PVPlacement(0,                   
+              G4ThreeVector(0,0,0),   
+              logicSphere,                   
+              SiO2->GetName(),            
+              logicWorld_,            
+              false,                             
+              0);                                 
               
-
-//logicWorld_->SetVisAttributes(G4VisAttributes::GetInvisible());
-
-//G4double step = 1 * nm;
-//G4UserLimits* userLimits = new G4UserLimits(step);
-//logicSphere->SetUserLimits(userLimits);
-
 return physWorld;
 }
 
@@ -353,35 +324,29 @@ void DetectorConstruction::ConstructSDandField() {
   auto sd = sdManager->GetSD();
   G4SDManager::GetSDMpointer()->AddNewDetector(sd);
 
-  // Combine all positions and charges
   std::vector<G4ThreeVector> allPositions;
   std::vector<G4double> allCharges;
 
-  // Electrons (negative charge)
   G4double eCharge = -1.602e-19 * CLHEP::coulomb;
   for (const auto& pos : fElectronPositions) {
     allPositions.push_back(pos);
     allCharges.push_back(eCharge);
   }
-  // Protons (positive charge)
   G4double pCharge = +1.602e-19 * CLHEP::coulomb;
   for (const auto& pos : fProtonPositions) {
     allPositions.push_back(pos);
     allCharges.push_back(pCharge);
   }
-  // Holes (positive charge)
   G4double hCharge = +1.602e-19 * CLHEP::coulomb;
   for (const auto& pos : fHolePositions) {
     allPositions.push_back(pos);
     allCharges.push_back(hCharge);
   } 
 
-  // Define grid: 800 µm cube centered at origin, 2 µm step
-  G4ThreeVector min(-worldX_/2, -worldY_/2, -worldZ_/2); //-400*um, -400*um, -400*um);
-  G4ThreeVector max(worldX_/2, worldY_/2, worldZ_/2); // 400*um,  400*um,  400*um);
+  G4ThreeVector min(-worldX_/2, -worldY_/2, -worldZ_/2); 
+  G4ThreeVector max(worldX_/2, worldY_/2, worldZ_/2); 
   G4ThreeVector step(10*um, 10*um, 10*um);
 
-  // Only create adaptive field map if we have charge data
   if (!allPositions.empty() && !allCharges.empty()) {
 
     const G4double time_step_dt = equivalentIterationTime_ / second;
@@ -390,23 +355,18 @@ void DetectorConstruction::ConstructSDandField() {
 
     G4cout << "Starting Adaptive Field Map Precomputation" << G4endl;
 
-    // --- Print the requested values here ---
     G4cout << "   Final Octree Depth: " << octreeDepth_ << G4endl;
     G4cout << "   Minimum Step: " << G4BestUnit(fieldMinimumStep_,"Length") << G4endl;
-    // --------------------------------------
 
-    // Start timer
     auto start = std::chrono::high_resolution_clock::now();
 
     const G4double material_temperature = materialTemperature_ / kelvin;
-    //std::string state_filename = "charges.txt";
-    // Then create adaptive field map using the uniform one
     auto adaptiveFieldMap = new AdaptiveSumRadialFieldMap(
-        allPositions, allCharges, // Pass the uniform field map
-        fieldGradThreshold_,               // Gradient threshold (V/m per micron)
+        allPositions, allCharges, 
+        fieldGradThreshold_,              
         fieldMinimumStep_,
-        time_step_dt, // <-- Pass the time step
-        material_temperature,     // <-- Pass the temperature
+        time_step_dt, 
+        material_temperature,     
         charges_filename_,
         filename_,
         min, max,
@@ -421,18 +381,15 @@ void DetectorConstruction::ConstructSDandField() {
     std::chrono::duration<double> duration = end - start;
     G4cout << "Ending Adaptive Field Map Precomputation" << G4endl;
 
-    // Convert seconds to minutes (1 minute = 60 seconds)
     double duration_in_minutes = duration.count() / 60.0;
     G4cout << "Precomputation took " << duration_in_minutes << " minutes." << G4endl;
 
-    // Set up the field manager - NOW IT WILL WORK!
     auto worldFM = new G4FieldManager();
-    worldFM->SetDetectorField(adaptiveFieldMap);  // No error now!
+    worldFM->SetDetectorField(adaptiveFieldMap); 
     worldFM->SetMinimumEpsilonStep(1.0e-7);
     worldFM->SetMaximumEpsilonStep(1.0e-4);
     worldFM->SetDeltaOneStep(0.1*um);
 
-    // This will also work now!
     auto equation = new G4EqMagElectricField(adaptiveFieldMap);
     const G4int nvar = 8;
     auto stepper = new G4DormandPrince745(equation, nvar);
@@ -442,8 +399,7 @@ void DetectorConstruction::ConstructSDandField() {
 
     logicWorld_->SetFieldManager(worldFM, true);
   }
-
-  // Attach sensitive detector to daughters
+  //Set all the Daughters & World as sensitive Detectors
   G4int nD = logicWorld_->GetNoDaughters();
   for (G4int i = 0; i < nD; ++i) {
     auto lv = logicWorld_->GetDaughter(i)->GetLogicalVolume();
@@ -451,11 +407,6 @@ void DetectorConstruction::ConstructSDandField() {
       lv->SetSensitiveDetector(sd);
     }
   }
-
-  // set sensitive detector to the ENTIRE WORLD
-  // only for creating figures of deflection and scattering of particles outside geometry
-  // otherwise uncomment this (makes ROOT files unnecessarily large)
-  // logicWorld_->SetSensitiveDetector(sd);
 }
 
 

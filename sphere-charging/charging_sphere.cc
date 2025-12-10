@@ -88,58 +88,22 @@ int main(int argc,char** argv) {
       G4cout << "OpenMP is NOT enabled" << G4endl;
   #endif
 
-  // --------------------------------------------------------------------
-  // user application setting
-  // --------------------------------------------------------------------
-
   /// construct the default run manager
   G4RunManager* runManager = new G4RunManager;
-
-  // #ifdef G4MULTITHREADED
-  //   G4MTRunManager* runManager = new G4MTRunManager;
-  //   G4int numThreads = 2*(G4Threading::G4GetNumberOfCores());
-  //   runManager->SetNumberOfThreads(numThreads);
-  //   G4cout << "Multithreaded - Number of threads: " << numThreads << G4endl;
-  //   G4cout << "Number of cores: " << G4Threading::G4GetNumberOfCores() << G4endl;
-  // #else
-  //   G4RunManager* runManager = new G4RunManager;
-  //   G4cout << "Single threaded" << G4endl;
-  // #endif
 
   /// set mandatory initialization classes
   DetectorConstruction* det= new DetectorConstruction;
   runManager->SetUserInitialization(det);
 
-  // doesn't do anything ...
-  //G4ProductionCutsTable::GetProductionCutsTable()->SetEnergyRange(10*eV, 10*keV); 
-
   // Use PhysListFactory to get a reference physics list
   G4PhysListFactory factory; 
    G4VModularPhysicsList* physList=factory.GetReferencePhysList("FTFP_BERT_EMX");
-   // already included in FTFP_BERT_EMX: G4EmExtraPhysics, G4hImpactIonisation, G4IonQMDPhysics
-
-   //physList->RegisterPhysics(new G4StepLimiterPhysics); 
-   //physList->ReplacePhysics(new G4EmStandardPhysicsWVI);
-   //physList->ReplacePhysics(new G4EmLowEPPhysics);
-   //physList->ReplacePhysics(new G4EmLivermorePhysics);
    physList->ReplacePhysics(new G4EmStandardPhysics_option4);
 
   G4EmParameters* emParams = G4EmParameters::Instance();
   emParams->SetFluo(true);   // Enable fluorescence
   emParams->SetAuger(true);  // Enable Auger electrons
   emParams->SetPixe(true);   // Enable PIXE
-  //emParams->SetQuantumEntanglement(true); // Enable quantum entanglement
-
-  // G4ProcessManager* pmanager = G4Proton::Proton()->GetProcessManager();
-  // G4hIonisation* hIoni = new G4hIonisation();
-  // G4VEmModel* mod = new G4LindhardSorensenIonModel();
-  // hIoni->SetEmModel(mod);
-  // pmanager->AddProcess(hIoni);
-
-  // // Add step limiter to all particles
-  // auto* stepLimitPhys = new G4StepLimiterPhysics();
-  // stepLimitPhys->SetApplyToAll(true); // apply to all particles, not just charged
-  // physList->RegisterPhysics(stepLimitPhys);
 
   // Add periodic boundary conditions
   G4PeriodicBoundaryPhysics* pbc = new G4PeriodicBoundaryPhysics("PBC", true, true, false); // Turn off pbc in Z direction
@@ -160,13 +124,7 @@ int main(int argc,char** argv) {
   G4ParticleHPManager::GetInstance()->SetProduceFissionFragments( false );
   G4ParticleHPManager::GetInstance()->SetUseWendtFissionModel( false );
   G4ParticleHPManager::GetInstance()->SetUseNRESP71Model( false );
-  //G4ParticleHPManager::GetInstance()->SetSkipMissingIsotopes( true );
-  //G4ParticleHPManager::GetInstance()->SetDoNotAdjustFinalState( true );
-  //G4ParticleHPManager::GetInstance()->SetUseOnlyPhotoEvaporation( true );
-  //G4ParticleHPManager::GetInstance()->SetNeglectDoppler( true );
-  //G4ParticleHPManager::GetInstance()->SetProduceFissionFragments( true );
-  //G4ParticleHPManager::GetInstance()->SetUseWendtFissionModel( true );
-  //G4ParticleHPManager::GetInstance()->SetUseNRESP71Model( true );
+
 
   ///get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();

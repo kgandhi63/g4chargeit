@@ -14,17 +14,14 @@
 #include <atomic>              // For std::atomic counters
 #include <cstdint>             // For uint32_t, uint64_t in enums/export
 
-// Forward declaration if Node/ChargeNode structs are used internally only (Optional)
-// struct Node;
-// struct ChargeNode;
+\
 
 class AdaptiveSumRadialFieldMap : public G4ElectricField {
 
 public:
     // Enum to choose storage precision
-    enum class StorageType : uint32_t { Double = 0, Float = 1 }; // Explicit underlying type
+    enum class StorageType : uint32_t { Double = 0, Float = 1 };
 
-    // --- Constructor ---
     AdaptiveSumRadialFieldMap(
         std::vector<G4ThreeVector>& positions,
         std::vector<G4double>& charges,
@@ -42,13 +39,10 @@ public:
         StorageType storage = StorageType::Double
     );
 
-    // --- Destructor ---
     ~AdaptiveSumRadialFieldMap() override;
 
-    // --- G4ElectricField Interface ---
     void GetFieldValue(const G4double point[4], G4double field[6]) const override;
 
-    // --- Public Utility ---
     void ExportFieldMapToFile(const std::string& filename) const;
     void SaveFinalParticleState(const std::string& filename) const;
     void PrintMeshStatistics() const;
@@ -56,7 +50,6 @@ public:
 
 
 private:
-    // --- Nested Structures for Octree Nodes ---
     struct Node {
         G4ThreeVector min, max, center;
         G4ThreeVector precomputed_field = G4ThreeVector(0,0,0);
@@ -68,11 +61,10 @@ private:
         std::unique_ptr<ChargeNode> children[8] = {nullptr};
         G4ThreeVector center_of_mass = G4ThreeVector(0,0,0);
         G4double total_charge = 0.0;
-        int particle_index = -1; // -1:empty/internal, -2:aggregate, >=0:single particle index
+        int particle_index = -1; 
         bool is_leaf = true;
     };
 
-    // --- Member Variables ---
     int max_depth_;
     G4double minStepSize_;
     G4ThreeVector worldMin_;
@@ -83,53 +75,48 @@ private:
     int initialDepth_;
     bool dissipateCharge_;
 
-    // References to the master particle data
     std::vector<G4ThreeVector>& fPositions;
     std::vector<G4double>& fCharges;
     std::string fStateFilename;
 
-    // Octree roots
+
     std::unique_ptr<Node> root_;
     std::unique_ptr<ChargeNode> charge_root_;
 
-    // List of final leaf nodes in the field map octree (pointers to nodes owned by root_)
+
     std::vector<Node*> all_leaves_;
 
-    // Statistics counters (atomic for thread safety during parallel build/refine)
+
     std::atomic<int> total_nodes_;
     std::atomic<int> leaf_nodes_; // Tracks final leaf count
     std::atomic<int> gradient_refinements_;
     std::atomic<int> max_depth_reached_; // Use atomic for max during parallel refine
 
 
-    // --- Private Helper Functions ---
 
+    
     void LoadPersistentState(const std::string& filename,
                                std::vector<G4ThreeVector>& positions, // Modify external vectors
                                std::vector<G4double>& charges);
 
-    // Field Map Octree
     std::unique_ptr<Node> buildFromScratch();
-    // *** ADDED DECLARATION to match .cc file ***
+
     std::unique_ptr<Node> createOctreeFromScratch(const G4ThreeVector& min_bounds, const G4ThreeVector& max_bounds, int depth);
     void refineMeshByGradient(Node* node, int depth);
     bool hasHighFieldGradient(const G4ThreeVector& center, const G4ThreeVector& center_field, double sample_distance) const;
     void collectFinalLeaves(Node* node);
     G4ThreeVector evaluateFieldRecursive(const G4ThreeVector& point, const Node* node) const;
 
-    // Barnes-Hut Octree
     void buildChargeOctree();
     void insertCharge(ChargeNode* node, int particle_index, const G4ThreeVector& min_bounds, const G4ThreeVector& max_bounds);
     G4ThreeVector computeFieldWithApproximation(const G4ThreeVector& point, const ChargeNode* node, const G4ThreeVector& node_min, const G4ThreeVector& node_max) const;
     G4ThreeVector computeFieldFromCharges(const G4ThreeVector& point) const;
     void buildUniformGrid(Node* node, int depth);
     Node* findLeafNode(const G4ThreeVector& point, Node* node) const; // <-- Add this
-    // Charge Dissipation
     void ApplyChargeDissipation(G4double dt, G4double temp_K);
     double calculateConductivity(double temp_K) const;
     void distributeChargeChange(const std::vector<int>& particle_indices, G4double total_charge_change);
 
-    // General Utilities
     bool pointInside(const G4ThreeVector& min_bounds, const G4ThreeVector& max_bounds, const G4ThreeVector& point) const;
     void calculateBoundingBox(G4ThreeVector& min_box, G4ThreeVector& max_box) const;
     void calculateChildBounds(const G4ThreeVector& parent_min, const G4ThreeVector& parent_max,
@@ -137,9 +124,8 @@ private:
                               G4ThreeVector& child_min, G4ThreeVector& child_max) const;
     void collectStatistics(const Node* node, int depth);
 
-    // File I/O Helpers
     void writeFieldPointsToFileRecursive(std::ofstream& outfile, const Node* node) const;
 
-}; // End of class AdaptiveSumRadialFieldMap
+}; 
 
-#endif // AdaptiveSumRadialFieldMap_h
+#endif 

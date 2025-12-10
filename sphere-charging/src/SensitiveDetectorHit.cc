@@ -34,42 +34,33 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-// -- one more nasty trick for new and delete operator overloading:
 G4Allocator<SensitiveDetectorHit> SDHitAllocator;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
  
-SensitiveDetectorHit::SensitiveDetectorHit(const G4Step* step) // no need for strip, write parentID instead
-// const means that the compiler won't let you modify the step, which is what we want
-  
-// <<-- note BTW this is the only way to initialize a "const" member
-{
+SensitiveDetectorHit::SensitiveDetectorHit(const G4Step* step) {
    
    // step info for particle tree
    const G4VProcess* currentProcess = step -> GetPreStepPoint() ->GetProcessDefinedStep();  
    
-   if (currentProcess != 0){ // save the step process if it exists
+   if (currentProcess != 0){ 
 	processPre_ = step -> GetPreStepPoint() -> GetProcessDefinedStep() -> GetProcessName();
    }
-   else processPre_ = "initStep"; // otherwise show that it is an initial step (particle creation)
+   else processPre_ = "initStep"; 
 
    processPost_ = step -> GetPostStepPoint() -> GetProcessDefinedStep() -> GetProcessName();
    particleType_ = step -> GetTrack() -> GetParticleDefinition() -> GetParticleName();
    volumePre_ = step -> GetPreStepPoint() -> GetPhysicalVolume() -> GetName();
  
-   if (step -> GetPostStepPoint() -> GetPhysicalVolume() != 0){ // save the post volume name if it exists
+   if (step -> GetPostStepPoint() -> GetPhysicalVolume() != 0){ 
 	volumePost_ = step -> GetPostStepPoint() -> GetPhysicalVolume() -> GetName();
    }
-   else volumePost_ = "OutOfWorld"; // otherwise show that the particle went out of the world
+   else volumePost_ = "OutOfWorld"; 
 
-   // step info for energy tree
-   //eDep_ = step -> GetTotalEnergyDeposit(); // get energy deposition from the step, extract the parent ID
-   //nonIeDep_ = step -> GetNonIonizingEnergyDeposit();
+
    kineticEnergyPre_ = step -> GetPreStepPoint() -> GetKineticEnergy();
    kineticEnergyPost_ = step -> GetPostStepPoint() -> GetKineticEnergy();
    parentID_ = step -> GetTrack() -> GetParentID();
-   //chargePre_ = step -> GetPreStepPoint() -> GetCharge();
-   //chargePost_ = step -> GetPostStepPoint() -> GetCharge();
 
    // step info for particle pre position
    postPreX_ = step -> GetPreStepPoint() -> GetPosition().x();
@@ -80,7 +71,6 @@ SensitiveDetectorHit::SensitiveDetectorHit(const G4Step* step) // no need for st
    postPostX_ = step -> GetPostStepPoint() -> GetPosition().x();
    postPostY_ = step -> GetPostStepPoint() -> GetPosition().y();
    postPostZ_ = step -> GetPostStepPoint() -> GetPosition().z(); 
-   // verified that GetTrack() gives the same position as the PostStep Position
  
 }
 
