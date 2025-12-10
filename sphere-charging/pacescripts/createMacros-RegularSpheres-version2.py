@@ -21,8 +21,8 @@ from shared_utils import (
 account, username = "zjiang33-paid", "avira7"
 
 # Number of particles for each iteration
-eventnumbers_onlysolarwind = 1000000
-eventnumbers_onlyphotoemission = 1000000
+eventnumbers_onlysolarwind = 100000
+eventnumbers_onlyphotoemission = 100000
 iterationNUM = 200
 
 # Material properties

@@ -56,8 +56,8 @@ electron_intensity, photon_intensity = SWelectrons / SWions, PEflux / SWions
 
 # Mesh and simulation parameters
 minStepList = [0.01, 0.01]  # Minimum step for Octree mesh (µm)
-eventnumbersList = [1000000, 1000000] # for illumination plots
-#eventnumbersList = [50000, 50000]  # for iterations
+#eventnumbersList = [1000000, 1000000] # for illumination plots
+eventnumbersList = [50000, 50000]  # for iterations
 initialOctreeDepth = 8
 gradPercent = 0.7
 finalOctreeDepth = 11
@@ -67,7 +67,7 @@ chargeDissipation = "true"
 CAD_filename = "isolated_grains_interpolated.stl"  # STL file to import
 CAD_dimensions = (107.00044, 120.77438, 100.29045)  # µm
 particle_position = 40  # µm above geometry
-bufferXYworld = 20  # µm
+bufferXYworld = 0  # µm
 worldX = CAD_dimensions[0] + 2*bufferXYworld  # µm
 worldY = CAD_dimensions[1] + 2*bufferXYworld  # µm
 worldZ = CAD_dimensions[2] + 2*particle_position  # µm
