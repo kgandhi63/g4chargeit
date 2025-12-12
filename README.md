@@ -18,10 +18,15 @@ The following is accomplished with the G4ChargeIt module:
 # Dependancies
 Ensure the following packages are installed: 
 > `gcc/12.3.0`
+
 > `cmake/3.11.3`
+
 > `root/6.30.04`
+
 > `xerces-c/3.30.2`
+
 > `openmpi/4.1.5`
+
 > `geant4/11.3.0`
 
 # Obtaining Source Code
@@ -47,7 +52,9 @@ The simulation is built using the CMake compiler. The source code is located in 
 Configure the run-time environment by sourcing the configuration script of your geant4 installation, then perform an out-of-source build:
 
 > `source <path_to_geant4_install>/bin/geant4.sh`
+
 > `mkdir build`
+
 > `cd build/`
 
 Run the following `cmake` command with the appropriate tags to configure the project with MPI and OpenMP support:
