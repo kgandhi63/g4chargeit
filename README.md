@@ -79,18 +79,18 @@ Two cases will be run, solar wind irradiation and photons. To create macros for 
 > `sbatch batchscripts/000_iteration0_onlysolarwind_num100000.root`
 > 
 > `sbatch batchscripts/000_iteration0_onlyphotoemission_num100000.root`
-> 
+
+Then recreate all macro files:
+
 > `python createMacros-RegularSpheres.py`
 
-Then we setn a number of iterations once the 0th iterations have completed:
+Multiple jobs can be submitted through the HPC using:
 
 > `python create_submission_file.py [startIterationNum] [endIterationNum] [irradiationCase]`
-
-A `submit_iterations.sh` script will appear and can be submit through the HPC using:
-
+>
 >  `./submit_iterations.sh`
 
-This will start your thread of simulations that can be viewed in output logs. 
+This will start your thread of simulations that can be viewed in the `outputlogs`. 
 
 
 ## Analysis
