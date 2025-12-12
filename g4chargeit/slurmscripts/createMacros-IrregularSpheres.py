@@ -18,11 +18,11 @@ from shared_utils import (
 #############################################################
 
 # Account and user settings
-account, username = "zjiang33-paid", "avira7"
+account, username = "zjiang33", "avira7"
 
 # Number of particles for each iteration
-eventnumbers_onlysolarwind = 50000 #1000000 #50000 #1000000
-eventnumbers_onlyphotoemission =50000 #1000000 #50000#1000000
+eventnumbers_onlysolarwind = 1000000 #1000000 #10000 #1000000
+eventnumbers_onlyphotoemission =1000000 #1000000 #10000#1000000
 iterationNUM = 200
 
 # Material properties
@@ -45,24 +45,18 @@ chargeDissipation = "true"
 
 # Geometry and CAD settings
 CAD_filename = "irregular_spheres_frompython.stl"
-CAD_dimensions = (120, 105, 137)  # µm
-particle_position = 40  # µm above geometry
-bufferXYworld = 20  # µm
-
-# World dimensions
-worldX = CAD_dimensions[0] + 2*bufferXYworld  # µm
-worldY = CAD_dimensions[1] + 2*bufferXYworld  # µm
-worldZ = CAD_dimensions[2] + 2*particle_position  # µm
+worldX, worldY, worldZ = (120, 105, 202)  # µm
+illumination_plane_Zoffset = 10  # µm above geometry
 
 # Calculate offset for SW ions at 45 degrees
-Z_position = CAD_dimensions[2]/2 + particle_position
-XY_offset = Z_position - CAD_dimensions[2]/2 + bufferXYworld
+Z_position = worldZ/2 #+ illumination_plane_Zoffset
+XY_offset = 40 #Z_position - worldZ/2
 bufferX_direction = 0 #XY_offset/2  # µm
 rotation = np.sin(45*np.pi/180)
 
 # Flux values from Zimmerman 2016 manuscript (A/m² -> e/m²/s)
 PEflux, SWelectrons, SWions = np.array([4e-6, 1.5e-6, 3e-7]) * 6.241509e18
-planeArea = CAD_dimensions[0]*CAD_dimensions[1]/ (1e6**2)  # m²
+planeArea = worldX*worldY/ (1e6**2)  # m²
 electron_intensity, photon_intensity = SWelectrons / SWions, PEflux / SWions
 # print out the lunar environment parameters
 print(f"PE flux: {PEflux:.2e} e/m²/s, SW e- flux: {SWelectrons:.2e} e/m²/s, SW ions flux: {SWions:.2e} e/m²/s")
@@ -127,13 +121,13 @@ def write_macro(f, increment_filename, event_num, iterationTime,
     
     # Select particle source based on configuration
     if "onlysolarwind" in increment_filename:
-        write_particle_source_solarwind(f, CAD_dimensions, XY_offset, Z_position, 
+        write_particle_source_solarwind(f, (worldX,worldY,worldZ), XY_offset, Z_position, 
                                        rotation, bufferX_direction, "electronMaxwellian_distribution.txt", electron_intensity)
     elif "onlyphotoemission" in increment_filename:
-        write_particle_source_photoemission(f, CAD_dimensions, XY_offset, Z_position, 
+        write_particle_source_photoemission(f, (worldX,worldY,worldZ), XY_offset, Z_position, 
                                            rotation, bufferX_direction, "photonSolar_distribution.txt")
     elif "allparticles" in increment_filename:
-        write_particle_source_allparticles(f, CAD_dimensions, XY_offset, Z_position, 
+        write_particle_source_allparticles(f, (worldX,worldY,worldZ), XY_offset, Z_position, 
                                           rotation, bufferX_direction, "electronMaxwellian_distribution.txt",electron_intensity,
                                           "photonSolar_distribution.txt", photon_intensity)
     else:
