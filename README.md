@@ -29,7 +29,7 @@ Ensure the following packages are installed:
 
 Clone this repository with the following command:
 
-> `git clone https://github.com/avira7/Grain-Charging-Simulations.git`
+> `git clone https://github.com/avira7/g4chargeit.git`
 
 # Environment Setup
 Before compiling, you must ensure that you have linked periodic boundary conditions in Geant4. 
@@ -43,7 +43,7 @@ Then export the installation in your bash script as a global variable:
 > `export G4PBC=/path/to/g4pbc/installation`
 
 # Build & Run
-The simulation is built using the CMake compiler. The source code is located in the `sphere-charging` directory. 
+The simulation is built using the CMake compiler. The source code is located in the `g4chargeit` directory. 
 
 Configure the run-time environment by sourcing the configuration script of your geant4 installation, then perform an out-of-source build:
 
