@@ -72,7 +72,7 @@ A single iteration can be run using `/control/execute test-macros/testphotons-re
 ## Example Application 
 An application is provided. Submission scripts are generated for the charging of lunar regolith in the presence of photoelectrons and solar wind. Our example assumes the simulations are being run on a high performance cluster using the SLURM job scheduling system. The exact HPC batch commands will need to be change to reflect your computing environment. 
 
-To create macros for a series of iterations, we first need to run the 0th iteration then create the full series of iterations:
+Two cases will be run, solar wind irradiation and photons. To create macros for a series of iterations, we first need to run the 0th iteration:
 
 > `python createMacros-RegularSpheres.py`
 > 
@@ -82,9 +82,7 @@ To create macros for a series of iterations, we first need to run the 0th iterat
 > 
 > `python createMacros-RegularSpheres.py`
 
-Two cases will be run: solar wind irradiation and photons.
-
-Below is an example of setting a specific amount of iterations once the initial iterations have completed:
+Then we setn a number of iterations once the 0th iterations have completed:
 
 > `python create_submission_file.py [startIterationNum] [endIterationNum] [irradiationCase]`
 
