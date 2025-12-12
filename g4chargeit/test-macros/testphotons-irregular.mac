@@ -1,0 +1,67 @@
+# Macro file for testing photons
+#
+/control/verbose 0
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+/process/verbose 0
+/process/had/verbose 0
+/process/em/verbose 0
+#/cuts/setLowEdge 70 keV
+#
+/random/setSeeds 10008859 10005380
+/random/setSavingFlag 1
+#
+/process/em/fluo true
+/process/em/auger true
+/process/em/augerCascade true
+/process/em/deexcitationIgnoreCut true
+/process/em/Polarisation true
+/process/em/PhotoeffectBelowKShell true
+#
+/process/em/lowestElectronEnergy 0 eV
+/process/em/lowestMuHadEnergy 10 eV
+/process/em/enableSamplingTable 1
+#
+/process/eLoss/CSDARange 1
+/process/eLoss/UseICRU90 1
+/process/eLoss/UseAngularGenerator true
+#
+/sphere/worldX 120 um
+/sphere/worldY 105 um
+/sphere/worldZ 167 um
+/sphere/MaterialTemperature 425 K
+/sphere/MaterialDensity 1.9 g/cm3
+/sphere/IterationTime 0 s
+/sphere/ApplyChargeDissipation true
+/sphere/field/InitialDepth 8
+/sphere/field/MinimumStep 0.05 um
+/sphere/field/PercentGradThreshold 0.8
+/sphere/field/OctreeDepth 11
+/sphere/field/file test-fieldmap.txt 
+/sphere/charges/file test-charges.txt
+#
+/sphere/rootoutput/file test-rootOutput.root
+/sphere/cadinput/file irregular_spheres_frompython.stl
+#/sphere/cadinput/scale 0.001
+/sphere/epsilon 4
+/sphere/PBC true
+/run/initialize
+#
+/gps/particle gamma
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 80.0 um
+/gps/pos/halfy 72.5 um
+/gps/pos/centre 15.0 0 83.5 um
+/gps/direction -0.7071067811865475 0 -0.7071067811865475 
+/gps/ene/type Arb
+/gps/hist/type arb
+/gps/ene/diffspec true
+/gps/hist/file photon_distribution.txt
+/gps/hist/inter Lin
+#
+/control/execute vis.mac
+#
+/run/printProgress 100
+/run/beamOn 100
