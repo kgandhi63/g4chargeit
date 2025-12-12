@@ -58,7 +58,7 @@ Configure the run-time environment by sourcing the configuration script of your 
 
 Run the following `cmake` command with the appropriate tags to configure the project with MPI and OpenMP support:
 
-> `cmake -Dg4pbc_DIR=$G4PBC -DCMAKE_CXX_COMPILER=$(which mpicxx) -DCMAKE_CXX_FLAGS="-fopenmp" ../sphere-charging/`
+> `cmake -Dg4pbc_DIR=$G4PBC -DCMAKE_CXX_COMPILER=$(which mpicxx) -DCMAKE_CXX_FLAGS="-fopenmp" ../g4chargeit/`
 
 Once compiled, edit or create a new submission python script with your desired parameters. CAD files of arbitarary geometries can be used in STL ASCII format. All source files have already been explicitly included in CMakeLists.txt.
 
