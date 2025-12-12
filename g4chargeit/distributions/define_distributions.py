@@ -18,7 +18,7 @@ def maxwellian(v, vth):
     array-like
         Distribution values at given velocities
     """
-    return (1 / (vth * np.sqrt(np.pi))) * np.exp(-v**2 / vth**2)
+    return (v**2 / (vth * np.sqrt(np.pi))) * np.exp(-v**2 / vth**2)
 
 def generate_maxwellian_distribution(vmin, vmax, nPoints, vth, scale_factor=1e-6, output_file=None):
     """

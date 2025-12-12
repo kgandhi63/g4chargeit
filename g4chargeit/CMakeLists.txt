@@ -68,7 +68,7 @@ foreach(_script ${MACRO_FILES})
 endforeach()
 
 
-file(GLOB PACE_SCRIPTS ${CMAKE_SOURCE_DIR}/pacescripts/*)
+file(GLOB PACE_SCRIPTS ${CMAKE_SOURCE_DIR}/slurmscripts/*)
 file(GLOB DISTRIBUTIONS ${CMAKE_SOURCE_DIR}/distributions/*.txt)
 file(COPY ${PACE_SCRIPTS} DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${DISTRIBUTIONS} DESTINATION ${CMAKE_BINARY_DIR})
