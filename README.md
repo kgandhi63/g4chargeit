@@ -75,13 +75,16 @@ An application is provided. Submission scripts are generated for the charging of
 To create macros for a series of iterations, we first need to run the 0th iteration then create the full series of iterations:
 
 > `python createMacros-RegularSpheres.py`
+> 
 > `sbatch batchscripts/000_iteration0_onlysolarwind_num100000.root`
+> 
 > `sbatch batchscripts/000_iteration0_onlyphotoemission_num100000.root`
+> 
 > `python createMacros-RegularSpheres.py`
 
 Two cases will be run: solar wind irradiation and photons.
 
-Example submit before running `make`:
+Below is an example of setting a specific amount of iterations once the initial iterations have completed:
 
 > `python create_submission_file.py [startIterationNum] [endIterationNum] [irradiationCase]`
 
@@ -90,7 +93,6 @@ A `submit_iterations.sh` script will appear and can be submit through the HPC us
 >  `./submit_iterations.sh`
 
 This will start your thread of simulations that can be viewed in output logs. 
-
 
 
 ## Analysis
