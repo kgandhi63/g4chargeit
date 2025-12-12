@@ -485,7 +485,7 @@ def create_batch_script(batch_path, iteration, config_name, macro_path, account,
     username : str
         Username for email notifications
     """
-    cmd = f"./charging_sphere {macro_path}"
+    cmd = f"./g4chargeit {macro_path}"
     
     with open(batch_path, "w") as f:
         batch_script = BATCH_TEMPLATE.format(
