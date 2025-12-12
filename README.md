@@ -9,7 +9,7 @@ The following is accomplished with the g4chargeit module:
 * a general electric field solver is natively implemented to model electric charging of dielectric materials
 * time steps are discretized baesd on the relative fluence of incident particle distributions
 * geometry surface charge  is conserved and carried over to each submitted iteration
-* provides an analysis tool kit to demonstrate the charging of arbitrary geometric configurations
+* provides an analysis toolkit to demonstrate the charging of arbitrary geometric configurations
 
 # Dependancies
 Ensure the following packages are installed: 
