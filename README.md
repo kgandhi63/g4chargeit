@@ -1,18 +1,15 @@
 # Description
 
-This package contains a high-performance Monte Carlo simulation framework based on the open source package *Geant4* for modeling the time-dependent electrostatic charging of dielectric materials. This document assumes that you are familiar with developing applications based on the Geant4 Monte Carlo toolkit using a linux environment.  
+This package contains a Monte Carlo simulation framework based on the open source package Geant4 for modeling the time-dependent electrostatic charging of dielectric materials. This document assumes that you are familiar with developing applications based on the Geant4 Monte Carlo toolkit using a linux environment.  
 
+The g4chargeit package adds the functionality of iterative event based simulations to the Geant4 Monte Carlo toolkit.
 
-The G4ChargeIt package adds the functionality of iterative event based simulations to the Geant4 Monte Carlo toolkit.
-
-The following is accomplished with the G4ChargeIt module:
+The following is accomplished with the g4chargeit module:
 * iterations of simulations are generated and run sequentially
 * a general electric field solver is natively implemented to model electric charging of dielectric materials
 * time steps are discretized baesd on the relative fluence of incident particle distributions
 * geometry surface charge  is conserved and carried over to each submitted iteration
 * provides an analysis tool kit to demonstrate the charging of arbitrary geometric configurations
-
-
 
 # Dependancies
 Ensure the following packages are installed: 
@@ -66,23 +63,35 @@ Compile the code using `make`. The `-j` flag enables parallel compilation to spe
 
 > `make -j<number_processors>`
 
-A `submit_iterations.sh` script will appear, simply run:
+An executable called `g4chargeit` will appear, simply run:
+
+>  `./g4chargeit`
+
+A single iteration can be run using `/control/execute test-macros/testphotons-regular.mac`.
+
+## Example Application 
+An application is provided. Submission scripts are generated for the charging of lunar regolith in the presence of photoelectrons and solar wind. Our example assumes the simulations are being run on a high performance cluster using the SLURM job scheduling system. The exact HPC batch commands will need to be change to reflect your computing environment. 
+
+To create macros for a series of iterations, we first need to run the 0th iteration then create the full series of iterations:
+
+> `python createMacros-RegularSpheres.py`
+> `sbatch batchscripts/000_iteration0_onlysolarwind_num100000.root`
+> `sbatch batchscripts/000_iteration0_onlyphotoemission_num100000.root`
+> `python createMacros-RegularSpheres.py`
+
+Two cases will be run: solar wind irradiation and photons.
+
+Example submit before running `make`:
+
+> `python create_submission_file.py [startIterationNum] [endIterationNum] [irradiationCase]`
+
+A `submit_iterations.sh` script will appear and can be submit through the HPC using:
 
 >  `./submit_iterations.sh`
 
 This will start your thread of simulations that can be viewed in output logs. 
-## Example Application 
-An application is already provided. Submission scripts are generated for the charging of lunar regolith in the presence of photoelectrons and solar wind. Our example assumes the simulations are being run on a high performance cluster using the SLURM job scheduling system. The exact HPC batch commands will need to be change to reflect your computing environment. 
 
-To run the example submit before running `make`:
 
-> `python create_submission_file.py`
-
-Then run `make` and submit: 
-
->  `./submit_iterations.sh`
-
-Three cases will be run: solar wind irradiation, photoemission, and a combination of the two.
 
 ## Analysis
 
