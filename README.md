@@ -1,48 +1,73 @@
-# Grain-Charging-Simulations
+# Description
 
-## 1- MATERIALS AND GEOMETRY DEFINITION
- 	
-## 2- PHYSICS LIST
-   
-All physics classes are located in PhysicsList.cc. 
-> [!IMPORTANT]
-> Need to figure out the appropriate physics based on the literature review.
- 	 
-## 3- THE PRIMARY GENERATOR
- 	
-## 4-  OUTPUT
+This package contains a high-performance Monte Carlo simulation framework based on the open source package *Geant4* for modeling the time-dependent electrostatic charging of dielectric materials. This document assumes that you are familiar with developing applications based on the Geant4 Monte Carlo toolkit using a linux environment.  
 
-Once GUI is closed, the program will generate a .ROOT file. (e.g test.ROOT)
-.ROOT file can be read using Jupyter Notebook by the uproot library. 
-The following information is saved to the root file:
-- pre and post location of particle (primary and other generated particles)
-- pre and post kinetic energy of each particle
-- particle number
-- type of interaction
 
-## 5- VISUALIZATION
- 
-The Visualization Manager is set in vis.mac.
-The initialization of the drawing is done via the commands
-/vis/... in the macro vis.mac. To get visualisation:
-> `/control/execute vis.mac`
+The G4ChargeIt package adds the functionality of iterative event based simulations to the Geant4 Monte Carlo toolkit.
 
-The detector has a default view which is a longitudinal view of the box.
-The tracks are drawn at the end of event, and erased at the end of run.
-	
-## 6- HOW TO START ?
+The following is accomplished with the G4ChargeIt module:
+* iterations of simulations are generated and run sequentially
+* a general electric field solver is natively implemented to model electric charging of dielectric materials
+* time steps are discretized baesd on the relative flux of incident particle distributions
+* geometry surface charge  is conserved and carried over to each submitted iteration
+* provides an analysis tool kit to demonstrate the charging of arbitrary geometric configurations
 
-Execute `cmake` in build folder. Run the following commands:
 
->`cmake *folder path* `
->
->`make`
->
->`gdb ./chargingsphere`
->
-> `run`
 
-Once GUI boots:
-> `control/execute macro.mac`
-	
+
+# Dependancies
+Ensure the following packages are installed: 
+> `gcc/12.3.0`
+> `cmake/3.11.3`
+> `root/6.30.04`
+> `xerces-c/3.30.2`
+> `openmpi/4.1.5`
+> `geant4/11.3.0`
+
+# Obtaining Source Code
+
+Clone this repository with the following command:
+
+> `git clone https://github.com/avira7/Grain-Charging-Simulations.git`
+
+# Environment Setup
+Before compiling, you must ensure that you have linked periodic boundary conditions in Geant4. 
+
+Installation instructions can be found here: 
+
+> `https://github.com/amentumspace/g4pbc`
+
+Then export the installation in your bash script as a global variable:
+
+> `export G4PBC=/path/to/g4pbc/installation`
+
+# Build & Run
+The simulation is built using the CMake compiler. The source code is located in the `sphere-charging` directory. 
+
+Configure the run-time environment by sourcing the configuration script of your geant4 installation, then perform an out-of-source build:
+
+> `source <path_to_geant4_install>/bin/geant4.sh`
+> `mkdir build`
+> `cd build/`
+
+Run the following `cmake` command with the appropriate tags to configure the project with MPI and OpenMP support:
+
+> `cmake -Dg4pbc_DIR=$G4PBC -DCMAKE_CXX_COMPILER=$(which mpicxx) -DCMAKE_CXX_FLAGS="-fopenmp" ../sphere-charging/`
+
+Once compiled, edit or create a new submission python script with your desired parameters. CAD files of arbitarary geometries can be used in STL ASCII format. All source files have already been explicitly included in CMakeLists.txt.
+
+Compile the code using `make`. The `-j` flag enables parallel compilation to speed up the process.
+
+> `make -j<number_processors>`
+
+A `submit_iterations.sh` script will appear, simply run:
+
+>  `./submit_iterations.sh`
+
+This will start your thread of simulations that can be viewed in output logs. 
+## Example Application 
+An application is already provided. Submission scripts are generated for the charging of lunar regolith in the presence of photoelectrons and solar wind.
+## Analysis
+
+Analysis tools are provided in the `analysis` folder. The conventional file output type is in ROOT format. 
 
