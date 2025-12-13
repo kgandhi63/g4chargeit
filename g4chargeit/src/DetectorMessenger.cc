@@ -54,67 +54,67 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction * Det)
  
 { 
 
-  fileNameCmd_ = new G4UIcmdWithAString("/rootoutput/file",this);
+  fileNameCmd_ = new G4UIcmdWithAString("/geometry/rootoutput/file",this);
   fileNameCmd_->SetGuidance("Define the filename.");
   fileNameCmd_->SetParameterName("choice",false);
   fileNameCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  PBCCmd_ = new G4UIcmdWithABool("/PBC",this);
+  PBCCmd_ = new G4UIcmdWithABool("/geometry/PBC",this);
   PBCCmd_->SetGuidance("PBC conditions on or off.");
   PBCCmd_->SetParameterName("choice",false);
   PBCCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  RootInputCmd_ = new G4UIcmdWithAString("/rootinput/file",this);
+  RootInputCmd_ = new G4UIcmdWithAString("/geometry/rootinput/file",this);
   RootInputCmd_->SetGuidance("Root Input Files (space-separated)");
   RootInputCmd_->SetParameterName("choice",false);
   RootInputCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  CADFileCmd_ = new G4UIcmdWithAString("/cadinput/file",this);
+  CADFileCmd_ = new G4UIcmdWithAString("/geometry/cadinput/file",this);
   CADFileCmd_->SetGuidance("CAD Input File.");
   CADFileCmd_->SetParameterName("choice",false);
   CADFileCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  EpsilonCmd_ = new G4UIcmdWithADouble("/epsilon", this);
+  EpsilonCmd_ = new G4UIcmdWithADouble("/geometry/epsilon", this);
   EpsilonCmd_->SetGuidance("Epsilon Value.");
   EpsilonCmd_->SetParameterName("choice",false);
   EpsilonCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  ScaleCmd_ = new G4UIcmdWithADouble("/cadinput/scale", this);
+  ScaleCmd_ = new G4UIcmdWithADouble("/geometry/cadinput/scale", this);
   ScaleCmd_->SetGuidance("Scale CAD Value.");
   ScaleCmd_->SetParameterName("choice",false);
   ScaleCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  WorldXCmd_ = new G4UIcmdWithADoubleAndUnit("/worldX", this);
+  WorldXCmd_ = new G4UIcmdWithADoubleAndUnit("/geometry/worldX", this);
   WorldXCmd_->SetGuidance("Set XY Scale of the World.");
   WorldXCmd_->SetParameterName("choice",false);
   WorldXCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  WorldYCmd_ = new G4UIcmdWithADoubleAndUnit("/worldY", this);
+  WorldYCmd_ = new G4UIcmdWithADoubleAndUnit("/geometry/worldY", this);
   WorldYCmd_->SetGuidance("Set XY Scale of the World.");
   WorldYCmd_->SetParameterName("choice",false);
   WorldYCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  WorldZCmd_ = new G4UIcmdWithADoubleAndUnit("/worldZ", this);
+  WorldZCmd_ = new G4UIcmdWithADoubleAndUnit("/geometry/worldZ", this);
   WorldZCmd_->SetGuidance("Set XY Scale of the World.");
   WorldZCmd_->SetParameterName("choice",false);
   WorldZCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  MaterialTemperatureCmd_ = new G4UIcmdWithADoubleAndUnit("/MaterialTemperature", this);
+  MaterialTemperatureCmd_ = new G4UIcmdWithADoubleAndUnit("/geometry/MaterialTemperature", this);
   MaterialTemperatureCmd_->SetGuidance("Set temperature of material (units of Kelvin).");
   MaterialTemperatureCmd_->SetParameterName("choice",false);
   MaterialTemperatureCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  MaterialDensityCmd_ = new G4UIcmdWithADoubleAndUnit("/MaterialDensity", this);
+  MaterialDensityCmd_ = new G4UIcmdWithADoubleAndUnit("/geometry/MaterialDensity", this);
   MaterialDensityCmd_->SetGuidance("Set temperature of material (units of Kelvin).");
   MaterialDensityCmd_->SetParameterName("choice",false);
   MaterialDensityCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  EquivalentIterationTimeCmd_ = new G4UIcmdWithADoubleAndUnit("/IterationTime", this);
+  EquivalentIterationTimeCmd_ = new G4UIcmdWithADoubleAndUnit("/geometry/IterationTime", this);
   EquivalentIterationTimeCmd_->SetGuidance("Set equivalent iteration time in lunar equivalent photoemission flux (units of seconds).");
   EquivalentIterationTimeCmd_->SetParameterName("choice",false);
   EquivalentIterationTimeCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);
 
-  ChargeDissipationModelCmd_ = new G4UIcmdWithABool("/ApplyChargeDissipation",this);
+  ChargeDissipationModelCmd_ = new G4UIcmdWithABool("/geometry/ApplyChargeDissipation",this);
   ChargeDissipationModelCmd_->SetGuidance("Turn on or off the charge dissipation model.");
   ChargeDissipationModelCmd_->SetParameterName("choice",false);
   ChargeDissipationModelCmd_->AvailableForStates(G4State_PreInit,G4State_Idle);

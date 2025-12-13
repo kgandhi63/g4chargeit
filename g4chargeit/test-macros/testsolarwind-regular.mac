@@ -26,53 +26,54 @@
 /process/eLoss/UseICRU90 1
 /process/eLoss/UseAngularGenerator true
 #
-/sphere/worldX 400 um
-/sphere/worldY 300 um
-/sphere/worldZ 403.2 um
-/sphere/MaterialTemperature 425 K
-/sphere/MaterialDensity 2.2 g/cm3
-/sphere/IterationTime 0 s
-/sphere/ApplyChargeDissipation true
-/sphere/field/InitialDepth 6
-/sphere/field/MinimumStep 0.005 um
-/sphere/field/PercentGradThreshold 0.7
-/sphere/field/OctreeDepth 11
-/sphere/field/file test-fieldmap.txt 
-/sphere/charges/file test-charges.txt
+/geometry/worldX 400 um
+/geometry/worldY 300 um
+/geometry/worldZ 453.2 um
+/geometry/MaterialTemperature 425 K
+/geometry/MaterialDensity 2.2 g/cm3
+/geometry/IterationTime 0 s
+/geometry/ApplyChargeDissipation true
+/field/InitialDepth 8
+/field/MinimumStep 0.1 um
+/field/PercentGradThreshold 0.8
+/field/OctreeDepth 11
+/field/file test-fieldmap.txt 
+/charges/file test-charges.txt
 #
-/sphere/rootoutput/file test-rootOutput.root
-/sphere/cadinput/file stacked_spheres_frompython_cropped.stl
-#/sphere/cadinput/scale 0.001
-/sphere/epsilon 4
-/sphere/PBC true
+/geometry/rootoutput/file test-rootOutput.root
+/geometry/cadinput/file regularSpheres_fromPython.stl
+/geometry/epsilon 4
+/geometry/PBC true
+#/geometry/cadinput/scale 0.001
 /run/initialize
 #
-/gps/particle proton
-/gps/pos/type Plane
-/gps/pos/shape Square
-/gps/pos/halfx 220.0 um
-/gps/pos/halfy 170.0 um
-/gps/pos/centre 15.0 0 201.6 um
-/gps/direction -0.7071067811865475 0 -0.7071067811865475 
-/gps/ene/type Mono
-/gps/ene/mono 1 keV
-#
-#/gps/source/add 1
 #/gps/particle e-
-#/gps/source/intensity 2
 #/gps/ene/type Arb
 #/gps/hist/type arb
 #/gps/ene/diffspec true
-#/gps/hist/file electron_distribution.txt
+#/gps/hist/file distributions/electronMaxwellian_distribution.txt
 #/gps/hist/inter Lin
 #/gps/pos/type Plane
 #/gps/pos/shape Square
-#/gps/pos/halfx 150.0 um
+#/gps/pos/halfx 200.0 um
 #/gps/pos/halfy 150.0 um
-#/gps/pos/centre 0 0 201.6 um
+#/gps/pos/centre 0 0 226.6 um
 #/gps/ang/type iso
+#/gps/ang/maxtheta 90 deg
 #
-/control/execute vis.mac
+#/gps/source/add 1
+#/gps/source/intensity 0.2
+/gps/particle proton
+/gps/ene/type Mono
+/gps/energy 1 keV
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 200.0 um
+/gps/pos/halfy 150.0 um
+/gps/pos/centre 40.0 0 226.6 um
+/gps/direction -0.7071067811865476 0 -0.7071067811865476
+#
+/control/execute test-macros/vis.mac
 #
 /run/printProgress 100
 /run/beamOn 100

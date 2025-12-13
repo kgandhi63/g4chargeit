@@ -31,6 +31,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/outputlogs)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/distributions)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/geometry)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/root)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/fieldmaps)
@@ -55,7 +56,6 @@ target_link_libraries(g4chargeit
 
 
 file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/test-macros)
-
 file(GLOB MACRO_FILES ${CMAKE_SOURCE_DIR}/test-macros/*)
 
 foreach(_script ${MACRO_FILES})
@@ -68,12 +68,13 @@ foreach(_script ${MACRO_FILES})
 endforeach()
 
 
-file(GLOB PACE_SCRIPTS ${CMAKE_SOURCE_DIR}/slurmscripts/*)
-file(GLOB DISTRIBUTIONS ${CMAKE_SOURCE_DIR}/distributions/*.txt)
-file(COPY ${PACE_SCRIPTS} DESTINATION ${CMAKE_BINARY_DIR})
-file(COPY ${DISTRIBUTIONS} DESTINATION ${CMAKE_BINARY_DIR})
+file(GLOB SLURM_SCRIPTS ${CMAKE_SOURCE_DIR}/slurm-scripts/*)
+file(COPY ${SLURM_SCRIPTS} DESTINATION ${CMAKE_BINARY_DIR})
 
-file(GLOB GEOMETRY ${CMAKE_SOURCE_DIR}/geometry/*)
+file(GLOB DISTRIBUTIONS ${CMAKE_SOURCE_DIR}/distributions/*.txt)
+file(COPY ${DISTRIBUTIONS} DESTINATION ${CMAKE_BINARY_DIR}/distributions/)
+
+file(GLOB GEOMETRY ${CMAKE_SOURCE_DIR}/geometry/*.stl)
 file(COPY ${GEOMETRY} DESTINATION ${CMAKE_BINARY_DIR}/geometry/)
 
 #----------------------------------------------------------------------------

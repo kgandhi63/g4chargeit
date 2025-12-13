@@ -27,41 +27,42 @@
 /process/eLoss/UseICRU90 1
 /process/eLoss/UseAngularGenerator true
 #
-/sphere/worldX 120 um
-/sphere/worldY 105 um
-/sphere/worldZ 167 um
-/sphere/MaterialTemperature 425 K
-/sphere/MaterialDensity 1.9 g/cm3
-/sphere/IterationTime 0 s
-/sphere/ApplyChargeDissipation true
-/sphere/field/InitialDepth 8
-/sphere/field/MinimumStep 0.05 um
-/sphere/field/PercentGradThreshold 0.8
-/sphere/field/OctreeDepth 11
-/sphere/field/file test-fieldmap.txt 
-/sphere/charges/file test-charges.txt
+/geometry/worldX 120 um
+/geometry/worldY 105 um
+/geometry/worldZ 202 um
+/geometry/MaterialTemperature 425 K
+/geometry/MaterialDensity 1.9 g/cm3
+/geometry/IterationTime 0 s
+/geometry/ApplyChargeDissipation true
+/field/InitialDepth 8
+/field/MinimumStep 0.01 um
+/field/PercentGradThreshold 0.8
+/field/OctreeDepth 11
+/field/file test-fieldmap.txt 
+/charges/file test-charges.txt
 #
-/sphere/rootoutput/file test-rootOutput.root
-/sphere/cadinput/file irregular_spheres_frompython.stl
-#/sphere/cadinput/scale 0.001
-/sphere/epsilon 4
-/sphere/PBC true
+/geometry/rootoutput/file test-rootOutput.root
+/geometry/cadinput/file irregularSpheres_fromPython.stl
+/geometry/epsilon 4
+/geometry/PBC true
+#/geometry/cadinput/scale 0.001
 /run/initialize
 #
 /gps/particle gamma
 /gps/pos/type Plane
 /gps/pos/shape Square
-/gps/pos/halfx 80.0 um
-/gps/pos/halfy 72.5 um
-/gps/pos/centre 15.0 0 83.5 um
+/gps/pos/halfx 60.0 um
+/gps/pos/halfy 52.5 um
+/gps/pos/centre 50 0 101.0 um
+#/gps/pos/centre 15.0 0 83.5 um
 /gps/direction -0.7071067811865475 0 -0.7071067811865475 
 /gps/ene/type Arb
 /gps/hist/type arb
 /gps/ene/diffspec true
-/gps/hist/file photon_distribution.txt
+/gps/hist/file distributions/photonSolar_distribution.txt
 /gps/hist/inter Lin
 #
-/control/execute vis.mac
+/control/execute test-macros/vis.mac
 #
 /run/printProgress 100
 /run/beamOn 100
