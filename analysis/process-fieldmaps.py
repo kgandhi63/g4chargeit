@@ -274,4 +274,21 @@ if __name__ == "__main__":
         max_workers_in=max_workers_in # Pass the new argument
     )
 
-# example: python process-fieldmaps.py  "../build-smallerworld-initial8max0.8final12" 'initial8max0.8final12' 'onlyphotoemission' 
+# example: python process-fieldmaps.py  "../build" 'initial8max0.8final12' 'onlyphotoemission' 
+
+# #!/bin/bash
+# #SBATCH --job-name=process-allcases
+# #SBATCH --account=gts-zjiang33
+# #SBATCH --mail-user=avira7@gatech.edu
+# #SBATCH --mail-type=BEGIN,END,FAIL
+# #SBATCH --nodes=1
+# #SBATCH --mem-per-cpu=264gb
+# #SBATCH --time=01:30:00
+# #SBATCH --output=outputlogs/log-fieldprocessing-test
+
+# source ~/.bashrc
+# conda activate geant4-env
+
+# echo "processing results for dissipationRefinedGrid-initial8max0.8final11 (PE case, 40 um sphere)"
+# python process-fieldmaps.py "../build" 'PEWang_425K_initial8max0.6final10_through111' 'onlyphotoemission' 10
+# date

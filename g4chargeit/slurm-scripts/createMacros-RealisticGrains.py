@@ -155,12 +155,12 @@ def write_macro(f, increment_filename, event_num, iterationTime,
     elif "onlysolarwind" in increment_filename:
         write_particle_source_solarwind(f, CAD_dimensions, XY_offset, Z_position, 
                                        rotation, buffer_plane=0, 
-                                       electron_dist_file="electronMaxwellian_distribution.txt", 
+                                       electron_dist_file="distributions/electronMaxwellian_distribution.txt", 
                                        electron_intensity=electron_intensity)
     elif "onlyphotoemission" in increment_filename:
         write_particle_source_photoemission(f, CAD_dimensions, XY_offset, Z_position, 
                                            rotation, buffer_plane=0, 
-                                           photon_dist_file="photonSolar_distribution.txt")
+                                           photon_dist_file="distributions/photonSolar_distribution.txt")
     else:
         raise Warning("Configuration must be one of: onlyUV, onlyelectrons, onlysolarwind, onlyphotoemission")
     

@@ -653,6 +653,19 @@ if __name__ == "__main__":
         output_h5=output_h5,
         max_iteration=max_iteration,
     )
-    
-    #list_h5_structure(output_h5)
-    # print(f"\nSuccessfully saved data to: {output_h5}")
+
+# example: python process-rootfiles.py "../build" "irregularInitial8max0.8final11_PEparticleloc_until46" 'onlyphotoemission' 46
+
+# #!/bin/bash
+# #SBATCH --job-name=process-test
+# #SBATCH --account=gts-zjiang33
+# #SBATCH --mail-user=avira7@gatech.edu
+# #SBATCH --mail-type=BEGIN,END,FAIL
+# #SBATCH --nodes=1
+# #SBATCH --mem-per-cpu=256gb
+# #SBATCH --time=02:00:00
+# #SBATCH --output=outputlogs/log-rootprocessing-test
+
+# echo "combine all root files up to a specific iteration number"
+# python process-rootfiles.py "../build" "irregularInitial8max0.8final11_PEparticleloc_until46" 'onlyphotoemission' 46
+# date
