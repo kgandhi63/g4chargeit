@@ -18,6 +18,8 @@ def maxwellian(v, vth):
     array-like
         Distribution values at given velocities
     """
+
+    np.sqrt(E)
     return (v**2 / (vth * np.sqrt(np.pi))) * np.exp(-v**2 / vth**2)
 
 def generate_maxwellian_distribution(vmin, vmax, nPoints, vth, scale_factor=1e-6, output_file=None):
@@ -64,42 +66,23 @@ def generate_maxwellian_distribution(vmin, vmax, nPoints, vth, scale_factor=1e-6
     return velocities_scaled, weights
 
 def interpolate_and_export_spectrum(csv_file, x_col, y_col, vmin, vmax, n_points, 
-                                     x_transform=None, scale_factor=1e-6, output_file=None):
+                                     x_transform=None, scale_factor=1e-6, output_file=None,
+                                     log_interpolation=False):
     """
     Load spectrum data from CSV, interpolate over a new energy grid, and export.
     
     Parameters:
     -----------
-    csv_file : str
-        Path to CSV file containing spectrum data
-    x_col : str
-        Name of x-axis column (energy/wavelength)
-    y_col : str
-        Name of y-axis column (intensity/flux)
-    vmin : float
-        Minimum energy for interpolation (eV)
-    vmax : float
-        Maximum energy for interpolation (eV)
-    n_points : int
-        Number of interpolation points
-    x_transform : callable, optional
-        Function to transform x-data (e.g., wavelength to energy conversion)
-    scale_factor : float, optional
-        Scaling factor for energies (default: 1e-6 for eV to MeV)
-    output_file : str, optional
-        Output filename. If None, no file is written.
-    
-    Returns:
-    --------
-    tuple
-        (energies_scaled, weights) arrays
+    log_interpolation : bool, optional
+        If True, use logarithmic spacing for interpolation grid AND 
+        log-log interpolation for y-values (default: False)
     """
     # Load data
     data = pd.read_csv(csv_file)
     x_data = np.array(data[x_col])
     y_data = np.array(data[y_col])
     
-    # Apply transformation if provided (e.g., wavelength to energy)
+    # Apply transformation if provided
     if x_transform:
         x_data = x_transform(x_data)
     
@@ -111,15 +94,40 @@ def interpolate_and_export_spectrum(csv_file, x_col, y_col, vmin, vmax, n_points
     x_data = x_data[sorted_indices]
     y_data = y_data[sorted_indices]
     
+    # Remove zero or negative values for log interpolation
+    if log_interpolation:
+        mask = (y_data > 0) & (x_data > 0)
+        x_data = x_data[mask]
+        y_data = y_data[mask]
+        
+        if len(x_data) == 0:
+            raise ValueError("No positive values remaining after filtering for log interpolation")
+    
     print(f"Data range: {min(x_data):.2f} to {max(x_data):.2f} eV")
     
     # Create interpolation grid
-    x_interp = np.linspace(vmin, vmax, n_points)
+    if log_interpolation:
+        if vmin <= 0:
+            raise ValueError("vmin must be > 0 for logarithmic interpolation")
+        x_interp = np.logspace(np.log10(vmin), np.log10(vmax), n_points)
+        
+        # Log-log interpolation
+        interp_func = interp1d(np.log10(x_data), np.log10(y_data), 
+                              kind='linear', bounds_error=False, fill_value='extrapolate')
+        y_interp = 10**interp_func(np.log10(x_interp))
+        print(f"Using log-log interpolation")
+    else:
+        x_interp = np.linspace(vmin, vmax, n_points)
+        interp_func = interp1d(x_data, y_data, kind='linear', 
+                              bounds_error=False, fill_value='extrapolate')
+        y_interp = interp_func(x_interp)
+        print(f"Using linear interpolation")
     
-    # Interpolate
-    interp_func = interp1d(x_data, y_data, kind='linear', 
-                          bounds_error=False, fill_value='extrapolate')
-    y_interp = interp_func(x_interp)
+    # Ensure all interpolated values are positive (clamp to small positive value)
+    y_interp = np.maximum(y_interp, 1e-30)
+    
+    # Re-normalize after interpolation
+    y_interp = y_interp / np.sum(y_interp)
     
     # Scale energies
     energies_scaled = x_interp * scale_factor
@@ -134,40 +142,55 @@ def interpolate_and_export_spectrum(csv_file, x_col, y_col, vmin, vmax, n_points
     
     return energies_scaled, y_interp
 
-
 # =============================================================================
 # Generate Electron Distribution (Maxwellian)
 # =============================================================================
-print("Generating electron distribution...")
-electron_velocities, electron_weights = generate_maxwellian_distribution(
-    vmin=0.0,
-    vmax=100.0,
-    nPoints=80,
-    vth=10.0,  # Thermal velocity
-    scale_factor=1e-6,  # µm/ns to m/s
-    output_file="electronMaxwellian_distribution.txt"
+# print("Generating electron distribution...")
+# electron_velocities, electron_weights = generate_maxwellian_distribution(
+#     vmin=0.0,
+#     vmax=100.0,
+#     nPoints=80,
+#     vth=10.0,  # Thermal velocity
+#     scale_factor=1e-6,  # µm/ns to m/s
+#     output_file="electronMaxwellian_distribution.txt"
+# )
+
+# =============================================================================
+# Generate Solar Wind Electrons and Ions (from digitized data)
+# =============================================================================
+
+print("\nGenerating solar wind electrons distribution (Li 2023)...")
+electron_energies, electron_weights = interpolate_and_export_spectrum(
+    csv_file="Fig4-Li2023-SWelectrons.csv",
+    x_col="x",
+    y_col=" y",
+    vmin=1,
+    vmax=10000,
+    n_points=500,
+    log_interpolation=True,
+    x_transform=None,  # Convert wavelength (nm) to energy (eV)
+    scale_factor=1e-6,  # eV to MeV
+    output_file="electronSolarWind_distribution.txt"
 )
 
-# # =============================================================================
-# # Generate Photon Source Distribution (Feurerbacher 1972)
-# # =============================================================================
-# print("\nGenerating photon source distribution (Feurerbacher 1972)...")
-# photon_energies, photon_weights = interpolate_and_export_spectrum(
-#     csv_file="Fig4-Feurerbacher1972.csv",
-#     x_col="x",
-#     y_col=" y",
-#     vmin=5.0,
-#     vmax=30.0,
-#     n_points=1000,
-#     x_transform=None,  # Data already in eV
-#     scale_factor=1e-6,  # eV to MeV
-#     output_file="photonSource_distribution.txt"
-# )
+print("\nGenerating solar wind ions distribution (Li 2023)...")
+ions_energies, ions_weights = interpolate_and_export_spectrum(
+    csv_file="Fig4-Li2023-SWions.csv",
+    x_col="x",
+    y_col=" y",
+    vmin=500,
+    vmax=5000,
+    n_points=500,
+    log_interpolation=False,
+    x_transform=None,  # Convert wavelength (nm) to energy (eV)
+    scale_factor=1e-6,  # eV to MeV
+    output_file="ionSolarWind_distribution.txt"
+)
 
 # =============================================================================
 # Generate Solar Spectrum Distribution (Farrell Solar Minimum)
 # =============================================================================
-print("\nGenerating solar spectrum distribution (Farrell)...")
+print("\nGenerating solar spectrum distribution (Farrell 2023)...")
 solar_energies, solar_weights = interpolate_and_export_spectrum(
     csv_file="Fig2-FarrellSolarMinimum.csv",
     x_col="x",

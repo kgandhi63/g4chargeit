@@ -9,7 +9,7 @@ from shared_utils import (
     reset_folder, get_particle_counts_by_type,
     write_macro_header, write_physics_settings, write_geometry_settings,
     write_cad_settings, write_particle_source_solarwind,
-    write_particle_source_photoemission, write_particle_source_allparticles,
+    write_particle_source_photoemission,
     write_run_commands, create_batch_script
 )
 
@@ -18,11 +18,11 @@ from shared_utils import (
 #############################################################
 
 # Account and user settings
-account, username = "zjiang33-paid", "avira7"
+account, username = "pf17", "avira7"
 
 # Number of particles for each iteration
-eventnumbers_onlysolarwind = 100000
-eventnumbers_onlyphotoemission = 100000
+eventnumbers_onlysolarwind = 80000 # 100000 # for r=100 um spheres
+eventnumbers_onlyphotoemission = 1000000 # 5000000 # for r=100 um spheres
 iterationNUM = 200
 
 # Material properties
@@ -37,15 +37,16 @@ seedIN = None
 config_list = ["onlysolarwind", "onlyphotoemission"] 
 
 # Mesh and simulation parameters
-minStepList = [0.1, 0.05]  # Minimum step for Octree mesh (µm)
+minStepList = [0.01, 0.01]  # Minimum step for Octree mesh (µm)
 initialOctreeDepth = 8
 gradPercent = 0.8
 finalOctreeDepth = 11
 chargeDissipation = "true"
 
 # Geometry and CAD settings
-CAD_filename = "regularSpheres_fromPython.stl"
-CAD_dimensions = (400, 300, 373.2) # in units of microns
+CAD_filename = "regularSpheres_radius100um_fromPython.stl" #"regularSpheres_radius100um_fromPython.stl"
+CAD_dimensions = (400, 300, 373.2) #(100, 75, 123.3) # for r=25 um spheres 
+#(400, 300, 373.2) # for r=100 um spheres 
 particle_position = 40  # µm above geometry
 bufferXYworld = 0  # µm
 
@@ -135,12 +136,8 @@ def write_macro(f, increment_filename, event_num, iterationTime,
         write_particle_source_photoemission(f, CAD_dimensions, XY_offset, Z_position, 
                                            rotation, buffer_plane=bufferX_direction, 
                                            photon_dist_file="distributions/photonSolar_distribution.txt")
-    elif "allparticles" in increment_filename:
-        write_particle_source_allparticles(f, CAD_dimensions, XY_offset, Z_position, rotation, buffer_plane=bufferX_direction, 
-                                          electron_dist_file="distributions/electronMaxwellian_distribution.txt",electron_intensity=electron_intensity,
-                                          photon_dist_file="distributions/photonSolar_distribution.txt", photon_intensity=photon_intensity)
     else:
-        raise Warning("Configuration must be one of: onlysolarwind, onlyphotoemission, allparticles")
+        raise Warning("Configuration must be one of: onlysolarwind, onlyphotoemission")
     
     # Write run commands
     write_run_commands(f, event_num)
@@ -199,8 +196,6 @@ for optionIN, minStepIN in zip(config_list, minStepList):
                 iterationTime = (particlesforIteration.get("proton", 0) / planeArea) / SWions
                 iterationTime2 = (particlesforIteration.get("e-", 0) / planeArea) / SWelectrons
                 print("ion time: ", iterationTime*1000, "e- time: ", iterationTime2*1000)
-            elif optionIN == "allparticles":
-                iterationTime = (particlesforIteration.get("gamma", 0) / planeArea) / PEflux
             else:
                 iterationTime = 0
             

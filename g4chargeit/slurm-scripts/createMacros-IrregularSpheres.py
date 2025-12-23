@@ -9,7 +9,7 @@ from shared_utils import (
     reset_folder, get_particle_counts_by_type,
     write_macro_header, write_physics_settings, write_geometry_settings,
     write_cad_settings, write_particle_source_solarwind,
-    write_particle_source_photoemission, write_particle_source_allparticles,
+    write_particle_source_photoemission,
     write_run_commands, create_batch_script
 )
 
@@ -18,11 +18,11 @@ from shared_utils import (
 #############################################################
 
 # Account and user settings
-account, username = "zjiang33", "avira7"
+account, username = "pf17", "avira7"
 
 # Number of particles for each iteration
-eventnumbers_onlysolarwind = 1000000 #1000000 #10000 #1000000
-eventnumbers_onlyphotoemission =1000000 #1000000 #10000#1000000
+eventnumbers_onlysolarwind = 10000 #36*10000 #1000000 #10000 #1000000
+eventnumbers_onlyphotoemission = 10000 #36*10000 #500000 #2000000 #10000#1000000
 iterationNUM = 200
 
 # Material properties
@@ -40,8 +40,8 @@ config_list = ["onlysolarwind", "onlyphotoemission"]
 minStepList = [0.01, 0.01]  # Minimum step for Octree mesh (µm)
 initialOctreeDepth = 8
 gradPercent = 0.8
-finalOctreeDepth = 11
-chargeDissipation = "true"
+finalOctreeDepth = 11 #11
+chargeDissipation = "false"
 
 # Geometry and CAD settings
 CAD_filename = "irregularSpheres_fromPython.stl"
@@ -59,7 +59,7 @@ rotation = np.sin(45*np.pi/180)
 # Flux values from Zimmerman 2016 manuscript (A/m² -> e/m²/s)
 PEflux, SWelectrons, SWions = np.array([4e-6, 1.5e-6, 3e-7]) * 6.241509e18
 planeArea = worldX*worldY/ (1e6**2)  # m²
-electron_intensity, photon_intensity = SWelectrons / SWions, PEflux / SWions
+electron_intensity, photon_intensity = SWelectrons / SWions, PEflux / SWions #SWelectrons / SWions
 # print out the lunar environment parameters
 print(f"PE flux: {PEflux:.2e} e/m²/s, SW e- flux: {SWelectrons:.2e} e/m²/s, SW ions flux: {SWions:.2e} e/m²/s")
 print(f"e- intensity wrt SW ions: {electron_intensity:.2f}, photon intensity wrt SW ions: {photon_intensity:.2f}")
@@ -123,17 +123,14 @@ def write_macro(f, increment_filename, event_num, iterationTime,
     
     # Select particle source based on configuration
     if "onlysolarwind" in increment_filename:
-        write_particle_source_solarwind(f, (worldX,worldY,worldZ), XY_offset, Z_position, 
-                                       rotation, bufferX_direction, "distributions/electronMaxwellian_distribution.txt", electron_intensity)
+        write_particle_source_solarwind(f, (worldX,worldY,worldZ), XY_offset, Z_position, rotation, bufferX_direction, \
+                                        electron_dist_file="distributions/electronSolarWind_distribution.txt", electron_intensity=electron_intensity, \
+                                        ion_dist_file="distributions/ionSolarWind_distribution.txt") #
     elif "onlyphotoemission" in increment_filename:
         write_particle_source_photoemission(f, (worldX,worldY,worldZ), XY_offset, Z_position, 
                                            rotation, bufferX_direction, "distributions/photonSolar_distribution.txt")
-    elif "allparticles" in increment_filename:
-        write_particle_source_allparticles(f, (worldX,worldY,worldZ), XY_offset, Z_position, rotation, bufferX_direction, 
-                                          "distributions/electronMaxwellian_distribution.txt",electron_intensity,
-                                          "distributions/photonSolar_distribution.txt", photon_intensity)
     else:
-        raise Warning("Configuration must be one of: onlysolarwind, onlyphotoemission, allparticles")
+        raise Warning("Configuration must be one of: onlysolarwind, onlyphotoemission")
     
     # Write run commands
     write_run_commands(f, event_num)
@@ -192,8 +189,6 @@ for optionIN, minStepIN in zip(config_list, minStepList):
                 iterationTime = (particlesforIteration.get("proton", 0) / planeArea) / SWions
                 iterationTime2 = (particlesforIteration.get("e-", 0) / planeArea) / SWelectrons
                 print("ion time: ", iterationTime*1000, "e- time: ", iterationTime2*1000)
-            elif optionIN == "allparticles":
-                iterationTime = (particlesforIteration.get("gamma", 0) / planeArea) / PEflux
             else:
                 iterationTime = 0
             

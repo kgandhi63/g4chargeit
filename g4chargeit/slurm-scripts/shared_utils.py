@@ -91,17 +91,22 @@ def get_particle_counts_by_type(root_file, directory_path=None):
                 # counts[particleIN] = gamma_initial_leading_e_creation.shape[0]
 
 
-                # get dataframe of the last e- event within the sensitive detector
-                last_e_event = df[(df["Particle_Type"] == "e-") & (df["Parent_ID"] > 0.0)].drop_duplicates(subset="Event_Number", keep="last")
-                # get new dataframe of all e- that left the world
-                world_e_energy=last_e_event[(last_e_event["Volume_Name_Post"]=="physical_cyclic") | (last_e_event["Volume_Name_Pre"]=="physical_cyclic")]
-                # get all the initial gamma energy that leads to an e- escaping
-                matching_event_numbers = np.intersect1d(df["Event_Number"], world_e_energy["Event_Number"])
+                # # get dataframe of the last e- event within the sensitive detector
+                # last_e_event = df[(df["Particle_Type"] == "e-")].drop_duplicates(subset="Event_Number", keep="last")
+                # # get new dataframe of all e- that left the world
+                # world_e_energy=last_e_event[(last_e_event["Volume_Name_Post"]=="physical_cyclic") | (last_e_event["Volume_Name_Pre"]=="physical_cyclic")]
+                # # get all the initial gamma energy that leads to an e- escaping
+                # matching_event_numbers = np.intersect1d(df["Event_Number"], world_e_energy["Event_Number"])
 
-                #  get all the initial gamma energy that leds to the creation of e-
-                matching_event_numbers = np.intersect1d(df["Event_Number"], last_e_event["Event_Number"])
-                gamma_initial_leading_e_creation = df[df["Event_Number"].isin(matching_event_numbers)].drop_duplicates(subset="Event_Number", keep="first")
-                counts[particleIN] = gamma_initial_leading_e_creation.shape[0]
+                # #  get all the initial gamma energy that leds to the creation of e-
+                # matching_event_numbers = np.intersect1d(df["Event_Number"], world_e_energy["Event_Number"])
+                # gamma_initial_leading_e_creation = df[df["Event_Number"].isin(matching_event_numbers)].drop_duplicates(subset="Event_Number", keep="first")
+                # counts[particleIN] = gamma_initial_leading_e_creation.shape[0]
+
+                electron_dataframe = df[df["Particle_Type"]=="e-"]
+                last_electron = electron_dataframe.drop_duplicates(subset="Event_Number", keep="last")
+                escaping_electrons = last_electron[(last_electron["Volume_Name_Post"]=="physical_cyclic") | (last_electron["Volume_Name_Pre"]=="physical_cyclic")]
+                counts[particleIN] = escaping_electrons.shape[0]
 
 
             else:
@@ -161,14 +166,19 @@ def write_physics_settings(f):
     f.write('/process/em/deexcitationIgnoreCut true\n')
     f.write('/process/em/Polarisation true\n')
     f.write('/process/em/PhotoeffectBelowKShell true\n')
+    f.write('/process/em/pixe false\n')
     f.write('#\n')
     f.write('/process/em/lowestElectronEnergy 0 eV\n')
-    f.write('/process/em/lowestMuHadEnergy 100 eV\n')
+    f.write('/process/em/lowestMuHadEnergy 10 eV\n')
     f.write('/process/em/enableSamplingTable 1\n')
     f.write('#\n')
     f.write('/process/eLoss/CSDARange 1\n')
     f.write('/process/eLoss/UseICRU90 1\n')
     f.write('/process/eLoss/UseAngularGenerator true\n')
+    f.write('#\n')
+    f.write('/process/msc/RangeFactorMuHad 0.02\n')
+    f.write('/process/msc/StepLimit UseSafetyPlus\n')
+    f.write('/process/eLoss/StepFunctionMuHad 0.05 0.01 um\n')
     f.write('#\n')
 
 
@@ -293,7 +303,8 @@ def write_particle_source_uv_single(f, energy, cad_dims, z_position):
 
 
 def write_particle_source_solarwind(f, cad_dims, xy_offset, z_position, rotation, buffer_plane = 0, 
-                                    electron_dist_file="electronMaxwellian_distribution.txt", electron_intensity=5):
+                                    electron_dist_file="electronSolarWind_distribution.txt", electron_intensity=5, 
+                                    ion_dist_file=None):
     """
     Write GPS commands for solar wind (protons + electrons).
     
@@ -311,6 +322,9 @@ def write_particle_source_solarwind(f, cad_dims, xy_offset, z_position, rotation
         Rotation factor (typically sin(45°))
     electron_dist_file : str
         Filename for electron energy distribution
+    ion_dist_file : None [default] 
+        Default: protons are monoenergetic 1 keV
+        Otherwise: filename for ion energy distribution       
     """
 
     # Electrons (Maxwellian distribution)
@@ -319,7 +333,7 @@ def write_particle_source_solarwind(f, cad_dims, xy_offset, z_position, rotation
     f.write("/gps/hist/type arb\n")
     f.write("/gps/ene/diffspec true\n")
     f.write(f"/gps/hist/file {electron_dist_file}\n")
-    f.write("/gps/hist/inter Lin\n")
+    f.write("/gps/hist/inter Log\n")
     f.write("/gps/pos/type Plane\n")
     f.write("/gps/pos/shape Square\n")
     f.write(f'/gps/pos/halfx {cad_dims[0]/2} um\n')
@@ -333,69 +347,24 @@ def write_particle_source_solarwind(f, cad_dims, xy_offset, z_position, rotation
     f.write('/gps/source/add 1\n')
     f.write(f"/gps/source/intensity {1/electron_intensity}\n")
     f.write('/gps/particle proton\n')
-    f.write('/gps/ene/type Mono\n')
-    f.write('/gps/energy 1 keV\n')
+
+    if ion_dist_file == None:
+        f.write('/gps/ene/type Mono\n')
+        f.write('/gps/energy 1 keV\n')  
+    else:
+        f.write("/gps/ene/type Arb\n")
+        f.write("/gps/hist/type arb\n")
+        f.write("/gps/ene/diffspec true\n")
+        f.write(f"/gps/hist/file {ion_dist_file}\n")
+        f.write("/gps/hist/inter Lin\n")
+
     f.write('/gps/pos/type Plane\n')
     f.write('/gps/pos/shape Square\n')
     f.write(f'/gps/pos/halfx {cad_dims[0]/2 + buffer_plane} um\n')
     f.write(f'/gps/pos/halfy {cad_dims[1]/2} um\n')
     f.write(f'/gps/pos/centre {xy_offset} 0 {z_position} um\n')
     f.write(f'/gps/direction -{rotation} 0 -{rotation}\n')
-
-
-def write_particle_source_allparticles(f, cad_dims, xy_offset, z_position, rotation, buffer_plane = 0, 
-                                    electron_dist_file="electronMaxwellian_distribution.txt", electron_intensity=5,
-                                    photon_dist_file="photonSolar_distribution.txt", photon_intensity=13.3):
-
-    """Write GPS commands for all particles (photons + SW protons + electrons)."""
     
-    # Protons at 45 degrees
-    f.write('/gps/particle proton\n')
-    f.write('/gps/ene/type Mono\n')
-    f.write('/gps/energy 1 keV\n')
-    f.write('/gps/pos/type Plane\n')
-    f.write('/gps/pos/shape Square\n')
-    f.write(f'/gps/pos/halfx {cad_dims[0]/2 + buffer_plane} um\n')
-    f.write(f'/gps/pos/halfy {cad_dims[1]/2} um\n')
-    f.write(f'/gps/pos/centre {xy_offset} 0 {z_position} um\n')
-    f.write(f'/gps/direction -{rotation} 0 -{rotation}\n')
-    f.write('#\n')
-    
-    # Electrons (Maxwellian distribution)
-    f.write('/gps/source/add 1\n')
-    f.write("/gps/particle e-\n")
-    f.write(f"/gps/source/intensity {electron_intensity}\n")
-    f.write("/gps/ene/type Arb\n")
-    f.write("/gps/hist/type arb\n")
-    f.write("/gps/ene/diffspec true\n")
-    f.write(f"/gps/hist/file {electron_dist_file}\n")
-    f.write("/gps/hist/inter Lin\n")
-    f.write("/gps/pos/type Plane\n")
-    f.write("/gps/pos/shape Square\n")
-    f.write(f'/gps/pos/halfx {cad_dims[0]/2} um\n')
-    f.write(f'/gps/pos/halfy {cad_dims[1]/2} um\n')
-    f.write(f"/gps/pos/centre 0 0 {z_position} um\n")
-    f.write("/gps/ang/type iso\n")
-    f.write("/gps/ang/maxtheta 90 deg\n")
-    f.write('#\n')
-    
-    # Photons (solar spectrum)
-    f.write('/gps/source/add 2\n')
-    f.write(f'/gps/source/intensity {photon_intensity}\n')
-    f.write('/gps/particle gamma\n')
-    f.write('/gps/pos/type Plane\n')
-    f.write('/gps/pos/shape Square\n')
-    f.write(f'/gps/pos/halfx {cad_dims[0]/2 + buffer_plane} um\n')
-    f.write(f'/gps/pos/halfy {cad_dims[1]/2} um\n')
-    f.write(f'/gps/pos/centre {xy_offset} 0 {z_position} um\n')
-    f.write(f'/gps/direction -{rotation} 0 -{rotation}\n')
-    f.write("/gps/ene/type Arb\n")
-    f.write("/gps/hist/type arb\n")
-    f.write("/gps/ene/diffspec true\n")
-    f.write(f"/gps/hist/file {photon_dist_file}\n")
-    f.write("/gps/hist/inter Lin\n")
-    f.write("/gps/source/multiplevertex true\n")
-
 
 def write_particle_source_photoemission(f, cad_dims, xy_offset, z_position, rotation,buffer_plane=0,
                                        photon_dist_file="photonSolar_distribution.txt"):

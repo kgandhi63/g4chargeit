@@ -237,6 +237,7 @@ if (!RootInput_.empty()) {
         double kinetic_energy_post_mev;
         double parent_id;
         Char_t particle_type[50];
+        Char_t process_name_pre[100];
 
         // Set branch addresses
         tree->SetBranchAddress("Event_Number", &event_number);
@@ -246,6 +247,7 @@ if (!RootInput_.empty()) {
         tree->SetBranchAddress("Parent_ID", &parent_id);
         tree->SetBranchAddress("Kinetic_Energy_Post_MeV", &kinetic_energy_post_mev);
         tree->SetBranchAddress("Particle_Type", &particle_type);
+        tree->SetBranchAddress("Process_Name_Pre", &process_name_pre);
 
         const std::string target_volume = "SiO2";
 
@@ -262,10 +264,10 @@ if (!RootInput_.empty()) {
 
             std::string ptype = particle_type;
 
-            // Track photon stops (photon reaches zero kinetic energy)
-            if (ptype == "gamma" && kinetic_energy_post_mev == 0.0 && std::string(volume_name_post) == target_volume) {
-                photonStops.insert(event_number);
-            }
+            // // Track photon stops (photon reaches zero kinetic energy)
+            // if (ptype == "gamma" && kinetic_energy_post_mev == 0.0 && std::string(volume_name_post) == target_volume) {
+            //     photonStops.insert(event_number);
+            // }
 
             // Stopped electrons
             if (ptype == "e-" && kinetic_energy_post_mev == 0.0 && std::string(volume_name_post) == target_volume) {
@@ -283,13 +285,12 @@ if (!RootInput_.empty()) {
                 fProtonPositions.push_back(pos);
             }
 
-            if (ptype == "e-" && parent_id == 1 && photonStops.count(event_number)) {
-                if (holeRecordedEvents.insert(event_number).second) {
-                    G4ThreeVector pos((*pre_step_position)[0] * mm,
-                                      (*pre_step_position)[1] * mm,
-                                      (*pre_step_position)[2] * mm);
-                    fHolePositions.push_back(pos);
-                }
+            if (ptype == "e-" && parent_id == 1 && std::string(process_name_pre) == "initStep") {
+                G4ThreeVector pos((*pre_step_position)[0] * mm,
+                                  (*pre_step_position)[1] * mm,
+                                  (*pre_step_position)[2] * mm);
+                fHolePositions.push_back(pos);
+ 
             }
         }
 

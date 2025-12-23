@@ -453,6 +453,7 @@ void AdaptiveSumRadialFieldMap::buildChargeOctree() {
         }
     }
 }
+
 void AdaptiveSumRadialFieldMap::insertCharge(ChargeNode* node, int particle_index, const G4ThreeVector& min_bounds, const G4ThreeVector& max_bounds) {
     if (!node) return; if (particle_index < 0 || static_cast<size_t>(particle_index) >= fPositions.size()) {
         G4Exception("AdaptiveSumRadialFieldMap::insertCharge", "IndexOutOfBounds", FatalException, "Invalid particle index provided."); return;
@@ -463,7 +464,7 @@ void AdaptiveSumRadialFieldMap::insertCharge(ChargeNode* node, int particle_inde
         if (node->particle_index == -1) { node->particle_index = particle_index; }
         else {
             int old_particle_index = node->particle_index; bool aggregate = false;
-            if (old_particle_index == -2) { aggregate = true; } else if (old_particle_index >= 0) { if (fPositions[particle_index] == fPositions[old_particle_index]) { aggregate = true; } else { const G4double minBoxSizeSq = (1.0 * nm) * (1.0 * nm); if ((max_bounds - min_bounds).mag2() < minBoxSizeSq) { aggregate = true; } } }
+            if (old_particle_index == -2) { aggregate = true; } else if (old_particle_index >= 0) { if (fPositions[particle_index] == fPositions[old_particle_index]) { aggregate = true; } else { const G4double minBoxSizeSq = minStepSize_ * minStepSize_; if ((max_bounds - min_bounds).mag2() < minBoxSizeSq) { aggregate = true; } } }
             if (aggregate && old_particle_index != -2) { node->particle_index = -2; return; }
             node->is_leaf = false; node->particle_index = -1; G4ThreeVector center = (min_bounds + max_bounds) * 0.5;
             if (old_particle_index >= 0) {
@@ -478,12 +479,55 @@ void AdaptiveSumRadialFieldMap::insertCharge(ChargeNode* node, int particle_inde
 
 
 
-G4ThreeVector AdaptiveSumRadialFieldMap::computeFieldWithApproximation(const G4ThreeVector& point, const ChargeNode* node, const G4ThreeVector& node_min, const G4ThreeVector& node_max) const {
-    if (!node || std::abs(node->total_charge) < 1e-25 * CLHEP::coulomb) return G4ThreeVector(0,0,0); G4ThreeVector displacement = point - node->center_of_mass; G4double d2 = displacement.mag2(); const G4double softening_factor_sq = (1.0*nm)*(1.0*nm); if (d2 < softening_factor_sq) d2 = softening_factor_sq;
-    if (node->is_leaf) { if (node->particle_index != -1) { G4double inv_d3 = 1.0 / (std::sqrt(d2) * d2); G4double scale = node->total_charge * k_electric * inv_d3; return displacement * scale; } else return G4ThreeVector(0,0,0); }
-    double width = (node_max.x() - node_min.x()); double distance = std::sqrt(d2); if (width / distance < barnes_hut_theta_) { G4double inv_d3 = 1.0 / (distance * d2); G4double scale = node->total_charge * k_electric * inv_d3; return displacement * scale; }
-    else { G4ThreeVector E_total(0,0,0); G4ThreeVector center = (node_min + node_max) * 0.5; for(int i = 0; i < 8; ++i) { if(node->children[i]) { G4ThreeVector c_min, c_max; calculateChildBounds(node_min, node_max, center, i, c_min, c_max); E_total += computeFieldWithApproximation(point, node->children[i].get(), c_min, c_max); } } return E_total; }
+G4ThreeVector AdaptiveSumRadialFieldMap::computeFieldWithApproximation(
+    const G4ThreeVector& point, 
+    const ChargeNode* node, 
+    const G4ThreeVector& node_min, 
+    const G4ThreeVector& node_max) const 
+{
+    if (!node || std::abs(node->total_charge) < 1e-25 * CLHEP::coulomb) return G4ThreeVector(0,0,0);
+
+    // --- FORCE ACCEPT AGGREGATED NODE ---
+    if (node->particle_index == -2) { // aggregated node
+        G4ThreeVector r = point - node->center_of_mass;
+        G4double r2 = r.mag2() + (1.0*nm)*(1.0*nm); // softening
+        return r * (node->total_charge * k_electric / std::pow(r2, 1.5));
+    }
+
+    G4ThreeVector displacement = point - node->center_of_mass;
+    G4double d2 = displacement.mag2();
+    const G4double softening_factor_sq = minStepSize_*minStepSize_;
+    if (d2 < softening_factor_sq) d2 = softening_factor_sq;
+
+    if (node->is_leaf) {
+        if (node->particle_index != -1) {
+            G4double inv_d3 = 1.0 / (std::sqrt(d2) * d2);
+            return displacement * (node->total_charge * k_electric * inv_d3);
+        } else return G4ThreeVector(0,0,0);
+    }
+
+    double width = (node_max.x() - node_min.x());
+    double distance = std::sqrt(d2);
+
+    if (width / distance < barnes_hut_theta_) {
+        G4double inv_d3 = 1.0 / (distance * d2);
+        return displacement * (node->total_charge * k_electric * inv_d3);
+    }
+
+    // recurse into children
+    G4ThreeVector E_total(0,0,0);
+    G4ThreeVector center = (node_min + node_max) * 0.5;
+    for(int i = 0; i < 8; ++i) {
+        if(node->children[i]) {
+            G4ThreeVector c_min, c_max;
+            calculateChildBounds(node_min, node_max, center, i, c_min, c_max);
+            E_total += computeFieldWithApproximation(point, node->children[i].get(), c_min, c_max);
+        }
+    }
+    return E_total;
 }
+
+
 G4ThreeVector AdaptiveSumRadialFieldMap::computeFieldFromCharges(const G4ThreeVector& point) const { if (!charge_root_) return G4ThreeVector(0,0,0); G4ThreeVector min_box, max_box; calculateBoundingBox(min_box, max_box); return computeFieldWithApproximation(point, charge_root_.get(), min_box, max_box); }
 
 std::unique_ptr<AdaptiveSumRadialFieldMap::Node> AdaptiveSumRadialFieldMap::buildFromScratch() {
@@ -626,15 +670,44 @@ void AdaptiveSumRadialFieldMap::refineMeshByGradient(Node* node, int depth) {
 }
 
 
-bool AdaptiveSumRadialFieldMap::hasHighFieldGradient(const G4ThreeVector& center, const G4ThreeVector& center_field [[maybe_unused]], double sample_distance) const {
-    if (fPositions.empty()) return false; double actual_distance = std::min(std::max(sample_distance, 0.1 * nm), 1.0 * um); // Adjusted range slightly
-    const std::vector<G4ThreeVector> sample_points = { center + G4ThreeVector(actual_distance, 0, 0), center - G4ThreeVector(actual_distance, 0, 0), center + G4ThreeVector(0, actual_distance, 0), center - G4ThreeVector(0, actual_distance, 0), center + G4ThreeVector(0, 0, actual_distance), center - G4ThreeVector(0, 0, actual_distance) }; std::vector<double> field_magnitudes(6);
-    #pragma omp parallel for 
-    for (int i = 0; i < 6; ++i) { field_magnitudes[i] = computeFieldFromCharges(sample_points[i]).mag(); }
-    if (actual_distance == 0) return false; double inv_2d = 1.0/(2.0*actual_distance); double gx=(field_magnitudes[0]-field_magnitudes[1])*inv_2d; double gy=(field_magnitudes[2]-field_magnitudes[3])*inv_2d; double gz=(field_magnitudes[4]-field_magnitudes[5])*inv_2d; double grad_sq = gx*gx+gy*gy+gz*gz;
+bool AdaptiveSumRadialFieldMap::hasHighFieldGradient(
+    const G4ThreeVector& center, 
+    const G4ThreeVector& parent_field, 
+    double leaf_size) const 
+{
+    if (fPositions.empty()) return false;
 
-    return grad_sq > (fieldGradThreshold_*fieldGradThreshold_);
+    // Step proportional to leaf size, clamped to reasonable limits
+    double dx = std::clamp(0.2 * leaf_size, 0.1*nm, 1.0*um);
+
+    // Diagonal directions for sampling: +diag, -diag, +X, just 3 points total
+    std::vector<G4ThreeVector> sample_points = {
+        center + G4ThreeVector( dx,  dx,  dx),
+        center + G4ThreeVector(-dx, -dx, -dx),
+        center + G4ThreeVector( dx, -dx,  dx) // arbitrary third diagonal
+    };
+
+    std::vector<double> field_magnitudes(sample_points.size());
+
+    #pragma omp parallel for
+    for (size_t i = 0; i < sample_points.size(); ++i) {
+        field_magnitudes[i] = computeFieldFromCharges(sample_points[i]).mag();
+    }
+
+    // Approximate gradient using finite differences along diagonal
+    double grad_sq = 0.0;
+    for (double f_mag : field_magnitudes) {
+        double df = f_mag - parent_field.mag();
+        grad_sq += (df*df);
+    }
+
+    grad_sq /= (sample_points.size() * dx * dx); // normalize by step^2
+
+    return grad_sq > (fieldGradThreshold_ * fieldGradThreshold_);
 }
+
+
+
 void AdaptiveSumRadialFieldMap::collectFinalLeaves(Node* node) { if (!node) return; if (node->is_leaf) { all_leaves_.push_back(node); } else { for (int i = 0; i < 8; ++i) { if(node->children[i]) collectFinalLeaves(node->children[i].get()); } } }
 
 void AdaptiveSumRadialFieldMap::GetFieldValue(const G4double point[4], G4double field[6]) const { const G4ThreeVector r(point[0], point[1], point[2]); G4ThreeVector E = evaluateField(r); field[0]=0; field[1]=0; field[2]=0; field[3]=E.x(); field[4]=E.y(); field[5]=E.z(); }
