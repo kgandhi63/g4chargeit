@@ -1,48 +1,99 @@
-# Grain-Charging-Simulations
+# Description
 
-## 1- MATERIALS AND GEOMETRY DEFINITION
- 	
-## 2- PHYSICS LIST
-   
-All physics classes are located in PhysicsList.cc. 
-> [!IMPORTANT]
-> Need to figure out the appropriate physics based on the literature review.
- 	 
-## 3- THE PRIMARY GENERATOR
- 	
-## 4-  OUTPUT
+This package contains a Monte Carlo simulation framework based on the open source package Geant4 for modeling the time-dependent electrostatic charging of dielectric materials. This document assumes that you are familiar with developing applications based on the Geant4 Monte Carlo toolkit using a linux environment.  
 
-Once GUI is closed, the program will generate a .ROOT file. (e.g test.ROOT)
-.ROOT file can be read using Jupyter Notebook by the uproot library. 
-The following information is saved to the root file:
-- pre and post location of particle (primary and other generated particles)
-- pre and post kinetic energy of each particle
-- particle number
-- type of interaction
+The g4chargeit package adds the functionality of iterative event based simulations to the Geant4 Monte Carlo toolkit.
 
-## 5- VISUALIZATION
- 
-The Visualization Manager is set in vis.mac.
-The initialization of the drawing is done via the commands
-/vis/... in the macro vis.mac. To get visualisation:
-> `/control/execute vis.mac`
+The following is accomplished with the g4chargeit module:
+* iterations of simulations are generated and run sequentially
+* a general electric field solver is natively implemented to model electric charging of dielectric materials
+* time steps are discretized baesd on the relative fluence of incident particle distributions
+* geometry surface charge  is conserved and carried over to each submitted iteration
+* provides an analysis toolkit to demonstrate the charging of arbitrary geometric configurations
 
-The detector has a default view which is a longitudinal view of the box.
-The tracks are drawn at the end of event, and erased at the end of run.
-	
-## 6- HOW TO START ?
+# Dependancies
+Ensure the following packages are installed: 
+> `gcc/12.3.0`
 
-Execute `cmake` in build folder. Run the following commands:
+> `cmake/3.11.3`
 
->`cmake *folder path* `
+> `root/6.30.04`
+
+> `xerces-c/3.30.2`
+
+> `openmpi/4.1.5`
+
+> `geant4/11.3.0`
+
+# Obtaining Source Code
+
+Clone this repository with the following command:
+
+> `git clone https://github.com/kgandhi63/g4chargeit.git`
+
+# Environment Setup
+Before compiling, you must ensure that you have linked periodic boundary conditions in Geant4. 
+
+Installation instructions can be found here: 
+
+> `https://github.com/amentumspace/g4pbc`
+
+Then export the installation in your bash script as a global variable:
+
+> `export G4PBC=/path/to/g4pbc/installation`
+
+# Build & Run
+The simulation is built using the CMake compiler. The source code is located in the `g4chargeit` directory. 
+
+Configure the run-time environment by sourcing the configuration script of your geant4 installation, then perform an out-of-source build:
+
+> `source <path_to_geant4_install>/bin/geant4.sh`
+
+> `mkdir build`
+
+> `cd build/`
+
+Run the following `cmake` command with the appropriate tags to configure the project with MPI and OpenMP support:
+
+> `cmake -Dg4pbc_DIR=$G4PBC -DCMAKE_CXX_COMPILER=$(which mpicxx) -DCMAKE_CXX_FLAGS="-fopenmp" ../g4chargeit/`
+
+Once compiled, edit or create a new submission python script with your desired parameters. CAD files of arbitarary geometries can be used in STL ASCII format. All source files have already been explicitly included in CMakeLists.txt.
+
+Compile the code using `make`. The `-j` flag enables parallel compilation to speed up the process.
+
+> `make -j<number_processors>`
+
+An executable called `g4chargeit` will appear, simply run:
+
+>  `./g4chargeit`
+
+A single iteration can be run using `/control/execute test-macros/testphotons-regular.mac`.
+
+## Example Application 
+An application is provided. Submission scripts are generated for the charging of lunar regolith in the presence of photoelectrons and solar wind. Our example assumes the simulations are being run on a high performance cluster using the SLURM job scheduling system. The exact HPC batch commands will need to be change to reflect your computing environment. 
+
+Two cases will be run, solar wind irradiation and photons. To create macros for a series of iterations, we first need to run the 0th iteration:
+
+> `python createMacros-RegularSpheres.py`
+> 
+> `sbatch batchscripts/000_iteration0_onlysolarwind_num100000.root`
+> 
+> `sbatch batchscripts/000_iteration0_onlyphotoemission_num100000.root`
+
+Then recreate all macro files:
+
+> `python createMacros-RegularSpheres.py`
+
+Multiple jobs can be submitted through the HPC using:
+
+> `python create_submission_file.py [startIterationNum] [endIterationNum] [irradiationCase]`
 >
->`make`
->
->`gdb ./chargingsphere`
->
-> `run`
+>  `./submit_iterations.sh`
 
-Once GUI boots:
-> `control/execute macro.mac`
-	
+This will start your thread of simulations that can be viewed in the `outputlogs`. 
+
+
+## Analysis
+
+Analysis tools are provided in the `analysis` folder. The conventional file output type is in ROOT format. 
 
