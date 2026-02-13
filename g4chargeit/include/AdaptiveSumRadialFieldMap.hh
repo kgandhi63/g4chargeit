@@ -6,6 +6,7 @@
 #include "G4Types.hh"          // For G4double
 #include "G4SystemOfUnits.hh"  // Defines units like m, nm, um
 #include "G4PhysicalConstants.hh" // Defines eplus, epsilon0, pi
+#include "G4VSolid.hh"
 
 #include <vector>
 #include <string>
@@ -14,7 +15,8 @@
 #include <atomic>              // For std::atomic counters
 #include <cstdint>             // For uint32_t, uint64_t in enums/export
 
-\
+
+class G4VSolid;
 
 class AdaptiveSumRadialFieldMap : public G4ElectricField {
 
@@ -26,6 +28,8 @@ public:
         std::vector<G4ThreeVector>& positions,
         std::vector<G4double>& charges,
         const G4double& gradThreshold,
+        G4VSolid* geometry,
+        const G4double& dielectricConstant,
         const G4double& minStep,
         const G4double& time_step_dt,
         const G4double& material_temp_K,
@@ -74,6 +78,8 @@ private:
     G4double barnes_hut_theta_;
     int initialDepth_;
     bool dissipateCharge_;
+    G4VSolid* geometry_;
+    G4double dielectricConstant_;
 
     std::vector<G4ThreeVector>& fPositions;
     std::vector<G4double>& fCharges;
@@ -116,6 +122,7 @@ private:
     void ApplyChargeDissipation(G4double dt, G4double temp_K);
     double calculateConductivity(double temp_K) const;
     void distributeChargeChange(const std::vector<int>& particle_indices, G4double total_charge_change);
+    double GetDielectricFraction(const G4ThreeVector& center, double half_width) const;
 
     bool pointInside(const G4ThreeVector& min_bounds, const G4ThreeVector& max_bounds, const G4ThreeVector& point) const;
     void calculateBoundingBox(G4ThreeVector& min_box, G4ThreeVector& max_box) const;

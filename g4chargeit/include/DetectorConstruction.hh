@@ -103,9 +103,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
     G4double equivalentIterationTime_;
     G4double density_;
     G4bool boolDissipationModel_;
-
-    // CAD geometry
-    G4VSolid* sphereSolid_;  // ← Make sure this exists
+    G4VSolid* sphereSolid_;
 
 };
 

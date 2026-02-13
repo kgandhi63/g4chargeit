@@ -123,19 +123,16 @@ G4PhysicalVolumeStore::GetInstance()->Clean();
 G4LogicalVolumeStore::GetInstance()->Clean();
 G4SolidStore::GetInstance()->Clean();
 
-G4MaterialPropertiesTable* dielectric = new G4MaterialPropertiesTable();
-dielectric->AddConstProperty("Epsilon",  Epsilon_, true);
 G4int ncomponents,natoms;
 
 G4Material* SiO2 = new G4Material("SiO2", density_, ncomponents=2,
     kStateSolid, materialTemperature_);
 
-G4Element* Si = new G4Element("Silion","Si", 14., 28.0855*g/mole);
+G4Element* Si = new G4Element("Silicon","Si", 14., 28.0855*g/mole);
 G4Element* O = new G4Element("Oxygen", "O", 8., 16.00*g/mole);
 
 SiO2->AddElement(Si, natoms=1);
 SiO2->AddElement(O, natoms=2);
-SiO2->SetMaterialPropertiesTable(dielectric);
 
 G4cout << "Density of " << SiO2->GetName() << ": " << G4BestUnit(SiO2->GetDensity(), "Volumic Mass")  
        << "at a temperature of " << SiO2->GetTemperature() << " K" << G4endl;
@@ -364,7 +361,9 @@ void DetectorConstruction::ConstructSDandField() {
     const G4double material_temperature = materialTemperature_ / kelvin;
     auto adaptiveFieldMap = new AdaptiveSumRadialFieldMap(
         allPositions, allCharges, 
-        fieldGradThreshold_,              
+        fieldGradThreshold_,
+        sphereSolid_,
+        Epsilon_,  
         fieldMinimumStep_,
         time_step_dt, 
         material_temperature,     

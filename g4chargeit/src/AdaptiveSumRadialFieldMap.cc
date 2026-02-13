@@ -4,6 +4,7 @@
 #include "G4UnitsTable.hh"
 #include "G4PhysicalConstants.hh" 
 
+
 #include <cmath>
 #include <algorithm>
 #include <fstream>
@@ -108,6 +109,8 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     std::vector<G4ThreeVector>& positions,
     std::vector<G4double>& charges,
     const G4double& gradThreshold,
+    G4VSolid* geometry,
+    const G4double& dielectricConstant,
     const G4double& minStep,
     const G4double& time_step_dt,
     const G4double& material_temp_K,
@@ -121,7 +124,7 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     StorageType storage)
     : max_depth_(max_depth_param), minStepSize_(minStep),
       worldMin_(min_bounds), worldMax_(max_bounds), fieldGradThreshold_(gradThreshold), fStorage(storage),dissipateCharge_(dissipateCharge),
-      fPositions(positions), fCharges(charges), fStateFilename(state_filename), initialDepth_(initial_depth) // Use references directly
+      fPositions(positions), fCharges(charges), fStateFilename(state_filename), initialDepth_(initial_depth), geometry_(geometry), dielectricConstant_(dielectricConstant) // Use references directly
 {
 
     LoadPersistentState(fStateFilename, fPositions, fCharges);
@@ -156,7 +159,7 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
         Node* leaf = all_leaves_[i];
         if(leaf) {
             leaf->precomputed_field = computeFieldFromCharges(leaf->center);
-            field_magnitudes[i] = leaf->precomputed_field.mag(); 
+            field_magnitudes[i] = leaf->precomputed_field.mag();
         } else {
              field_magnitudes[i] = 0.0;
         }
@@ -184,7 +187,7 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     }
     if (dissipateCharge_) { 
 
-        G4cout << "Applying one-time charge dissipation ('tax')..." << G4endl;
+        G4cout << "Applying one-time charge dissipation ..." << G4endl;
         ApplyChargeDissipation(time_step_dt, material_temp_K); 
         auto end_charge = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> duration3 = end_charge - end_build1;
@@ -195,6 +198,26 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     all_leaves_.clear();
     collectFinalLeaves(root_.get());
     leaf_nodes_.store(static_cast<int>(all_leaves_.size()));
+
+
+    G4cout << "Applying dielectric scaling to final mesh..." << G4endl;
+    num_leaves = all_leaves_.size();
+
+    #pragma omp parallel for schedule(dynamic)
+    for (size_t i = 0; i < num_leaves; ++i) { 
+        Node* leaf = all_leaves_[i];
+        if(leaf) {
+            // Check boundary overlap for this specific leaf
+            double half_width = (leaf->max.x() - leaf->min.x()) * 0.5;
+            double f = GetDielectricFraction(leaf->center, half_width);
+
+            // Apply scaling only if partially or fully inside
+            if (f > 0.0) {
+                 double epsilon_eff = 1.0 + f * (dielectricConstant_ - 1.0);
+                 leaf->precomputed_field = leaf->precomputed_field / epsilon_eff;
+            }
+        }
+    }
 
     G4cout << "   --> Saving refined field to " <<filename << G4endl;
     if (!filename.empty()) {
@@ -440,6 +463,29 @@ void AdaptiveSumRadialFieldMap::distributeChargeChange(const std::vector<int>& p
          }
      }
 }
+
+
+double AdaptiveSumRadialFieldMap::GetDielectricFraction(const G4ThreeVector& c, double hw) const {
+    if (!geometry_) return 0.0;
+
+    G4ThreeVector points[] = {
+        c,
+        c + G4ThreeVector( hw,  hw,  hw), c + G4ThreeVector( hw,  hw, -hw),
+        c + G4ThreeVector( hw, -hw,  hw), c + G4ThreeVector( hw, -hw, -hw),
+        c + G4ThreeVector(-hw,  hw,  hw), c + G4ThreeVector(-hw,  hw, -hw),
+        c + G4ThreeVector(-hw, -hw,  hw), c + G4ThreeVector(-hw, -hw, -hw)
+    };
+
+    int inside_count = 0;
+    for (const auto& p : points) {
+        if (geometry_->Inside(p) != kOutside) { 
+            inside_count++;
+        }
+    }
+
+    return (double)inside_count / 9.0; 
+}
+
 
 void AdaptiveSumRadialFieldMap::buildChargeOctree() {
     charge_root_.reset(); // Important when rebuilding
