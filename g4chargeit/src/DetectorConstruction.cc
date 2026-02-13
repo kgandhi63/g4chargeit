@@ -135,7 +135,8 @@ SiO2->AddElement(Si, natoms=1);
 SiO2->AddElement(O, natoms=2);
 
 G4cout << "Density of " << SiO2->GetName() << ": " << G4BestUnit(SiO2->GetDensity(), "Volumic Mass")  
-       << "at a temperature of " << SiO2->GetTemperature() << " K" << G4endl;
+       << "at a temperature of " << SiO2->GetTemperature() << " K" << G4endl
+       << "with a dielectric constant of " << Epsilon_ << G4endl;
 
 G4bool checkOverlaps = false;
 
@@ -407,6 +408,11 @@ void DetectorConstruction::ConstructSDandField() {
       lv->SetSensitiveDetector(sd);
     }
   }
+
+  // set sensitive detector to the ENTIRE WORLD
+  // only for creating figures of deflection and scattering of particles outside geometry
+  // otherwise uncomment this (makes ROOT files unnecessarily large)
+  //logicWorld_->SetSensitiveDetector(sd);
 }
 
 

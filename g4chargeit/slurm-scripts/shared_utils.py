@@ -196,7 +196,7 @@ def write_geometry_settings(f, increment_filename, world_dims, material_props,
     world_dims : dict
         Dictionary with keys 'worldX', 'worldY', 'worldZ'
     material_props : dict
-        Dictionary with keys 'temperature', 'density', 'iterationTime', 'chargeDissipation'
+        Dictionary with keys 'temperature', 'density', 'iterationTime', 'chargeDissipation', 'dielectric'
     mesh_params : dict
         Dictionary with keys 'initialOctreeDepth', 'minStep', 'gradPercent', 'finalOctreeDepth'
     input_files : list, optional
@@ -205,6 +205,7 @@ def write_geometry_settings(f, increment_filename, world_dims, material_props,
     f.write(f'/geometry/worldX {world_dims["worldX"]} um\n')
     f.write(f'/geometry/worldY {world_dims["worldY"]} um\n')
     f.write(f'/geometry/worldZ {world_dims["worldZ"]} um\n')
+    f.write(f'/geometry/epsilon {material_props["dielectric"]}\n')
     f.write(f'/geometry/MaterialTemperature {material_props["temperature"]} K\n')
     f.write(f'/geometry/MaterialDensity {material_props["density"]} g/cm3\n')
     f.write(f'/geometry/IterationTime {material_props["iterationTime"]} s\n')

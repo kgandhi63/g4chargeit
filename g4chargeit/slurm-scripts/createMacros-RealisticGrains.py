@@ -155,8 +155,9 @@ def write_macro(f, increment_filename, event_num, iterationTime,
     elif "onlysolarwind" in increment_filename:
         write_particle_source_solarwind(f, CAD_dimensions, XY_offset, Z_position, 
                                        rotation, buffer_plane=0, 
-                                       electron_dist_file="distributions/electronMaxwellian_distribution.txt", 
-                                       electron_intensity=electron_intensity)
+                                       electron_dist_file="distributions/electronSolarWind_distribution.txt", 
+                                       electron_intensity=electron_intensity, 
+                                       ion_dist_file = "distributions/ionSolarWind_distribution.txt")
     elif "onlyphotoemission" in increment_filename:
         write_particle_source_photoemission(f, CAD_dimensions, XY_offset, Z_position, 
                                            rotation, buffer_plane=0, 

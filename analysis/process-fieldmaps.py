@@ -8,6 +8,8 @@ import sys
 from numba import njit, prange 
 import h5py
 import trimesh
+import re
+import ast
 
 # --- Full Function Implementations (Optimized Readers/Calculators) ---
 
@@ -53,6 +55,87 @@ def calculate_filter_mask(pos, target, radius_mm):
         mask[i] = dist_sq <= radius_sq
         
     return mask
+
+
+def extract_iterationTime_octreeParameters(file_path):
+    """
+    Extract the IterationTime and octree parameters from a Geant4 macro file.
+    
+    Parameters:
+    file_path (str): Path to the macro file
+    
+    Returns:
+    dict: Dictionary containing iteration_time and octree parameters, or None values if not found
+    """
+    with open(file_path, 'r') as f:
+        content = f.read()
+    
+    # Initialize result dictionary with None values
+    result = {
+        'iteration_time': None,
+        'material_temperature': None,
+        'minimum_step': None,
+        'percent_grad_threshold': None,
+        'initial_octree_depth': None,
+        'final_octree_depth': None
+    }
+    
+    # Search for IterationTime
+    pattern_iteration_time = r'/geometry/IterationTime\s+(\d+\.?\d*(?:[eE][+-]?\d+)?)\s+s'
+    match = re.search(pattern_iteration_time, content)
+    if match:
+        result['iteration_time'] = float(match.group(1))
+    
+    # Search for MaterialTemperature (with unit conversion)
+    pattern_material_temp = r'/geometry/MaterialTemperature\s+(\d+\.?\d*(?:[eE][+-]?\d+)?)\s+(\w+)'
+    match = re.search(pattern_material_temp, content)
+    if match:
+        value = float(match.group(1))
+        unit = match.group(2)
+        # Convert to Kelvin if needed
+        if unit == 'K':
+            result['material_temperature'] = value
+        elif unit == 'C':
+            result['material_temperature'] = value + 273.15
+        else:
+            result['material_temperature'] = value  # Store as-is if unit unknown
+    
+
+    # Search for InitialDepth
+    pattern_initial_depth = r'/field/InitialDepth\s+(\d+)'
+    match = re.search(pattern_initial_depth, content)
+    if match:
+        result['initial_octree_depth'] = int(match.group(1))
+    
+    # Search for MinimumStep (with unit conversion)
+    pattern_minimum_step = r'/field/MinimumStep\s+(\d+\.?\d*(?:[eE][+-]?\d+)?)\s+(\w+)'
+    match = re.search(pattern_minimum_step, content)
+    if match:
+        value = float(match.group(1))
+        unit = match.group(2)
+        # Convert to micrometers if needed
+        if unit == 'um':
+            result['minimum_step'] = value
+        elif unit == 'mm':
+            result['minimum_step'] = value * 1000
+        elif unit == 'nm':
+            result['minimum_step'] = value / 1000
+        else:
+            result['minimum_step'] = value  # Store as-is if unit unknown
+    
+    # Search for PercentGradThreshold
+    pattern_percent_grad = r'/field/PercentGradThreshold\s+(\d+\.?\d*(?:[eE][+-]?\d+)?)'
+    match = re.search(pattern_percent_grad, content)
+    if match:
+        result['percent_grad_threshold'] = float(match.group(1))
+    
+    # Search for OctreeDepth
+    pattern_octree_depth = r'/field/OctreeDepth\s+(\d+)'
+    match = re.search(pattern_octree_depth, content)
+    if match:
+        result['final_octree_depth'] = int(match.group(1))
+    
+    return result
 
 def read_adaptive_fieldmap(filename):
     """
@@ -104,6 +187,7 @@ def process_iteration_radius(filename, target=np.array([-0.1, 0, 0.122]), radius
     - Reads the field
     - Scales fields if requested
     - Filters points within radius_um from target
+    - Extracts iteration time from corresponding macro file
     - Returns iteration key and filtered data dictionary
     """
     # 📢 LOGGING: Print the file being processed
@@ -146,11 +230,10 @@ def process_iteration_radius(filename, target=np.array([-0.1, 0, 0.122]), radius
         "pos": pos_filtered,
         "E": E_stacked_filtered,
         "E_mag": E_mag_filtered,
-        "gradRefinements": int(metadata['mesh_parameters']['total_nodes'] - metadata['mesh_parameters']['final_leaf_nodes'])
+        "gradRefinements": int(metadata['mesh_parameters']['total_nodes'] - metadata['mesh_parameters']['final_leaf_nodes']),
     }
 
     return f"iter_{iteration_number}", filtered_data
-
 
 # --- Parallel driver ---
 
@@ -167,10 +250,19 @@ def process_folder_parallel(folder_path, output_h5="processed-fieldmaps.h5",
         print(f"⚠️ No files found in '{folder_path}/fieldmaps/' matching pattern '*{configIN}*.txt'. Stopping.")
         return
 
+    # Extract macro parameters from the first macro file (applies to all iterations)
+    macro_files = sorted(glob.glob(f"{folder_path}/macros/*{configIN}*.mac"))
+    if macro_files:
+        macroParameters = extract_iterationTime_octreeParameters(macro_files[1])
+        print(f"Extracted macro parameters from: {os.path.basename(macro_files[1])}")
+    else:
+        print("⚠️ No macro files found. Macro parameters will not be saved.")
+        macroParameters = {}
+
     os.makedirs(os.path.dirname(output_h5), exist_ok=True)
 
-    # 1. Concurrency Control: Use input or hardcoded safe default (4)
-    MAX_WORKERS = os.cpu_count() #max(1, (os.cpu_count() or 2)//2)
+    # 1. Concurrency Control: Use input or hardcoded safe default
+    MAX_WORKERS = max_workers_in if max_workers_in else os.cpu_count()
     GZIP_COMPRESSION_LEVEL = 5
 
     # 📢 LOGGING: Print the worker count
@@ -179,6 +271,22 @@ def process_folder_parallel(folder_path, output_h5="processed-fieldmaps.h5",
     # Create or open the HDF5 file once
     try:
         with h5py.File(output_h5, "w") as h5file:
+            
+            # Add global metadata attributes to the root of the HDF5 file
+            h5file.attrs["central_target_point"] = target  
+            h5file.attrs['fieldmap_sphere_um'] = radius_um
+            h5file.attrs['config_tag'] = configIN
+            
+            # Add all macro parameters as global attributes
+            for key, value in macroParameters.items():
+                if value is not None:
+                    h5file.attrs[key] = value
+                else:
+                    h5file.attrs[key] = -1.0  # Default for None values
+            
+            print(f"Added global metadata: target={target}, radius={radius_um} µm")
+            print(f"Added macro parameters: {macroParameters}")
+            
             with concurrent.futures.ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
                 futures = [executor.submit(process_iteration_radius, fn, target, radius_um) for fn in filenames]
 
@@ -223,46 +331,70 @@ def process_folder_parallel(folder_path, output_h5="processed-fieldmaps.h5",
 
 
 # --- CLI entry point ---
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("\nUsage: python parallel_fieldmap_processor.py <folder_path> [note] [config_tag] [temp_K] [max_workers]\n")
-        print("Example: python parallel_fieldmap_processor.py ../build-folder initial_run onlyphotoemission 425 4")
+        print("\nUsage: python parallel_fieldmap_processor.py <folder_path> [config_tag] [target_x,y,z] [sphere_radius_um] [geometry_file] [output_name] [max_workers]\n")
+        print("Example: python parallel_fieldmap_processor.py ../build-folder onlyphotoemission [-0.1,0,0.137] 50 regularSpheres_fromPython.stl initial_run 4")
+        print("\nArguments:")
+        print("  folder_path       : Path to the build folder containing fieldmaps/ and macros/")
+        print("  config_tag        : Configuration tag to filter files (default: 'onlyphotoemission')")
+        print("  target_x,y,z      : Target coordinates in mm, comma-separated (default: [-0.1, 0, 0.137])")
+        print("  sphere_radius_um  : Filtering radius in micrometers (default: 50)")
+        print("  geometry_file     : STL geometry filename (default: 'regularSpheres_fromPython.stl')")
+        print("  output_name       : Output HDF5 filename (without extension, default: 'single_config')")
+        print("  max_workers       : Number of parallel workers (default: CPU count)")
         sys.exit(1)
 
-    # load in geometry to get the center of the geometry 
-    #stacked_spheres_frompython_cropped.stl, isolated_grain_interpolated.stl
-    #geometryIN = "stacked_spheres_frompython_cropped.stl"
-    geometryIN = "isolated_grains_interpolated.stl"
-    geometry = trimesh.load_mesh(f'../sphere-charging/geometry/{geometryIN}') 
-    print(f"imported {geometryIN}, has a center of {geometry.centroid}")
-
-    # 1. Parse arguments
-    # python script.py <folder_path> [note] [config_tag] [saving_radius] [max_workers]
+    # Parse arguments in order: folder_path config target sphereRadius outfileName geometryIN maxWorkers
     folder_path = sys.argv[1]
-    noteIN = sys.argv[2] if len(sys.argv) > 2 else 'single_config'
-    configIN = sys.argv[3] if len(sys.argv) > 3 else 'onlyphotoemission' 
-    radiusIN = int(sys.argv[4]) if len(sys.argv) > 4 else 50 # units: µm
     
-    # New argument: max_workers
+    # Argument 2: config_tag
+    configIN = sys.argv[2] if len(sys.argv) > 2 else 'onlyphotoemission'
+
+    # Argument 3: target location
+    if len(sys.argv) > 3:
+        targetIN = np.array(ast.literal_eval(sys.argv[3]), dtype=float)
+    else:
+        targetIN = np.array([-0.1, 0.0, 0.1 + 0.037])
+    
+    # Argument 4: sphere_radius_um
     try:
-        max_workers_in = int(sys.argv[5]) if len(sys.argv) > 5 else None
+        radiusIN = int(sys.argv[4]) if len(sys.argv) > 4 else 50  # units: µm
+    except ValueError:
+        print("Error: sphere_radius_um must be an integer.")
+        sys.exit(1)
+    
+    # Argument 6: geometry_file
+    geometryIN = sys.argv[5] if len(sys.argv) > 5 else 'regularSpheres_fromPython.stl'
+
+    # Argument 5: output_name
+    outputNote = sys.argv[6] if len(sys.argv) > 6 else 'single_config'
+    
+    # Argument 7: max_workers
+    try:
+        max_workers_in = int(sys.argv[7]) if len(sys.argv) > 7 else None
     except ValueError:
         print("Error: max_workers must be an integer.")
         sys.exit(1)
 
-    # Fixed target and radius parameters (moved to main execution setup)
-    targetIN = np.array([-0.1, 0, 0.1 + 0.037]) + geometry.centroid
-    #targetIN = np.array([0.1, 0, 0.1 - 0.015 + 0.037])
-    tempIN = 425  # units: K
+    # Load geometry to get the center
+    geometry = trimesh.load_mesh(f'{folder_path}/geometry/{geometryIN}') 
+    print(f"Imported {geometryIN}, has a center of {geometry.centroid}")
+    
+    # Add the geometry offset to the target location 
+    targetIN = targetIN + geometry.centroid
 
-    output_file = f"processed-fieldmaps/{noteIN}.h5"
+    # Create output file path
+    output_file = f"processed-fieldmaps/{outputNote}.h5"
 
     print(f"--- Starting Parallel Processing ---")
     print(f"Input Folder: {folder_path}")
-    print(f"Output File: {output_file}")
     print(f"Config Tag: {configIN}")
-    print(f"Target Radius: {radiusIN} µm centered at {targetIN}")
+    print(f"Geometry File: {geometryIN}")
+    print(f"Target Point: {targetIN} µm (relative to geometry centroid: {geometry.centroid})")
+    print(f"Filter Radius: {radiusIN} µm")
+    print(f"Output File: {output_file}")
+    print(f"Max Workers: {max_workers_in if max_workers_in else 'CPU count'}")
     print("------------------------------------")
 
     process_folder_parallel(
@@ -271,11 +403,13 @@ if __name__ == "__main__":
         configIN=configIN, 
         target=targetIN, 
         radius_um=radiusIN,
-        max_workers_in=max_workers_in # Pass the new argument
+        max_workers_in=max_workers_in
     )
 
-# example: python process-fieldmaps.py  "../build" 'initial8max0.8final12' 'onlyphotoemission' 
+# Example usage:
+# python process-fieldmaps.py ../build-folder onlyphotoemission [-0.1,0,0.137] 50 regularSpheres_fromPython.stl initial_run maxWorkers
 
+# SLURM batch script example:
 # #!/bin/bash
 # #SBATCH --job-name=process-allcases
 # #SBATCH --account=gts-zjiang33
@@ -285,10 +419,10 @@ if __name__ == "__main__":
 # #SBATCH --mem-per-cpu=264gb
 # #SBATCH --time=01:30:00
 # #SBATCH --output=outputlogs/log-fieldprocessing-test
-
+#
 # source ~/.bashrc
 # conda activate geant4-env
-
-# echo "processing results for dissipationRefinedGrid-initial8max0.8final11 (PE case, 40 um sphere)"
-# python process-fieldmaps.py "../build" 'PEWang_425K_initial8max0.6final10_through111' 'onlyphotoemission' 10
+#
+# echo "Processing fieldmaps for PE case with 10 µm sphere radius"
+# python process-fieldmaps.py "../build" 'onlyphotoemission' [-0.1,0,0.137] 10 'regularSpheres_fromPython.stl' 'PEWang_425K_initial8max0.6final10_through111'
 # date

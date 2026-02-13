@@ -28,6 +28,7 @@ iterationNUM = 200
 # Material properties
 temperature = 425  # Kelvin
 density = 2.2  # g/cm3 (SiO2)
+dielectric = 3.9 # set dielectric constant 
 
 # Optional: set random seed for debugging
 # seedIN = [10008859, 10005380]
@@ -110,6 +111,7 @@ def write_macro(f, increment_filename, event_num, iterationTime,
     material_props = {
         'temperature': temperature,
         'density': density,
+        'dielectric': dielectric,
         'iterationTime': iterationTime,
         'chargeDissipation': chargeDissipation
     }
@@ -130,8 +132,9 @@ def write_macro(f, increment_filename, event_num, iterationTime,
     if "onlysolarwind" in increment_filename:
         write_particle_source_solarwind(f, CAD_dimensions, XY_offset, Z_position, 
                                        rotation, buffer_plane=bufferX_direction, 
-                                       electron_dist_file="distributions/electronMaxwellian_distribution.txt", 
-                                       electron_intensity=electron_intensity)
+                                       electron_dist_file="distributions/electronSolarWind_distribution.txt", 
+                                       electron_intensity=electron_intensity, 
+                                       ion_dist_file = "distributions/ionSolarWind_distribution.txt")
     elif "onlyphotoemission" in increment_filename:
         write_particle_source_photoemission(f, CAD_dimensions, XY_offset, Z_position, 
                                            rotation, buffer_plane=bufferX_direction, 
