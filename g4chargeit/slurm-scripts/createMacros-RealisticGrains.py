@@ -20,11 +20,12 @@ from shared_utils import (
 #############################################################
 
 # Account and user settings
-account, username = "zjiang33-paid", "avira7"
+account, username = "pf17", "avira7"
 
 # Material properties
 density = 1.9  # g/cm3 (from Wang manuscript)
 temperature = 425  # K (293 K for room temp in Wang experiments)
+dielectric = 3.9 # set dielectric constant 
 
 # Iteration settings
 iterationNUM = 100
@@ -123,6 +124,7 @@ def write_macro(f, increment_filename, event_num, iterationTime,
     material_props = {
         'temperature': temperature,
         'density': density,
+        'dielectric': dielectric,
         'iterationTime': iterationTime,
         'chargeDissipation': chargeDissipation
     }

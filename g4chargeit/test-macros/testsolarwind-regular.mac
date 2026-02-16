@@ -47,30 +47,33 @@
 #/geometry/cadinput/scale 0.001
 /run/initialize
 #
-#/gps/particle e-
-#/gps/ene/type Arb
-#/gps/hist/type arb
-#/gps/ene/diffspec true
-#/gps/hist/file distributions/electronMaxwellian_distribution.txt
-#/gps/hist/inter Lin
-#/gps/pos/type Plane
-#/gps/pos/shape Square
-#/gps/pos/halfx 200.0 um
-#/gps/pos/halfy 150.0 um
-#/gps/pos/centre 0 0 226.6 um
-#/gps/ang/type iso
-#/gps/ang/maxtheta 90 deg
-#
-#/gps/source/add 1
-#/gps/source/intensity 0.2
-/gps/particle proton
-/gps/ene/type Mono
-/gps/energy 1 keV
+/gps/particle e-
+/gps/ene/type Arb
+/gps/hist/type arb
+/gps/ene/diffspec true
+/gps/hist/file distributions/electronSolarWind_distribution.txt
+/gps/hist/inter Log
 /gps/pos/type Plane
 /gps/pos/shape Square
-/gps/pos/halfx 200.0 um
-/gps/pos/halfy 150.0 um
-/gps/pos/centre 40.0 0 226.6 um
+/gps/pos/halfx 53.50022 um
+/gps/pos/halfy 60.38719 um
+/gps/pos/centre 0 0 90.14522500000001 um
+/gps/ang/type iso
+/gps/ang/maxtheta 90 deg
+#
+/gps/source/add 1
+/gps/source/intensity 0.2
+/gps/particle proton
+/gps/ene/type Arb
+/gps/hist/type arb
+/gps/ene/diffspec true
+/gps/hist/file distributions/ionSolarWind_distribution.txt
+/gps/hist/inter Lin
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 53.50022 um
+/gps/pos/halfy 60.38719 um
+/gps/pos/centre 40.00000000000001 0 90.14522500000001 um
 /gps/direction -0.7071067811865476 0 -0.7071067811865476
 #
 /control/execute test-macros/vis.mac

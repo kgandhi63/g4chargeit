@@ -28,6 +28,7 @@ iterationNUM = 200
 # Material properties
 temperature = 425  # Kelvin
 density = 1.9  # g/cm3 (SiO2)
+dielectric = 3.9 # set dielectric constant 
 
 # Optional: set random seed for debugging
 # seedIN = [10008859, 10005380]
@@ -105,6 +106,7 @@ def write_macro(f, increment_filename, event_num, iterationTime,
     material_props = {
         'temperature': temperature,
         'density': density,
+        'dielectric': dielectric,
         'iterationTime': iterationTime,
         'chargeDissipation': chargeDissipation
     }
