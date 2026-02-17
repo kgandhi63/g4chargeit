@@ -213,8 +213,8 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
 
             // Apply scaling only if partially or fully inside
             if (f > 0.0) {
-                 double epsilon_eff = 1.0 + f * (dielectricConstant_ - 1.0);
-                 leaf->precomputed_field = leaf->precomputed_field / epsilon_eff;
+                double epsilon_eff_perp = 1.0 / ( (1.0 - f) + (f / dielectricConstant_) );
+                 leaf->precomputed_field = leaf->precomputed_field / epsilon_eff_perp;
             }
         }
     }
