@@ -4,6 +4,8 @@ This package contains a Monte Carlo simulation framework based on the open sourc
 
 The g4chargeit package adds the functionality of iterative event based simulations to the Geant4 Monte Carlo toolkit.
 
+K. P. Gandhi, A. D. Vira, W. M. Farrell, N. Simonov, A. Romero-Calvo, T. M. Orlando, P. N. First, and Z. Jiang, g4chargeit: Geant4-based kinetic Monte Carlo simulations of charging in dielectric materials, arXiv:2602.17332 (2026). https://doi.org/10.48550/arXiv.2602.17332
+
 The following is accomplished with the g4chargeit module:
 * iterations of simulations are generated and run sequentially
 * a general electric field solver is natively implemented to model electric charging of dielectric materials
