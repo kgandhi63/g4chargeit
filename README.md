@@ -31,7 +31,9 @@ Ensure the following packages are installed:
 
 Clone this repository with the following command:
 
-> `git clone https://github.com/kgandhi63/g4chargeit.git`
+```bash
+git clone https://github.com/kgandhi63/g4chargeit.git
+```
 
 # Environment Setup
 Before compiling, you must ensure that you have linked periodic boundary conditions in Geant4. 
