@@ -40,36 +40,49 @@ Before compiling, you must ensure that you have linked periodic boundary conditi
 
 Installation instructions can be found here: 
 
-> `https://github.com/amentumspace/g4pbc`
+```bash
+https://github.com/amentumspace/g4pbc
+```
 
 Then export the installation in your bash script as a global variable:
 
-> `export G4PBC=/path/to/g4pbc/installation`
+```bash
+export G4PBC=/path/to/g4pbc/installation
+```
 
 # Build & Run
 The simulation is built using the CMake compiler. The source code is located in the `g4chargeit` directory. 
 
 Configure the run-time environment by sourcing the configuration script of your geant4 installation, then perform an out-of-source build:
 
-> `source <path_to_geant4_install>/bin/geant4.sh`
+```bash
+source <path_to_geant4_install>/bin/geant4.sh
+```
 
-> `mkdir build`
-
-> `cd build/`
+```bash
+mkdir build
+cd build/
+```
 
 Run the following `cmake` command with the appropriate tags to configure the project with MPI and OpenMP support:
 
-> `cmake -Dg4pbc_DIR=$G4PBC -DCMAKE_CXX_COMPILER=$(which mpicxx) -DCMAKE_CXX_FLAGS="-fopenmp" ../g4chargeit/`
+```bash
+cmake -Dg4pbc_DIR=$G4PBC -DCMAKE_CXX_COMPILER=$(which mpicxx) -DCMAKE_CXX_FLAGS="-fopenmp" ../g4chargeit/
+```
 
 Once compiled, edit or create a new submission python script with your desired parameters. CAD files of arbitarary geometries can be used in STL ASCII format. All source files have already been explicitly included in CMakeLists.txt.
 
 Compile the code using `make`. The `-j` flag enables parallel compilation to speed up the process.
 
-> `make -j<number_processors>`
+```bash
+make -j<number_processors>
+```
 
 An executable called `g4chargeit` will appear, simply run:
 
->  `./g4chargeit`
+```bash
+./g4chargeit
+```
 
 A single iteration can be run using `/control/execute test-macros/testphotons-regular.mac`.
 
@@ -78,21 +91,30 @@ An application is provided. Submission scripts are generated for the charging of
 
 Two cases will be run, solar wind irradiation and photons. To create macros for a series of iterations, we first need to run the 0th iteration:
 
-> `python createMacros-RegularSpheres.py`
-> 
-> `sbatch batchscripts/000_iteration0_onlysolarwind_num100000.root`
-> 
-> `sbatch batchscripts/000_iteration0_onlyphotoemission_num100000.root`
+```bash
+python createMacros-RegularSpheres.py
+```
+
+```bash
+sbatch batchscripts/000_iteration0_onlysolarwind_num100000.root
+sbatch batchscripts/000_iteration0_onlyphotoemission_num100000.root
+```
 
 Then recreate all macro files:
 
-> `python createMacros-RegularSpheres.py`
+```bash
+python createMacros-RegularSpheres.py
+```
 
 Multiple jobs can be submitted through the HPC using:
 
-> `python create_submission_file.py [startIterationNum] [endIterationNum] [irradiationCase]`
->
->  `./submit_iterations.sh`
+```bash
+python create_submission_file.py [startIterationNum] [endIterationNum] [irradiationCase]
+```
+
+```bash
+./submit_iterations.sh
+```
 
 This will start your thread of simulations that can be viewed in the `outputlogs`. 
 
