@@ -199,22 +199,23 @@ AdaptiveSumRadialFieldMap::AdaptiveSumRadialFieldMap(
     collectFinalLeaves(root_.get());
     leaf_nodes_.store(static_cast<int>(all_leaves_.size()));
 
+    if (dielectricConstant_ > 1.0) {
+        G4cout << "Applying dielectric scaling to final mesh..." << G4endl;
+        num_leaves = all_leaves_.size();
 
-    G4cout << "Applying dielectric scaling to final mesh..." << G4endl;
-    num_leaves = all_leaves_.size();
+        #pragma omp parallel for schedule(dynamic)
+        for (size_t i = 0; i < num_leaves; ++i) { 
+            Node* leaf = all_leaves_[i];
+            if(leaf) {
+                // Check boundary overlap for this specific leaf
+                double half_width = (leaf->max.x() - leaf->min.x()) * 0.5;
+                double f = GetDielectricFraction(leaf->center, half_width);
 
-    #pragma omp parallel for schedule(dynamic)
-    for (size_t i = 0; i < num_leaves; ++i) { 
-        Node* leaf = all_leaves_[i];
-        if(leaf) {
-            // Check boundary overlap for this specific leaf
-            double half_width = (leaf->max.x() - leaf->min.x()) * 0.5;
-            double f = GetDielectricFraction(leaf->center, half_width);
-
-            // Apply scaling only if partially or fully inside
-            if (f > 0.0) {
-                double epsilon_eff_perp = 1.0 / ( (1.0 - f) + (f / dielectricConstant_) );
-                 leaf->precomputed_field = leaf->precomputed_field / epsilon_eff_perp;
+                // Apply scaling only if partially or fully inside
+                if (f > 0.0) {
+                    double epsilon_eff_perp = 1.0 / ( (1.0 - f) + (f / dielectricConstant_) );
+                    leaf->precomputed_field = leaf->precomputed_field / epsilon_eff_perp;
+                }
             }
         }
     }

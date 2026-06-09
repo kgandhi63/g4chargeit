@@ -166,7 +166,7 @@ def write_physics_settings(f):
     f.write('/process/em/deexcitationIgnoreCut true\n')
     f.write('/process/em/Polarisation true\n')
     f.write('/process/em/PhotoeffectBelowKShell true\n')
-    f.write('/process/em/pixe false\n')
+    f.write('/process/em/pixe true\n')
     f.write('#\n')
     f.write('/process/em/lowestElectronEnergy 0 eV\n')
     f.write('/process/em/lowestMuHadEnergy 10 eV\n')

@@ -28,7 +28,7 @@ temperature = 425  # K (293 K for room temp in Wang experiments)
 dielectric = 3.9 # set dielectric constant 
 
 # Iteration settings
-iterationNUM = 100
+iterationNUM = 200
 
 # Optional: set random seed for debugging
 # seedIN = [10008859, 10005380]
@@ -58,7 +58,7 @@ electron_intensity, photon_intensity = SWelectrons / SWions, PEflux / SWions
 # Mesh and simulation parameters
 minStepList = [0.01, 0.01]  # Minimum step for Octree mesh (µm)
 #eventnumbersList = [1000000, 1000000] # for illumination plots
-eventnumbersList = [50000, 50000]  # for iterations
+eventnumbersList = [10000, 300000]  # for iterations
 initialOctreeDepth = 8
 gradPercent = 0.7
 finalOctreeDepth = 11
